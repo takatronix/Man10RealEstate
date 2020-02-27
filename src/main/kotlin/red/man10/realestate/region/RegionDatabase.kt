@@ -40,37 +40,36 @@ class RegionDatabase(private val pl: Plugin) {
      * @param tp List<x,y,z,pitch,yay>
      *
      */
-    fun changeRegionTeleport(name:String,tp:List<String>){
+    fun setRegionTeleport(name:String,tp:List<String>){
         val sql = "UPDATE `region` SET `x`=${tp[0]},`y`=${tp[1]},`z`=${tp[2]}," +
-                "`pitch`=${tp[3]},`yay`=${tp[4]};"
+                "`pitch`=${tp[3]},`yaw`=${tp[4]};"
     }
 
     ///////////////////////
     //リージョンの値段を変更
     ///////////////////////
-    fun changePrice(name:String,price:Double){
+    fun setPrice(name:String,price:Double){
         val sql =  "UPDATE `region` SET `price`='$price' WHERE  `name`=$name;"
     }
 
     ///////////////////////
     //ステータスの変更
     ///////////////////////
-    fun changeRegionStatus(name:String,status: String){
+    fun setRegionStatus(name:String,status: String){
         val sql =  "UPDATE `region` SET `status`='$status' WHERE  `name`=$name;"
     }
 
     //////////////////////
     //オーナーの変更
     //////////////////////
-    fun changeRegionOwner(name:String,owner: Player){
+    fun setRegionOwner(name:String,owner: Player){
         val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name='${owner.name}' WHERE `name`=$name;"
     }
 
     ///////////////////
     //リージョンの削除
     ///////////////////
-    fun deleteRegion(name:String){
-        val sql = "DELETE FROM `region` WHERE  `name`=$name;"
+    fun deleteRegion(id:Int){
+        val sql = "DELETE FROM `region` WHERE  `id`=$id;"
     }
-
 }

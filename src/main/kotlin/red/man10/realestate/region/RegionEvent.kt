@@ -1,11 +1,17 @@
 package red.man10.realestate.region
 
+import org.apache.commons.lang.Validate
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Particle
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
+import red.man10.realestate.Constants
 import red.man10.realestate.Plugin
+import java.util.*
+
 
 class RegionEvent (private val pl :Plugin) : Listener{
 
@@ -22,10 +28,10 @@ class RegionEvent (private val pl :Plugin) : Listener{
         if (e.action != Action.LEFT_CLICK_BLOCK)return
 
         val wand = e.item?:return
-
         if (wand.type != Material.STICK)return
         if (!wand.hasItemMeta())return
-        if (wand.itemMeta.displayName!= "§f§l範囲指定ワンド")return
+        if(wand.itemMeta.displayName != Constants.WAND_NAME)
+            return
 
         val lore = wand.lore?: mutableListOf()
         val loc = e.clickedBlock!!.location
@@ -38,14 +44,29 @@ class RegionEvent (private val pl :Plugin) : Listener{
             lore.add("§aWorld:§f"+p.world.name)
             lore.add("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
             pl.sendMessage(p,"§e§lSet Start:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+
+            //      TODO:二人同時に編集できないのをいつか直す
+            pl.wandStartLocation = loc.clone()
         }else{
+
+
             lore.add("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
             pl.sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+            //      TODO:二人同時に編集できないのをいつか直す
+            pl.wandEndLocation = loc.clone()
+
         }
+
+
+
+
 
         wand.lore = lore
 
         e.isCancelled = true
     }
+
+
+
 
 }
