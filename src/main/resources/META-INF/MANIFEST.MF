@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: Man10RealEstate.jar
+Main-Class: red.man10.realestate.Plugin
+
