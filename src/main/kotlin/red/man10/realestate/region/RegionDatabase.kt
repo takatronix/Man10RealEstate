@@ -14,12 +14,13 @@ class RegionDatabase(private val pl: Plugin) {
      * @param status ステータス(Free,Protected,Lock)
      *
      */
-    fun registerRegion(owner:Player,name:String,status:String){
+    fun registerRegion(owner:Player,name:String,status:String,world:String){
 
         val sql = "INSERT INTO `region` " +
                 "(`server`, `world`, `owner_uuid`, `owner_name`, `x`, `y`, `z`, `pitch`, `yaw`, `name`, `status`) " +
-                "VALUES ('${owner.server.name}', '${owner.world.name}'," +
+                "VALUES ('${owner.server.name}', '$world'," +
                 " '${owner.uniqueId}', '${owner.name}','$name', '$status');"
+
     }
 
     /**
@@ -71,10 +72,5 @@ class RegionDatabase(private val pl: Plugin) {
     fun deleteRegion(name:String){
         val sql = "DELETE FROM `region` WHERE  `name`=$name;"
     }
-
-
-
-
-
 
 }

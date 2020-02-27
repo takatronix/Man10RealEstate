@@ -6,3 +6,6 @@ prefix: Man10Builder
 authors: [takatronix,forest611]
 description: Man10 Real Estate Plugin
 softdepend: [Man10CommonLibs]
+commands:
+  mre:
+    default: op
