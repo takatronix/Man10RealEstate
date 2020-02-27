@@ -1,5 +1,4 @@
--- auto-generated definition
-create table region
+create table man10builder.region
 (
     id         int auto_increment
         primary key,
@@ -19,12 +18,18 @@ nullならだれも所有していない',
     ex         double       null comment '終点',
     ey         double       null comment '終点',
     ez         double       null comment '終点',
-    enabled    tinyint(1)   not null comment '有効か無効かフラグ
-無効になっている場合、評価などは一切できない',
-    protect    tinyint(1)   null comment '保護フラグ
-保護がかかっている場合、regeon_authテーブルに定義されている権限者もしくはred.man10.region.auth権限をもっているもの以外はブロック破壊できない',
     name       varchar(128) null comment '名称',
-    datetime   datetime     null comment '作成日'
+    created    datetime     null comment '作成日',
+    status     varchar(16)  not null comment '"OnSale" 販売中 ：保護あり（admin,ownerのみ）
+"Free" 保護なし だれでもいじられるエリア
+"Protected" 保護あり :　admin,owner,userのみ
+"Lock" 違法などでロック中：　admin以外いじれない
+
+',
+    price      double       null comment '販売金額
+OnSale状態になったときに販売価格
+売り上げ金額は、売上テーブルに登録しオフラインでも売買できるとする
+'
 )
     comment '領域管理のためのテーブル';
 
