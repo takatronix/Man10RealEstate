@@ -11,7 +11,7 @@ class Plugin : JavaPlugin(), Listener {
     var prefix = "[§5Man10RealEstate§f]"
 
     override fun onEnable() { // Plugin startup logic
-        logger.info("Man10 Real Estate plugin enabled.")
+        logger.info("Man10 Real Estate plugin enabled")
         server.pluginManager.registerEvents(this, this)
         saveResource("config.yml", false)
     }
