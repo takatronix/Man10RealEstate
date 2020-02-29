@@ -10,8 +10,11 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
 import red.man10.realestate.region.Commands
+import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.HashMap
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -23,6 +26,8 @@ class Plugin : JavaPlugin(), Listener {
     var wandStartLocation: Location? = null;
     var wandEndLocation: Location? = null;
     var particleTime:Int = 0;
+
+    val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
 
     override fun onEnable() { // Plugin startup logic
         logger.info("Man10 Real Estate plugin enabled.")

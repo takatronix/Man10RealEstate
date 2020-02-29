@@ -9,3 +9,5 @@ softdepend: [Man10CommonLibs]
 commands:
   mre:
     default: op
+  mreop:
+    default: op

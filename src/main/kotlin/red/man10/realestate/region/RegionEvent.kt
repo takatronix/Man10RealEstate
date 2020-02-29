@@ -4,12 +4,16 @@ import org.apache.commons.lang.Validate
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
+import org.bukkit.block.data.type.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
+import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Constants
 import red.man10.realestate.Plugin
+import java.lang.Exception
 import java.util.*
 
 
@@ -66,6 +70,61 @@ class RegionEvent (private val pl :Plugin) : Listener{
         e.isCancelled = true
     }
 
+    /////////////////////
+    //看板設置イベント
+    /////////////////////
+    @EventHandler
+    fun signChangeEvent(e:SignChangeEvent){
+        val lines = e.lines
+        val p = e.player
+
+        if (lines[0].indexOf("mre:") == 0){
+
+            val id : Int
+
+            try {
+                id = lines[0].replace("mre:","").toInt()
+            }catch (e:Exception){
+                println(e)
+                pl.sendMessage(p,"§3§l入力方法：”mre:<id>”")
+                return
+            }
+
+            val data = pl.regionData[id]?:return
+
+            e.setLine(0,data.name)
+            e.setLine(1,"§d§l${data.owner!!.name}")
+            e.setLine(2,"§b§l${data.status}")
+            e.setLine(3,"§e§l${data.price}")
+
+            pl.sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
+        }
+    }
+
+    ////////////////////////////
+    //看板クリックイベント
+    ////////////////////////////
+    @EventHandler
+    fun signClickEvent(e:PlayerInteractEvent){
+
+        if (e.action != Action.RIGHT_CLICK_BLOCK)return
+
+        val b= e.clickedBlock?:return
+        val sign : org.bukkit.block.Sign
+
+        try{
+            sign = b.state as org.bukkit.block.Sign
+        }catch (e:Exception){
+            println(e.message)
+            return
+        }
+
+        val lines = sign.lines
+
+
+
+
+    }
 
 
 
