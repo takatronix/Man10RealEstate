@@ -1,6 +1,8 @@
 package red.man10.realestate.region
 
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 
 class RegionDatabase(private val pl: Plugin) {
@@ -26,6 +28,10 @@ class RegionDatabase(private val pl: Plugin) {
                 " '${owner.uniqueId}', '${owner.name}','$name', '$status', " +
                 "`${start.first}`, `${start.second}`, `${start.third}`, " +
                 "`${end.first}`, `${end.second}`, `${end.third}`);"
+
+        val mysql = MySQLManager(pl,"man10estate")
+
+        mysql.execute(sql)
 
         val data = RegionData()
 
@@ -58,6 +64,9 @@ class RegionDatabase(private val pl: Plugin) {
                 " `ex`='${end.first}', `ey`='${end.second}', `ez`='${end.third}' WHERE  `id`='$id';"
 
 
+        val mysql = MySQLManager(pl,"man10estate")
+
+        mysql.execute(sql)
     }
 
     /**
@@ -74,6 +83,11 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql = "UPDATE `region` SET `x`=${tp[0]},`y`=${tp[1]},`z`=${tp[2]}," +
                 "`pitch`=${tp[3]},`yaw`=${tp[4]} WHERE `id`='$id';"
+
+        val mysql = MySQLManager(pl,"man10estate")
+
+        mysql.execute(sql)
+
     }
 
     //リージョンの値段を変更
@@ -84,6 +98,11 @@ class RegionDatabase(private val pl: Plugin) {
         pl.regionData[id] = data
 
         val sql =  "UPDATE `region` SET `price`='$price' WHERE  `id`='$id';"
+
+        val mysql = MySQLManager(pl,"man10estate")
+
+        mysql.execute(sql)
+
     }
 
     //ステータスの変更
@@ -94,6 +113,11 @@ class RegionDatabase(private val pl: Plugin) {
         pl.regionData[id] = data
 
         val sql =  "UPDATE `region` SET `status`='$status' WHERE  `id`='$id';"
+
+        val mysql = MySQLManager(pl,"man10estate")
+
+        mysql.execute(sql)
+
     }
 
     //オーナーの変更
@@ -104,6 +128,11 @@ class RegionDatabase(private val pl: Plugin) {
         pl.regionData[id] = data
 
         val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name='${owner.name}' WHERE `id`='$id';"
+
+        val mysql = MySQLManager(pl,"man10estate")
+
+        mysql.execute(sql)
+
     }
 
     //リージョンの削除
@@ -111,6 +140,11 @@ class RegionDatabase(private val pl: Plugin) {
         pl.regionData.remove(id)
 
         val sql = "DELETE FROM `region` WHERE  `id`=$id;"
+
+        val mysql = MySQLManager(pl,"man10estate")
+
+        mysql.execute(sql)
+
     }
 
     ////////////////////////////////////
@@ -122,6 +156,45 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql = "SELECT * FROM `region`;"
 
+        val mysql = MySQLManager(pl,"man10estate")
+
+        val rs = mysql.query(sql)?:return
+
+        while (rs.next()){
+
+            val id = rs.getInt("id")
+
+            val data = RegionData()
+
+            data.name = rs.getString("name")
+            data.world = rs.getString("world")
+            data.server = rs.getString("server")
+            data.owner = Bukkit.getPlayer(rs.getString("owner_uuid"))
+            data.status = rs.getString("status")
+            data.price = rs.getDouble("price")
+
+            data.teleport = mutableListOf(
+                    rs.getDouble("x"),
+                    rs.getDouble("y"),
+                    rs.getDouble("z"),
+                    rs.getDouble("pitch"),
+                    rs.getDouble("yay")
+            )
+            data.startCoordinate = Triple(
+                    rs.getDouble("sx"),
+                    rs.getDouble("sy"),
+                    rs.getDouble("sz")
+            )
+            data.endCoordinate = Triple(
+                    rs.getDouble("ex"),
+                    rs.getDouble("ey"),
+                    rs.getDouble("ez")
+            )
+
+            pl.regionData[id] = data
+        }
+        rs.close()
+        mysql.close()
     }
 
 
@@ -134,12 +207,14 @@ class RegionDatabase(private val pl: Plugin) {
         var owner : Player? = null
         var status = "OnSale"
 
+        var world = "world"
+        var server = "server"
+
         var startCoordinate: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
         var endCoordinate: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
         var teleport = mutableListOf<Double>()
 
         var price : Double = 0.0
-
 
     }
 }
