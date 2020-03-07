@@ -4,6 +4,7 @@ import org.apache.commons.lang.Validate
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
+import org.bukkit.Utility
 import org.bukkit.block.data.type.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,6 +19,8 @@ import java.util.*
 
 
 class RegionEvent (private val pl :Plugin) : Listener{
+
+    val utility = red.man10.realestate.Utility()
 
     /////////////////////////
     //リージョンの座標指定
@@ -92,10 +95,10 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
             val data = pl.regionData[id]?:return
 
-            e.setLine(0,data.name)
-            e.setLine(1,"§d§l${data.owner!!.name}")
-            e.setLine(2,"§b§l${data.status}")
-            e.setLine(3,"§e§l${data.price}")
+            e.setLine(0,"§eID:$id")
+            e.setLine(1,data.name)
+            e.setLine(2,"§d§l${data.owner!!.name}")
+            e.setLine(3,"§b§l${data.status}")
 
             pl.sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
         }
@@ -121,7 +124,23 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         val lines = sign.lines
 
+        val id = lines[0].replace("§eID:","").toInt()
 
+        val data = pl.regionData[id]?:return
+
+        val p = e.player
+
+        p.sendMessage("§a§l==========${data.name}§a§lの情報==========")
+
+        p.sendMessage("§a土地名:${data.name}")
+        p.sendMessage("§a現在のステータス:${data.status}")
+        p.sendMessage("§a現在のオーナー:${data.owner!!.name}")
+        p.sendMessage("§a値段:${data.price}")
+
+        p.sendMessage("§a§l==========================================")
+
+        utility.sendHoverText(p,"§d§lいいねする！＝＞","§d§l[いいね！]","")
+        utility.sendHoverText(p,"土地の購入など＝＞","[購入について]","")
 
 
     }

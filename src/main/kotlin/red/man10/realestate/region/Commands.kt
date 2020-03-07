@@ -32,12 +32,22 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 sender.inventory.addItem(wand)
                 return true
             }
+
+            //いいね
+            if (cmd == "good" && args.size == 2){
+
+            }
             return true
         }
 
         if (label == "mreop" && args.size == 3){
 
             if (!sender.hasPermission("mre.op"))return true
+
+            //いいね(op用)
+            if (cmd == "good" && args.size == 2){
+
+            }
 
             if (cmd == "create"){
 
@@ -72,14 +82,25 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val db = RegionDatabase(pl)
 
+                val id = pl.regionData.size
+
                 Thread(Runnable {
                     //リージョンをDBに登録
                     db.registerRegion(Bukkit.getPlayer(ownerName)!!,name,status,server,world, start, end)
                 }).start()
 
                 pl.sendMessage(sender,"§a§l登録完了！")
+                pl.sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
 
                 return true
+            }
+
+            //リージョンの削除
+            if (cmd == "delete" && args.size==2){
+                Thread(Runnable {
+                    RegionDatabase(pl).deleteRegion(args[1].toInt())
+                }).start()
+
             }
 
             //TODO:ページ切り替えをして見れるようにする
@@ -104,10 +125,12 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
     fun help(p:Player){
         pl.sendMessage(p,"§e§l/mre wand : 範囲指定用のワンドを取得")
-
+        pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
 
         if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
+        pl.sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
         pl.sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
+        pl.sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
         pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§d§lを持ってコマンドを実行してください")
         pl.sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
         pl.sendMessage(p,"§e§l/mreop reloadregion : リージョンデータの再読み込みをします")
