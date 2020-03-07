@@ -130,14 +130,14 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         val p = e.player
 
-        p.sendMessage("§a§l==========${data.name}§a§lの情報==========")
+        pl.sendMessage(p,"§a§l==========${data.name}§a§lの情報==========")
 
-        p.sendMessage("§a土地名:${data.name}")
-        p.sendMessage("§a現在のステータス:${data.status}")
-        p.sendMessage("§a現在のオーナー:${data.owner!!.name}")
-        p.sendMessage("§a値段:${data.price}")
+        pl.sendMessage(p,"§a土地名:${data.name}")
+        pl.sendMessage(p,"§a現在のステータス:${data.status}")
+        pl.sendMessage(p,"§a現在のオーナー:${data.owner!!.name}")
+        pl.sendMessage(p,"§a値段:${data.price}")
 
-        p.sendMessage("§a§l==========================================")
+        pl.sendMessage(p,"§a§l==========================================")
 
         utility.sendHoverText(p,"§d§lいいねする！＝＞","§d§l[いいね！]","")
         utility.sendHoverText(p,"土地の購入など＝＞","[購入について]","")

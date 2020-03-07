@@ -10,38 +10,40 @@ class RegionDatabase(private val pl: Plugin) {
 
     //TODO:Man10CommonLibsを参照できるようにする(できない原因不明)
 
-    /**
-     * リージョンの登録
-     *
-     * @param owner リージョンのオーナー
-     * @param name リージョン名
-     * @param status ステータス(Free,Protected,Lock)
-     *
-     */
-    fun registerRegion(owner:Player,name:String,status:String,server:String,world:String
-                       ,start:Triple<Double,Double,Double>,end:Triple<Double,Double,Double>){
+
+    /////////////////////////////////
+    //リージョンデータを新規で登録
+    /////////////////////////////////
+    fun registerRegion(data:RegionData,id:Int){
 
         val sql = "INSERT INTO `region` " +
-                "(`server`, `world`, `owner_uuid`, `owner_name`, `x`, `y`, `z`, `pitch`, `yaw`, `name`, `status`," +
+                "(`server`, `world`, `owner_uuid`, `owner_name`, `name`, `status`, " +
+                "`x`, `y`, `z`, `pitch`, `yaw`, " +
                 "`sx`, `sy`, `sz`, `ex`, `ey`, `ez`) " +
-                "VALUES ('${server}', '$world'," +
-                " '${owner.uniqueId}', '${owner.name}','$name', '$status', " +
-                "`${start.first}`, `${start.second}`, `${start.third}`, " +
-                "`${end.first}`, `${end.second}`, `${end.third}`);"
+                "VALUES (" +
+                "'${data.server}', " +
+                "'${data.world}', " +
+                "'${data.owner!!.uniqueId}', " +
+                "'${data.owner!!.name}' ," +
+                "'${data.name}', " +
+                "'${data.status}', " +
+                "'${data.teleport[0]}', "+
+                "'${data.teleport[1]}', "+
+                "'${data.teleport[2]}', "+
+                "'${data.teleport[3]}', "+
+                "'${data.teleport[4]}', "+
+                "'${data.startCoordinate.first}', " +
+                "'${data.startCoordinate.second}', " +
+                "'${data.startCoordinate.third}', " +
+                "'${data.endCoordinate.first}', " +
+                "'${data.endCoordinate.second}', " +
+                "'${data.endCoordinate.third}');"
 
         val mysql = MySQLManager(pl,"man10estate")
 
         mysql.execute(sql)
 
-        val data = RegionData()
-
-        data.name = name
-        data.owner = owner
-        data.startCoordinate = start
-        data.endCoordinate = end
-        data.status = status
-
-        pl.regionData[pl.regionData.size] = data
+        pl.regionData[id] = data
 
     }
 
@@ -72,7 +74,7 @@ class RegionDatabase(private val pl: Plugin) {
     /**
      * テレポート地点の変更
      * @param id リージョンid
-     * @param tp List<x,y,z,pitch,yay>
+     * @param tp List<x,y,z,pitch,yaw>
      *
      */
     fun setRegionTeleport(id:Int,tp:List<String>){
@@ -178,7 +180,7 @@ class RegionDatabase(private val pl: Plugin) {
                     rs.getDouble("y"),
                     rs.getDouble("z"),
                     rs.getDouble("pitch"),
-                    rs.getDouble("yay")
+                    rs.getDouble("yaw")
             )
             data.startCoordinate = Triple(
                     rs.getDouble("sx"),

@@ -40,7 +40,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             return true
         }
 
-        if (label == "mreop" && args.size == 3){
+        if (label == "mreop"){
 
             if (!sender.hasPermission("mre.op"))return true
 
@@ -49,7 +49,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             }
 
-            if (cmd == "create"){
+            if (cmd == "create" && args.size == 3){
 
                 val name = args[1]
                 val status = args[2]
@@ -68,25 +68,39 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     return true
                 }
 
-                val ownerName = lore[0].replace("§aOwner:§f","")
-                val server = lore[1].replace("§aServer:§f","")
-                val world = lore[2].replace("§aWorld:§f","")
+                val data = RegionDatabase.RegionData()
+
+                data.owner = Bukkit.getPlayer(lore[0].replace("§aOwner:§f",""))
+                data.server = lore[1].replace("§aServer:§f","")
+                data.world = lore[2].replace("§aWorld:§f","")
 
                 val c1 = lore[3].replace("§aStart:§fX:","")
-                        .replace("Y","").replace("Z","").split(",")
-                val start = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+                        .replace("Y","").replace("Z","")
+                        .replace(":","").split(",")
 
-                val c2 = lore[3].replace("§aEnd:§fX:","")
-                        .replace("Y","").replace("Z","").split(",")
-                val end = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+                data.startCoordinate = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
 
-                val db = RegionDatabase(pl)
+                val c2 = lore[4].replace("§aEnd:§fX:","")
+                        .replace("Y","").replace("Z","")
+                        .replace(":","").split(",")
+
+                data.endCoordinate = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+
+
+                data.teleport = mutableListOf(
+                        sender.location.x,
+                        sender.location.y,
+                        sender.location.z,
+                        sender.location.pitch.toDouble(),
+                        sender.location.yaw.toDouble()
+                )
+
 
                 val id = pl.regionData.size
 
                 Thread(Runnable {
                     //リージョンをDBに登録
-                    db.registerRegion(Bukkit.getPlayer(ownerName)!!,name,status,server,world, start, end)
+                    RegionDatabase(pl).registerRegion(data,id)
                 }).start()
 
                 pl.sendMessage(sender,"§a§l登録完了！")
@@ -128,10 +142,11 @@ class Commands (private val pl :Plugin):CommandExecutor{
         pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
 
         if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
+        pl.sendMessage(p,"§e§l==============================================")
         pl.sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
         pl.sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
+        pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§e§lを持ってコマンドを実行してください")
         pl.sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
-        pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§d§lを持ってコマンドを実行してください")
         pl.sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
         pl.sendMessage(p,"§e§l/mreop reloadregion : リージョンデータの再読み込みをします")
     }

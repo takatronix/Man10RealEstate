@@ -31,6 +31,7 @@ class Plugin : JavaPlugin(), Listener {
 
     override fun onEnable() { // Plugin startup logic
         logger.info("Man10 Real Estate plugin enabled.")
+        saveDefaultConfig()
 
         regionEvent = RegionEvent(this)
         cmd = Commands(this)
@@ -39,6 +40,7 @@ class Plugin : JavaPlugin(), Listener {
         server.pluginManager.registerEvents(regionEvent,this)
 
         getCommand("mre")!!.setExecutor(cmd)
+        getCommand("mreop")!!.setExecutor(cmd)
 
         saveResource("config.yml", false)
 
