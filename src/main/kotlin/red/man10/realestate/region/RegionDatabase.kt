@@ -44,6 +44,7 @@ class RegionDatabase(private val pl: Plugin) {
         mysql.execute(sql)
 
         pl.regionData[id] = data
+        (pl.worldRegion[data.world]?: mutableListOf()).add(id)
 
     }
 
@@ -194,6 +195,7 @@ class RegionDatabase(private val pl: Plugin) {
             )
 
             pl.regionData[id] = data
+            (pl.worldRegion[data.world]?: mutableListOf()).add(id)
         }
         rs.close()
         mysql.close()
@@ -217,6 +219,8 @@ class RegionDatabase(private val pl: Plugin) {
         var teleport = mutableListOf<Double>()
 
         var price : Double = 0.0
+
+        var member = mutableListOf<Player>()
 
     }
 }

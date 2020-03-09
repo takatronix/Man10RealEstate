@@ -20,7 +20,6 @@ import java.util.*
 
 class RegionEvent (private val pl :Plugin) : Listener{
 
-    val utility = red.man10.realestate.Utility()
 
     /////////////////////////
     //リージョンの座標指定
@@ -139,8 +138,8 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         pl.sendMessage(p,"§a§l==========================================")
 
-        utility.sendHoverText(p,"§d§lいいねする！＝＞","§d§l[いいね！]","")
-        utility.sendHoverText(p,"土地の購入など＝＞","[購入について]","")
+        pl.sendHoverText(p,"§d§lいいねする！＝＞","§d§l[いいね！]","")
+        pl.sendHoverText(p,"土地の購入など＝＞","[購入について]","")
 
 
     }

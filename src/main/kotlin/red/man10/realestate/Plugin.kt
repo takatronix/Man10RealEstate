@@ -1,5 +1,9 @@
 package red.man10.realestate
 
+import net.md_5.bungee.api.chat.BaseComponent
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ComponentBuilder
+import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Particle
@@ -9,6 +13,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
+import red.man10.realestate.protect.ProtectRegionEvent
 import red.man10.realestate.region.Commands
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
@@ -21,6 +26,7 @@ class Plugin : JavaPlugin(), Listener {
     var prefix = "[§5Man10RealEstate§f]"
 
     lateinit var regionEvent: RegionEvent
+    lateinit var protectEvent: ProtectRegionEvent
     lateinit var cmd : Commands
 
     var wandStartLocation: Location? = null;
@@ -28,16 +34,19 @@ class Plugin : JavaPlugin(), Listener {
     var particleTime:Int = 0;
 
     val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
+    val worldRegion = HashMap<String,MutableList<Int>>()
 
     override fun onEnable() { // Plugin startup logic
         logger.info("Man10 Real Estate plugin enabled.")
         saveDefaultConfig()
 
         regionEvent = RegionEvent(this)
+        protectEvent = ProtectRegionEvent(this)
         cmd = Commands(this)
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(regionEvent,this)
+        server.pluginManager.registerEvents(protectEvent,this)
 
         getCommand("mre")!!.setExecutor(cmd)
         getCommand("mreop")!!.setExecutor(cmd)
@@ -123,4 +132,42 @@ class Plugin : JavaPlugin(), Listener {
         }
         return result
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
+    // [例1] sendHoverText(player,"ここをクリック",null,"/say おはまん");
+    // [例2] sendHoverText(player,"カーソルをあわせて","ヘルプメッセージとか",null);
+    // [例3] sendHoverText(player,"カーソルをあわせてクリック","ヘルプメッセージとか","/say おはまん");
+    fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
+        //////////////////////////////////////////
+        //      ホバーテキストとイベントを作成する
+        var hoverEvent: HoverEvent? = null
+        val hover: Array<BaseComponent> = ComponentBuilder(hoverText).create()
+        hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)
+
+        //////////////////////////////////////////
+        //   クリックイベントを作成する
+        var clickEvent: ClickEvent? = null
+        clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, command)
+        val message: Array<BaseComponent> = ComponentBuilder(text).event(hoverEvent).event(clickEvent).create()
+//        p.spigot().sendMessage(message) 何故かエラー吐く
+    }
+
+    /////////////////////////////////////
+    //2点で指定した立方体の座標の範囲内かどうか
+    /////////////////////////////////////
+    fun isWithinRange(loc:Location,start:Triple<Double,Double,Double>,end:Triple<Double,Double,Double>):Boolean{
+
+        val x = loc.blockX
+        val y = loc.blockY
+        val z = loc.blockZ
+
+        if (x < start.first || x > end.first)return false
+        if (y < start.second|| y > end.second)return false
+        if (z < start.third || z > end.third)return false
+
+        return true
+
+    }
+
 }
