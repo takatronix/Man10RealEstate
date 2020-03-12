@@ -1,5 +1,6 @@
 package red.man10.realestate.protect
 
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -7,6 +8,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Plugin
+import javax.xml.stream.Location
 
 class ProtectRegionEvent(private val pl:Plugin):Listener{
 
@@ -20,23 +22,10 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
         val p = e.player
 
-        for (region in regionList){
-
-            val data = pl.regionData[region]?:continue
-
-            if (!pl.isWithinRange(e.block.location,data.startCoordinate,data.endCoordinate))continue
-
-            if (data.status == "OnSale" && data.owner == p)break
-
-            if (data.status == "Protected" &&(data.member.contains(p) || data.owner == p))break
-
-            if (data.status == "Lock")break
-
-            return
+        if (!canBreak(p,regionList,e.block.location)){
+            pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを破壊する権限がありません！")
+            e.isCancelled = true
         }
-
-        pl.sendMessage(p,"§4§lあなたにはこの場所のブロックを壊す権限がありません！")
-        e.isCancelled = true
     }
 
     @EventHandler
@@ -48,23 +37,10 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
         val p = e.player
 
-        for (region in regionList){
-
-            val data = pl.regionData[region]?:continue
-
-            if (!pl.isWithinRange(e.block.location,data.startCoordinate,data.endCoordinate))continue
-
-            if (data.status == "OnSale" && data.owner == p)break
-
-            if (data.status == "Protected" &&(data.member.contains(p) || data.owner == p))break
-
-            if (data.status == "Lock")break
-
-            return
+        if (!canBreak(p,regionList,e.block.location)){
+            pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
+            e.isCancelled = true
         }
-
-        pl.sendMessage(p,"§4§lあなたにはこの場所にブロックを設置する権限がありません！")
-        e.isCancelled = true
 
     }
 
@@ -80,23 +56,53 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
         val p = e.player
 
+        if (!canBreak(p,regionList,e.clickedBlock!!.location)){
+            pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+            e.isCancelled = true
+        }
+
+    }
+
+    fun canBreak(p:Player,regionList:MutableList<Int>,location: org.bukkit.Location):Boolean{
         for (region in regionList){
 
             val data = pl.regionData[region]?:continue
 
-            if (!pl.isWithinRange(e.clickedBlock!!.location,data.startCoordinate,data.endCoordinate))continue
-
-            if (data.status == "OnSale" && data.owner == p)break
-
-            if (data.status == "Protected" &&(data.member.contains(p) || data.owner == p))break
+            if (!isWithinRange(location,data.startCoordinate,data.endCoordinate))continue
 
             if (data.status == "Lock")break
 
-            return
+            if (data.status == "OnSale" && data.owner != p)break
+
+            if (data.status == "Protected"){
+                if (pl.regionUserData[Pair(p,region)] == null&& p != data.owner)break
+
+                val ud = pl.regionUserData[Pair(p,region)]?:break
+
+                if (ud.statsu == "Lock")break
+
+            }
+            return true
         }
 
-        pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
-        e.isCancelled = true
+        return false
+    }
+
+    /////////////////////////////////////
+    //2点で指定した立方体の座標の範囲内かどうか
+    /////////////////////////////////////
+    fun isWithinRange(loc: org.bukkit.Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>):Boolean{
+
+        val x = loc.blockX
+        val y = loc.blockY
+        val z = loc.blockZ
+
+        if (x < start.first || x > end.first)return false
+        if (y < start.second|| y > end.second)return false
+        if (z < start.third || z > end.third)return false
+
+        return true
 
     }
+
 }

@@ -51,9 +51,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             if (cmd == "create" && args.size == 3){
 
-                val name = args[1]
-                val status = args[2]
-
                 val wand = sender.inventory.itemInMainHand
 
                 if (!wand.hasItemMeta() || wand.itemMeta.displayName != Constants.WAND_NAME){
@@ -69,6 +66,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 }
 
                 val data = RegionDatabase.RegionData()
+
+                data.name = args[1]
+                data.status = args[2]
 
                 data.owner = Bukkit.getPlayer(lore[0].replace("§aOwner:§f",""))
                 data.server = lore[1].replace("§aServer:§f","")

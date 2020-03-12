@@ -17,6 +17,7 @@ import red.man10.realestate.protect.ProtectRegionEvent
 import red.man10.realestate.region.Commands
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
+import red.man10.realestate.region.RegionUserDatabase
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
@@ -34,6 +35,7 @@ class Plugin : JavaPlugin(), Listener {
     var particleTime:Int = 0;
 
     val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
+    val regionUserData = ConcurrentHashMap<Pair<Player,Int>,RegionUserDatabase.RegionUserData>()
     val worldRegion = HashMap<String,MutableList<Int>>()
 
     override fun onEnable() { // Plugin startup logic
@@ -53,6 +55,7 @@ class Plugin : JavaPlugin(), Listener {
 
         saveResource("config.yml", false)
 
+
         object : BukkitRunnable() {
             override fun run() {
                //  broadcast("timer")
@@ -63,6 +66,8 @@ class Plugin : JavaPlugin(), Listener {
                 particleTime++;
             }
         }.runTaskTimer(this, 0, 10)
+
+        RegionDatabase(this).loadRegion()
 
     }
 
@@ -153,21 +158,5 @@ class Plugin : JavaPlugin(), Listener {
 //        p.spigot().sendMessage(message) 何故かエラー吐く
     }
 
-    /////////////////////////////////////
-    //2点で指定した立方体の座標の範囲内かどうか
-    /////////////////////////////////////
-    fun isWithinRange(loc:Location,start:Triple<Double,Double,Double>,end:Triple<Double,Double,Double>):Boolean{
-
-        val x = loc.blockX
-        val y = loc.blockY
-        val z = loc.blockZ
-
-        if (x < start.first || x > end.first)return false
-        if (y < start.second|| y > end.second)return false
-        if (z < start.third || z > end.third)return false
-
-        return true
-
-    }
 
 }
