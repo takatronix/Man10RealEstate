@@ -44,7 +44,10 @@ class RegionDatabase(private val pl: Plugin) {
         mysql.execute(sql)
 
         pl.regionData[id] = data
-        (pl.worldRegion[data.world]?: mutableListOf()).add(id)
+
+        val list = pl.worldRegion[data.world]?: mutableListOf()
+        list.add(id)
+        pl.worldRegion[data.world] = list
 
     }
 

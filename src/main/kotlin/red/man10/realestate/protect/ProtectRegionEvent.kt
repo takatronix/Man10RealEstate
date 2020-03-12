@@ -68,38 +68,36 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
             val data = pl.regionData[region]?:continue
 
-            if (!isWithinRange(location,data.startCoordinate,data.endCoordinate))continue
+                if (isWithinRange(location,data.startCoordinate,data.endCoordinate)){
 
-            if (data.status == "Lock")break
+                if (data.owner == p && data.status != "Lock")break
 
-            if (data.status == "OnSale" && data.owner != p)break
+                if (data.status == "Protected"){
+                    if (p == data.owner)break
 
-            if (data.status == "Protected"){
-                if (pl.regionUserData[Pair(p,region)] == null&& p != data.owner)break
+                    val ud = pl.regionUserData[Pair(p,region)]?:return false
 
-                val ud = pl.regionUserData[Pair(p,region)]?:break
+                    if (ud.statsu != "Lock")break
+                }
 
-                if (ud.statsu == "Lock")break
-
+                return false
             }
-            return true
         }
-
-        return false
+        return true
     }
 
-    /////////////////////////////////////
-    //2点で指定した立方体の座標の範囲内かどうか
-    /////////////////////////////////////
+    ////////////////////////////////////////////////////////////
+    //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
+    ////////////////////////////////////////////////////////////
     fun isWithinRange(loc: org.bukkit.Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>):Boolean{
 
         val x = loc.blockX
         val y = loc.blockY
         val z = loc.blockZ
 
-        if (x < start.first || x > end.first)return false
-        if (y < start.second|| y > end.second)return false
-        if (z < start.third || z > end.third)return false
+        if (x < start.first.coerceAtMost(end.first) || x > start.first.coerceAtLeast(end.first))return false
+        if (y < start.second.coerceAtMost(end.second) || y > start.second.coerceAtLeast(end.second))return false
+        if (z < start.third.coerceAtMost(end.third) || z > start.third.coerceAtLeast(end.third))return false
 
         return true
 

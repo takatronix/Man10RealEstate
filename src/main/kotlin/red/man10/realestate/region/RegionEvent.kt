@@ -110,6 +110,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
     fun signClickEvent(e:PlayerInteractEvent){
 
         if (e.action != Action.RIGHT_CLICK_BLOCK)return
+        if (e.clickedBlock!!.type != Material.OAK_SIGN)return
 
         val b= e.clickedBlock?:return
         val sign : org.bukkit.block.Sign

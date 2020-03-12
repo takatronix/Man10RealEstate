@@ -96,7 +96,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 )
 
 
-                val id = pl.regionData.size
+                val id = pl.regionData.size+1
 
                 Thread(Runnable {
                     //リージョンをDBに登録
@@ -115,11 +115,12 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     RegionDatabase(pl).deleteRegion(args[1].toInt())
                 }).start()
 
+                return true
             }
 
             //TODO:ページ切り替えをして見れるようにする
             if (cmd == "list"){
-                for (i in 0 until pl.regionData.size){
+                for (i in 1 .. pl.regionData.size){
                     pl.sendMessage(sender,"$i : §b§l${pl.regionData[i]!!.name}")
                 }
                 return true
