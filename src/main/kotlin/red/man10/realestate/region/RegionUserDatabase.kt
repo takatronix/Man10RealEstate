@@ -60,8 +60,38 @@ class RegionUserDatabase (private val pl:Plugin){
 
     }
 
+    fun addProfit(user:Player,price: Double,type:String){
 
+        MySQLManager(pl,"userindex").execute("INSERT INTO `user_index` " +
+                "(`uuid`, `player`, `profit`, `type`, `date`)" +
+                " VALUES ('${user.uniqueId}', '${user.name}','$price','$type', now());")
 
+    }
+
+    fun showProfit(user:Player):Double{
+
+        val mysql = MySQLManager(pl,"userindex")
+
+        val rs = mysql.query("SELECT `profit` WHERE `uuid`='${user.uniqueId}' and `received`='0';")?:return 0.0
+
+        var profit = 0.0
+
+        while (rs.next()){
+            profit += rs.getDouble("profit")
+        }
+
+        return profit
+    }
+
+    fun takeProfit(user:Player){
+        val profit = showProfit(user)
+
+        MySQLManager(pl,"userindex").execute("UPDATE `user_index` SET `received`='1'" +
+                " WHERE `received`=0 and `uuid`='${user.uniqueId}';")
+
+        pl.vault.deposit(user.uniqueId,profit)
+
+    }
 
     class RegionUserData{
 

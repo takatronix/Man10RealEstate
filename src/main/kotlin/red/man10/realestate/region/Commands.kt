@@ -33,6 +33,14 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
+            if (cmd == "buy"){
+
+                Bukkit.getScheduler().runTask(pl, Runnable {
+                    RegionDatabase(pl).buy(args[1].toInt(),sender)
+                })
+
+            }
+
             //いいね
             if (cmd == "good" && args.size == 2){
 
@@ -44,9 +52,48 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             if (!sender.hasPermission("mre.op"))return true
 
-            //いいね(op用)
-            if (cmd == "good" && args.size == 2){
+            if (cmd == "setteleport" && args.size == 2){
 
+                Thread(Runnable {
+
+                    val loc = sender.location
+
+                    RegionDatabase(pl).setRegionTeleport(args[1].toInt(), mutableListOf(
+                            loc.x,
+                            loc.y,
+                            loc.z,
+                            loc.pitch.toDouble(),
+                            loc.yaw.toDouble()
+                    ))
+
+                }).start()
+
+                pl.sendMessage(sender,"§e§l登録完了！")
+                return true
+            }
+
+            if (cmd == "changestatus" && args.size == 3){
+                Thread(Runnable {
+                    RegionDatabase(pl).setRegionStatus(args[1].toInt(),args[2])
+                }).start()
+                pl.sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
+                return true
+            }
+
+            if (cmd == "changeprice" && args.size == 3){
+                Thread(Runnable {
+                    RegionDatabase(pl).setPrice(args[1].toInt(),args[2].toDouble())
+                }).start()
+                pl.sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
+                return true
+            }
+
+            if (cmd == "changeowner"){
+                Thread(Runnable {
+                    RegionDatabase(pl).setRegionOwner(args[1].toInt(),Bukkit.getPlayer(args[1])!!)
+                }).start()
+                pl.sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
+                return true
             }
 
             if (cmd == "create" && args.size == 3){
@@ -141,10 +188,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
     fun help(p:Player){
         pl.sendMessage(p,"§e§l/mre wand : 範囲指定用のワンドを取得")
         pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
+        pl.sendMessage(p,"§e§l/mre buy <id> : 指定idが販売中なら購入します")
 
         if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
         pl.sendMessage(p,"§e§l==============================================")
         pl.sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
+        pl.sendMessage(p,"§e§l/mreop setteleport <id> : 現在地点をテレポート地点に設定します")
+        pl.sendMessage(p,"§e§l/mreop changestatus <id> <status> : 指定idのステータスを変更します")
+        pl.sendMessage(p,"§e§l/mreop changeprice <id> <price> : 指定idの金額を変更します")
+        pl.sendMessage(p,"§e§l/mreop changeowner <id> <owner> : 指定idのオーナーを変更します")
         pl.sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
         pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§e§lを持ってコマンドを実行してください")
         pl.sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")

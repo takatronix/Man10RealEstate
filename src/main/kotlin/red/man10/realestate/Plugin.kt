@@ -18,6 +18,7 @@ import red.man10.realestate.region.Commands
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
+import java.awt.SystemColor
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
@@ -37,6 +38,8 @@ class Plugin : JavaPlugin(), Listener {
     val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
     val regionUserData = ConcurrentHashMap<Pair<Player,Int>,RegionUserDatabase.RegionUserData>()
     val worldRegion = HashMap<String,MutableList<Int>>()
+
+    val vault = VaultManager(this)
 
     override fun onEnable() { // Plugin startup logic
         logger.info("Man10 Real Estate plugin enabled.")
@@ -144,18 +147,9 @@ class Plugin : JavaPlugin(), Listener {
     // [例2] sendHoverText(player,"カーソルをあわせて","ヘルプメッセージとか",null);
     // [例3] sendHoverText(player,"カーソルをあわせてクリック","ヘルプメッセージとか","/say おはまん");
     fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
-        //////////////////////////////////////////
-        //      ホバーテキストとイベントを作成する
-        var hoverEvent: HoverEvent? = null
-        val hover: Array<BaseComponent> = ComponentBuilder(hoverText).create()
-        hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)
 
-        //////////////////////////////////////////
-        //   クリックイベントを作成する
-        var clickEvent: ClickEvent? = null
-        clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, command)
-        val message: Array<BaseComponent> = ComponentBuilder(text).event(hoverEvent).event(clickEvent).create()
-//        p.spigot().sendMessage(message) 何故かエラー吐く
+
+
     }
 
 

@@ -51,29 +51,6 @@ class RegionDatabase(private val pl: Plugin) {
 
     }
 
-    /**
-     * リージョンの座標を変更
-     * @param id リージョンid
-     * @param start Triple<sx,sy,sz>
-     * @param end Triple<ex,ey,ez>
-     */
-    fun setRegionCoordinate(id:Int,start:Triple<Double,Double,Double>,end:Triple<Double,Double,Double>){
-
-        val data = pl.regionData[id]?:return
-
-        data.startCoordinate = start
-        data.endCoordinate = end
-
-        pl.regionData[id] = data
-
-        val sql = "UPDATE `region` SET `sx`='${start.first}', `sy`='${start.second}', `sz`='${start.third}'," +
-                " `ex`='${end.first}', `ey`='${end.second}', `ez`='${end.third}' WHERE  `id`='$id';"
-
-
-        val mysql = MySQLManager(pl,"man10estate")
-
-        mysql.execute(sql)
-    }
 
     /**
      * テレポート地点の変更
@@ -81,10 +58,10 @@ class RegionDatabase(private val pl: Plugin) {
      * @param tp List<x,y,z,pitch,yaw>
      *
      */
-    fun setRegionTeleport(id:Int,tp:List<String>){
+    fun setRegionTeleport(id:Int,tp:MutableList<Double>){
 
         val data = pl.regionData[id]?:return
-        data.teleport = mutableListOf(tp[0].toDouble(),tp[1].toDouble(),tp[2].toDouble(),tp[3].toDouble(),tp[4].toDouble())
+        data.teleport = tp
         pl.regionData[id] = data
 
         val sql = "UPDATE `region` SET `x`=${tp[0]},`y`=${tp[1]},`z`=${tp[2]}," +
@@ -139,6 +116,42 @@ class RegionDatabase(private val pl: Plugin) {
 
         mysql.execute(sql)
 
+    }
+
+    //土地の購入
+    fun buy(id: Int,user:Player){
+
+        val data = pl.regionData[id]?:when{
+            else -> {
+                pl.sendMessage(user,"§3§l購入失敗！ 存在しないidです！")
+                return
+            }
+        }
+
+        if (user == data.owner){
+            pl.sendMessage(user,"§3§lあなたはこのリージョンのオーナーです！")
+            return
+        }
+
+        if (data.status != "onSale"){
+            pl.sendMessage(user,"§3§lこのリージョンは販売中ではありません")
+            return
+        }
+
+        if (pl.vault.getBalance(user.uniqueId) < data.price){
+            pl.sendMessage(user,"§3§l所持金が足りません！")
+            return
+        }
+
+        //旧オーナーに所持金を追加
+        pl.vault.withdraw(user.uniqueId,data.price)
+
+        setRegionOwner(id,user)
+        setRegionStatus(id,"Protected")
+
+
+
+        pl.sendMessage(user,"§a§l購入完了、土地の保護がされました！")
     }
 
     //リージョンの削除

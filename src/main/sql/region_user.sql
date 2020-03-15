@@ -1,4 +1,4 @@
-create table Man10RealEstate.region_user
+create table region_user
 (
     region_id    int           not null comment 'リージョンID: プライマリキー',
     type         int default 0 null comment 'タイプ: 0 共同所有者(default) 1:使用者 ',
