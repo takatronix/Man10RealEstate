@@ -72,7 +72,6 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
                 if (data.owner == p && data.status != "Lock")break
 
-                if (data.status == "Protected"){
                     if (p == data.owner)break
 
                     val ud = pl.regionUserData[Pair(p,region)]?:return false
@@ -82,7 +81,6 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
                 return false
             }
-        }
         return true
     }
 
