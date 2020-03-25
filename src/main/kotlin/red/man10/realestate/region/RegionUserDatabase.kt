@@ -4,13 +4,13 @@ import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import java.sql.ClientInfoStatus
+import java.sql.ResultSet
 import java.util.*
 
-@Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
 class RegionUserDatabase (private val pl:Plugin){
 
 
-    fun addUserData(regionId:Int,user:Player,type:Int,status: String){
+    fun createUserData(regionId:Int,user:Player,type:Int,status: String){
 
         val data = RegionUserData()
 
@@ -38,6 +38,9 @@ class RegionUserDatabase (private val pl:Plugin){
         pl.regionUserData[Pair(user,regionId)] = data
     }
 
+    //////////////////////////
+    //
+    //////////////////////////
     fun changeDeposit(id:Int,user:Player,price:Double){
 
         val data = pl.regionUserData[Pair(user,id)]?:return
@@ -48,11 +51,18 @@ class RegionUserDatabase (private val pl:Plugin){
 
         MySQLManager(pl,"region_user").execute(
               "UPDATE `region_user` " +
-                    "SET `deposit`='$price' " +
+                    "SET `deposit`='$price'," +
+                      "`paid_date`=now() " +
                     "WHERE  `region_id`='$id' AND `uuid`='${user.uniqueId}';")
 
+        data.paid = Date()
+
+        pl.regionUserData[Pair(user,id)] = data
     }
 
+    //////////////////////////
+    //共同者データを削除する
+    //////////////////////////
     fun removeUser(id:Int,user:Player){
         pl.regionUserData.remove(Pair(user,id))
 
@@ -60,6 +70,9 @@ class RegionUserDatabase (private val pl:Plugin){
 
     }
 
+    //////////////////////////////////////////
+    //指定プレイヤーに利益を追加する
+    //////////////////////////////////////////
     fun addProfit(user:Player,price: Double,type:String){
 
         MySQLManager(pl,"userindex").execute("INSERT INTO `user_index` " +
@@ -68,23 +81,36 @@ class RegionUserDatabase (private val pl:Plugin){
 
     }
 
-    fun showProfit(user:Player):Double{
-
-        val mysql = MySQLManager(pl,"userindex")
-
-        val rs = mysql.query("SELECT `profit` WHERE `uuid`='${user.uniqueId}' and `received`='0';")?:return 0.0
+    ///////////////////////////
+    //利益の額を取得する
+    ///////////////////////////
+    fun getProfit(user:Player,type: String):Double{
 
         var profit = 0.0
 
+        val mysql = MySQLManager(pl,"userindex")
+
+        val rs : ResultSet
+
+        rs = if (type == "all"){
+            mysql.query("SELECT `profit` WHERE `uuid`='${user.uniqueId}' and `received`='0';")?:return 0.0
+        }else{
+            //家賃:house 投げ銭:donation 土地販売:land
+            mysql.query("SELECT `profit` WHERE `uuid`='${user.uniqueId}' and `received`='0' and `type`='$type';")?:return 0.0
+        }
+
         while (rs.next()){
-            profit += rs.getDouble("profit")
+            profit+=rs.getDouble("profit")
         }
 
         return profit
     }
 
+    ///////////////////////////////////////
+    //溜まっているお金を取り出す
+    ///////////////////////////////////////
     fun takeProfit(user:Player){
-        val profit = showProfit(user)
+        val profit = getProfit(user,"all")
 
         MySQLManager(pl,"userindex").execute("UPDATE `user_index` SET `received`='1'" +
                 " WHERE `received`=0 and `uuid`='${user.uniqueId}';")

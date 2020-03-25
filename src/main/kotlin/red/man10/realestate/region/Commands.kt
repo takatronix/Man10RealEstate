@@ -11,6 +11,10 @@ import red.man10.realestate.Constants
 import red.man10.realestate.Plugin
 
 class Commands (private val pl :Plugin):CommandExecutor{
+
+    val db = RegionDatabase(pl)
+    val pdb = RegionUserDatabase(pl)
+
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
         if (sender !is Player)return false
@@ -33,18 +37,43 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
+            //onSaleの土地を購入する
             if (cmd == "buy"){
 
                 Bukkit.getScheduler().runTask(pl, Runnable {
                     RegionDatabase(pl).buy(args[1].toInt(),sender)
                 })
-
+                return true
             }
 
             //いいね
             if (cmd == "good" && args.size == 2){
 
             }
+
+            //取り出し
+            if (cmd == "withdraw"){
+                Bukkit.getScheduler().runTask(pl, Runnable {
+                    pdb.takeProfit(sender)
+                })
+                return true
+            }
+
+            //利益を表示
+            if (cmd == "bal"){
+                Bukkit.getScheduler().runTask(pl, Runnable {
+
+                    val profit = pdb.getProfit(sender,"all")
+
+                    pl.sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
+
+                    if (profit >0){
+                        //TODO:利益があればチャットクリックで受け取れるようにする
+                    }
+
+                })
+            }
+
             return true
         }
 
@@ -58,7 +87,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                     val loc = sender.location
 
-                    RegionDatabase(pl).setRegionTeleport(args[1].toInt(), mutableListOf(
+                    db.setRegionTeleport(args[1].toInt(), mutableListOf(
                             loc.x,
                             loc.y,
                             loc.z,
@@ -74,7 +103,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             if (cmd == "changestatus" && args.size == 3){
                 Thread(Runnable {
-                    RegionDatabase(pl).setRegionStatus(args[1].toInt(),args[2])
+                    db.setRegionStatus(args[1].toInt(),args[2])
                 }).start()
                 pl.sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
                 return true
@@ -82,7 +111,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             if (cmd == "changeprice" && args.size == 3){
                 Thread(Runnable {
-                    RegionDatabase(pl).setPrice(args[1].toInt(),args[2].toDouble())
+                    db.setPrice(args[1].toInt(),args[2].toDouble())
                 }).start()
                 pl.sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
                 return true
@@ -147,7 +176,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 Thread(Runnable {
                     //リージョンをDBに登録
-                    RegionDatabase(pl).registerRegion(data,id)
+                    db.registerRegion(data,id)
                 }).start()
 
                 pl.sendMessage(sender,"§a§l登録完了！")
@@ -159,7 +188,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //リージョンの削除
             if (cmd == "delete" && args.size==2){
                 Thread(Runnable {
-                    RegionDatabase(pl).deleteRegion(args[1].toInt())
+                    db.deleteRegion(args[1].toInt())
                 }).start()
 
                 return true
@@ -176,7 +205,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //リージョンデータのリロード
             if (cmd == "reloadregion"){
                 Thread(Runnable {
-                    RegionDatabase(pl).loadRegion()
+                    db.loadRegion()
                 }).start()
             }
         }
