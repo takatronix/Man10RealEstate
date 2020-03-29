@@ -1,10 +1,7 @@
 package red.man10.realestate.region
 
 import org.apache.commons.lang.Validate
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.Utility
+import org.bukkit.*
 import org.bukkit.block.data.type.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -12,6 +9,8 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import red.man10.realestate.Constants
 import red.man10.realestate.Plugin
 import java.lang.Exception
@@ -142,9 +141,13 @@ class RegionEvent (private val pl :Plugin) : Listener{
         pl.sendHoverText(p,"§d§lいいねする！＝＞","§d§l[いいね！]","")
         pl.sendHoverText(p,"土地の購入など＝＞","[購入について]","")
 
-
     }
 
-
+    @EventHandler
+    fun loginEvent(e:PlayerJoinEvent){
+        Bukkit.getScheduler().runTask(pl, Runnable {
+            RegionUserDatabase(pl).loadUserData(e.player)
+        })
+    }
 
 }

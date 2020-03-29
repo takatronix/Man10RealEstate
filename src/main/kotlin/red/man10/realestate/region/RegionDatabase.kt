@@ -8,9 +8,6 @@ import red.man10.realestate.Plugin
 class RegionDatabase(private val pl: Plugin) {
 
 
-    //TODO:Man10CommonLibsを参照できるようにする(できない原因不明)
-
-
     /////////////////////////////////
     //リージョンデータを新規で登録
     /////////////////////////////////
@@ -39,9 +36,7 @@ class RegionDatabase(private val pl: Plugin) {
                 "'${data.endCoordinate.second}', " +
                 "'${data.endCoordinate.third}');"
 
-        val mysql = MySQLManager(pl,"man10estate")
-
-        mysql.execute(sql)
+        pl.mysqlQueue.add(sql)
 
         pl.regionData[id] = data
 
@@ -67,9 +62,7 @@ class RegionDatabase(private val pl: Plugin) {
         val sql = "UPDATE `region` SET `x`=${tp[0]},`y`=${tp[1]},`z`=${tp[2]}," +
                 "`pitch`=${tp[3]},`yaw`=${tp[4]} WHERE `id`='$id';"
 
-        val mysql = MySQLManager(pl,"man10estate")
-
-        mysql.execute(sql)
+        pl.mysqlQueue.add(sql)
 
     }
 
@@ -82,9 +75,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql =  "UPDATE `region` SET `price`='$price' WHERE  `id`='$id';"
 
-        val mysql = MySQLManager(pl,"man10estate")
-
-        mysql.execute(sql)
+        pl.mysqlQueue.add(sql)
 
     }
 
@@ -97,10 +88,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql =  "UPDATE `region` SET `status`='$status' WHERE  `id`='$id';"
 
-        val mysql = MySQLManager(pl,"man10estate")
-
-        mysql.execute(sql)
-
+        pl.mysqlQueue.add(sql)
     }
 
     //オーナーの変更
@@ -112,9 +100,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name='${owner.name}' WHERE `id`='$id';"
 
-        val mysql = MySQLManager(pl,"man10estate")
-
-        mysql.execute(sql)
+        pl.mysqlQueue.add(sql)
 
     }
 
@@ -160,10 +146,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql = "DELETE FROM `region` WHERE  `id`=$id;"
 
-        val mysql = MySQLManager(pl,"man10estate")
-
-        mysql.execute(sql)
-
+        pl.mysqlQueue.add(sql)
     }
 
     ////////////////////////////////////

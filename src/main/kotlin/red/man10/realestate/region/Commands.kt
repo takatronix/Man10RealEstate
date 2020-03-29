@@ -49,6 +49,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //いいね
             if (cmd == "good" && args.size == 2){
 
+                val isLike = pdb.setLike(sender,args[1].toInt())
+
+                if (isLike){
+                    pl.sendMessage(sender,"§a§aいいねしました！")
+                }else{
+                    pl.sendMessage(sender,"§a§aいいね解除しました！")
+                }
+                return true
+
             }
 
             //取り出し
@@ -63,15 +72,38 @@ class Commands (private val pl :Plugin):CommandExecutor{
             if (cmd == "bal"){
                 Bukkit.getScheduler().runTask(pl, Runnable {
 
-                    val profit = pdb.getProfit(sender,"all")
+                    val profit = pdb.getProfit(sender)
 
                     pl.sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
 
                     if (profit >0){
                         //TODO:利益があればチャットクリックで受け取れるようにする
                     }
-
                 })
+                return true
+            }
+
+            //共同者を追加する ex)/mre adduser [id] [user] [type] [status]
+            if (cmd == "adduser" && args.size == 5){
+
+                val id = args[1].toInt()
+                val data = pl.regionData[id]?:return true
+
+                if (sender != data.owner || !sender.hasPermission("mre.op")){
+                    return true
+                }
+
+                pdb.createUserData(id,Bukkit.getPlayer(args[2])?:return false,args[3].toInt(),args[4])
+                pl.sendMessage(sender,"§e§l${args[2]}§a§lを共同者に追加しました！")
+                return true
+
+            }
+
+            //共同者を削除
+            if (cmd == "removeuser" && args.size == 3){
+                pdb.removeUserData(args[1].toInt(),Bukkit.getPlayer(args[2])?:return false)
+                pl.sendMessage(sender,"§e§l削除完了！")
+                return true
             }
 
             return true

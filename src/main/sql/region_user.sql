@@ -1,16 +1,14 @@
-create table region_user
-(
-    region_id    int           not null comment 'リージョンID: プライマリキー',
-    type         int default 0 null comment 'タイプ: 0 共同所有者(default) 1:使用者 ',
-    uuid         varchar(36)   not null,
-    name         varchar(16)   not null comment 'ユーザー名',
-    created_time datetime      not null comment '登録日時',
-    status       varchar(16)   null comment 'ステータス: "Lock"　など、現在状態',
-    deposit      double default 0.0 not null comment '支払った額',
-    paid_date    datetime      null comment '最後に支払った日'
+CREATE TABLE `region_user` (
 
-    primary key (region_id, uuid)
-);
+  `region_id` int NOT NULL DEFAULT '0' COMMENT 'リージョンID',
+  `type` int NOT NULL DEFAULT '0' COMMENT '0:共同所有者 1:使用者',
+  `player` int DEFAULT NULL,
+  `uuid` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '',
+  `created_time` datetime NOT NULL COMMENT '登録日',
+  `status` varchar(16) DEFAULT '' COMMENT 'ステータス',
+  `deposit` double NOT NULL DEFAULT '0' COMMENT '支払った額',
+  `paid_date` datetime NOT NULL COMMENT '最後に支払った日',
+  PRIMARY KEY (`region_id`),
+  KEY `uuid` (`uuid`)
 
-create index region_user_uuid_index
-    on Man10RealEstate.region_user (uuid);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

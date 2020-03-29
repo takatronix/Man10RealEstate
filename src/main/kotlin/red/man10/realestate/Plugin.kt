@@ -1,9 +1,7 @@
 package red.man10.realestate
 
-import net.md_5.bungee.api.chat.BaseComponent
+import com.sun.org.apache.xpath.internal.operations.Bool
 import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.ComponentBuilder
-import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Particle
@@ -18,9 +16,9 @@ import red.man10.realestate.region.Commands
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
-import java.awt.SystemColor
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.LinkedBlockingQueue
 import kotlin.collections.HashMap
 
 
@@ -31,13 +29,16 @@ class Plugin : JavaPlugin(), Listener {
     lateinit var protectEvent: ProtectRegionEvent
     lateinit var cmd : Commands
 
-    var wandStartLocation: Location? = null;
-    var wandEndLocation: Location? = null;
-    var particleTime:Int = 0;
+    var wandStartLocation: Location? = null
+    var wandEndLocation: Location? = null
+    var particleTime:Int = 0
 
     val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
     val regionUserData = ConcurrentHashMap<Pair<Player,Int>,RegionUserDatabase.RegionUserData>()
     val worldRegion = HashMap<String,MutableList<Int>>()
+
+    val mysqlQueue = LinkedBlockingQueue<String>()
+    val isLiked = HashMap<Pair<Player,Int>,Boolean>()
 
     val vault = VaultManager(this)
 
@@ -148,8 +149,27 @@ class Plugin : JavaPlugin(), Listener {
     // [例3] sendHoverText(player,"カーソルをあわせてクリック","ヘルプメッセージとか","/say おはまん");
     fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
 
+        val message = net.md_5.bungee.api.chat.TextComponent(text)
+        message.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND,command)
 
 
+    }
+
+    ////////////////////////
+    //dbのクエリキュー
+    ////////////////////////
+    fun mysqlQueue(){
+        Thread(Runnable {
+            try{
+                val sql = MySQLManager(this,"man10realestate queue")
+                while (true){
+                    val take = mysqlQueue.take()
+                    sql.execute(take)
+                }
+            }catch (e:InterruptedException){
+
+            }
+        }).start()
     }
 
 
