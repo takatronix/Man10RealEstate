@@ -104,6 +104,24 @@ class RegionDatabase(private val pl: Plugin) {
 
     }
 
+    //賃料の変更
+    fun setRent(id:Int,rent:Double){
+        val data = pl.regionData[id]?:return
+        data.rent = rent
+        pl.regionData[id] = data
+
+        pl.mysqlQueue.add("UPDATE `region` SET `rent`=$rent WHERE `id`='$id';")
+    }
+
+    //スパンの変更
+    fun setSpan(id:Int,span:Int){
+        val data = pl.regionData[id]?:return
+        data.span = span
+        pl.regionData[id] = data
+
+        pl.mysqlQueue.add("UPDATE `region` SET `span`=$span WHERE `id`='$id';")
+    }
+
     //土地の購入
     fun buy(id: Int,user:Player){
 
@@ -175,6 +193,9 @@ class RegionDatabase(private val pl: Plugin) {
             data.status = rs.getString("status")
             data.price = rs.getDouble("price")
 
+            data.rent = rs.getDouble("rent")
+            data.span = rs.getInt("span")
+
             data.teleport = mutableListOf(
                     rs.getDouble("x"),
                     rs.getDouble("y"),
@@ -221,6 +242,9 @@ class RegionDatabase(private val pl: Plugin) {
         var teleport = mutableListOf<Double>()
 
         var price : Double = 0.0
+
+        var rent : Double = 0.0
+        var span = 0 //0:month 1:week 2:day
 
     }
 }

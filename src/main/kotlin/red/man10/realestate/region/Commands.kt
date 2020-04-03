@@ -1,6 +1,7 @@
 package red.man10.realestate.region
 
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -19,14 +20,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
         if (sender !is Player)return false
 
-        if (args.isEmpty()){
-            help(sender)
-            return true
-        }
-
         val cmd = args[0]
 
         if (label == "mre"){
+
+            if (args.isEmpty()){
+                help(sender,false)
+                return true
+            }
+
             //範囲指定ワンド取得
             if (cmd == "wand"){
                 val wand = ItemStack(Material.STICK)
@@ -84,14 +86,12 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
 
             //共同者を追加する ex)/mre adduser [id] [user] [type] [status]
+            //def: type:2 status:Share
             if (cmd == "adduser" && args.size == 5){
 
                 val id = args[1].toInt()
-                val data = pl.regionData[id]?:return true
 
-                if (sender != data.owner || !sender.hasPermission("mre.op")){
-                    return true
-                }
+                if (!hasRegionAdmin(sender,id)){ return true }
 
                 pdb.createUserData(id,Bukkit.getPlayer(args[2])?:return false,args[3].toInt(),args[4])
                 pl.sendMessage(sender,"§e§l${args[2]}§a§lを共同者に追加しました！")
@@ -101,8 +101,51 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //共同者を削除
             if (cmd == "removeuser" && args.size == 3){
-                pdb.removeUserData(args[1].toInt(),Bukkit.getPlayer(args[2])?:return false)
+
+                val id = args[1].toInt()
+
+                if (!hasRegionAdmin(sender,id)){ return true }
+
+                pdb.removeUserData(id,Bukkit.getPlayer(args[2])?:return false)
                 pl.sendMessage(sender,"§e§l削除完了！")
+                return true
+            }
+
+            //tp
+            if (cmd == "tp" && args.size == 2){
+                val data = pl.regionData[args[1].toInt()]?:return false
+
+                sender.teleport(Location(
+                        Bukkit.getWorld(data.world),
+                        data.teleport[0],
+                        data.teleport[1],
+                        data.teleport[2],
+                        data.teleport[3].toFloat(),
+                        data.teleport[4].toFloat()
+                ))
+                pl.sendMessage(sender,"§a§lテレポートしました！")
+                return true
+            }
+
+            //賃料 /mre rent id rent
+            if (cmd == "rent" && args.size == 3){
+                val id = args[1].toInt()
+                val rent = args[2].toDouble()
+
+                if (!hasRegionAdmin(sender,id))return false
+
+                db.setRent(id,rent)
+                return true
+            }
+
+            //スパン /mre span id span
+            if (cmd == "span" && args.size == 4){
+                val id = args[1].toInt()
+                val span = args[2].toInt()
+
+                if (!hasRegionAdmin(sender,id))return false
+
+                db.setSpan(id,span)
                 return true
             }
 
@@ -111,8 +154,14 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
         if (label == "mreop"){
 
+            if (args.isEmpty()){
+                help(sender,true)
+                return true
+            }
+
             if (!sender.hasPermission("mre.op"))return true
 
+            //指定地点をテレポート地点にする
             if (cmd == "setteleport" && args.size == 2){
 
                 Thread(Runnable {
@@ -242,28 +291,46 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
         }
 
-
         return false
     }
 
-    fun help(p:Player){
-        pl.sendMessage(p,"§e§l/mre wand : 範囲指定用のワンドを取得")
-        pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
-        pl.sendMessage(p,"§e§l/mre buy <id> : 指定idが販売中なら購入します")
+    fun help(p:Player,op:Boolean){
 
-        if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
-        pl.sendMessage(p,"§e§l==============================================")
-        pl.sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
-        pl.sendMessage(p,"§e§l/mreop setteleport <id> : 現在地点をテレポート地点に設定します")
-        pl.sendMessage(p,"§e§l/mreop changestatus <id> <status> : 指定idのステータスを変更します")
-        pl.sendMessage(p,"§e§l/mreop changeprice <id> <price> : 指定idの金額を変更します")
-        pl.sendMessage(p,"§e§l/mreop changeowner <id> <owner> : 指定idのオーナーを変更します")
-        pl.sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
-        pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§e§lを持ってコマンドを実行してください")
-        pl.sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
-        pl.sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
-        pl.sendMessage(p,"§e§l/mreop reloadregion : リージョンデータの再読み込みをします")
+        if (!op){
+            pl.sendMessage(p,"§e§l/mre wand : 範囲指定用のワンドを取得")
+            pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
+            pl.sendMessage(p,"§e§l/mre buy <id> : 指定idが販売中なら購入します")
+            pl.sendMessage(p,"§e§l/mre adduser <id> <user> <type> <id> : リージョンにユーザーを追加します")
+            pl.sendMessage(p,"§e§l/mre removeuser <id> <user> : リージョンのユーザーを削除します")
+            pl.sendMessage(p,"§e§l/mre tp <id> : 指定したidにテレポートします")
+            pl.sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")
+            pl.sendMessage(p,"§e§l/mre span <id> <span> : 賃料を支払うスパンを設定します 0:月 1:週 0:日")
+        }else{
+            if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
+            pl.sendMessage(p,"§e§l==============================================")
+            pl.sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
+            pl.sendMessage(p,"§e§l/mreop setteleport <id> : 現在地点をテレポート地点に設定します")
+            pl.sendMessage(p,"§e§l/mreop changestatus <id> <status> : 指定idのステータスを変更します")
+            pl.sendMessage(p,"§e§l/mreop changeprice <id> <price> : 指定idの金額を変更します")
+            pl.sendMessage(p,"§e§l/mreop changeowner <id> <owner> : 指定idのオーナーを変更します")
+            pl.sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
+            pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§e§lを持ってコマンドを実行してください")
+            pl.sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
+            pl.sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
+            pl.sendMessage(p,"§e§l/mreop reloadregion : リージョンデータの再読み込みをします")
+        }
     }
 
+    //指定リージョンの管理者かどうか
+    fun hasRegionAdmin(p:Player,id:Int):Boolean{
+        if (p.hasPermission("mre.op"))return true
 
+        val data = pl.regionData[id]?:return false
+        if (data.owner == p)return true
+
+        val userdata = pl.regionUserData[Pair(p,id)]?:return false
+        if (userdata.type == 0 && userdata.statsu == "Share")return true
+
+        return false
+    }
 }

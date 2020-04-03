@@ -31,6 +31,8 @@ OnSale状態になったときに販売価格
 売り上げ金額は、売上テーブルに登録しオフラインでも売買できるとする
 ',
     profit     double       null comment '土地の利益'
+    rent       double       null comment '賃料'
+    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)'
 )
     comment '領域管理のためのテーブル';
 

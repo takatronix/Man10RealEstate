@@ -1,4 +1,4 @@
-package red.man10.realestate.protect
+package red.man10.realestate.region
 
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -7,23 +7,16 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
-import javax.xml.stream.Location
 
 class ProtectRegionEvent(private val pl:Plugin):Listener{
 
     @EventHandler
     fun blockBreakEvent(e:BlockBreakEvent){
 
-        val regionList = pl.worldRegion[e.player.world.name]?:return
-
-        //adminなどはプロテクト無視
-        if (e.player.hasPermission("mre.op"))return
-
         val p = e.player
 
-        if (!canBreak(p,regionList,e.block.location)){
+        if (!canBreak(p,e.block.location,0)){
             pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを破壊する権限がありません！")
             e.isCancelled = true
         }
@@ -31,18 +24,12 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
     @EventHandler
     fun blockPlaceEvent(e:BlockPlaceEvent){
-        val regionList = pl.worldRegion[e.player.world.name]?:return
-
-        //adminなどはプロテクト無視
-        if (e.player.hasPermission("mre.op"))return
-
         val p = e.player
 
-        if (!canBreak(p,regionList,e.block.location)){
+        if (!canBreak(p,e.block.location,1)){
             pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
             e.isCancelled = true
         }
-
     }
 
     @EventHandler
@@ -50,38 +37,52 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         if (e.action != Action.RIGHT_CLICK_BLOCK)return
         if (!e.hasBlock())return
 
-        val regionList = pl.worldRegion[e.player.world.name]?:return
-
-        //adminなどはプロテクト無視
-        if (e.player.hasPermission("mre.op"))return
-
         val p = e.player
 
-        if (!canBreak(p,regionList,e.clickedBlock!!.location)){
+        if (!canBreak(p,e.clickedBlock!!.location,2)){
             pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
         }
-
     }
 
-    fun canBreak(p:Player,regionList:MutableList<Int>,location: org.bukkit.Location):Boolean{
-        for (region in regionList){
+    fun canBreak(p:Player,loc: org.bukkit.Location,eventType:Int):Boolean{
 
-            val data = pl.regionData[region]?:continue
+        //adminなどはプロテクト無視
+        if (p.hasPermission("mre.op"))return true
 
-                if (isWithinRange(location,data.startCoordinate,data.endCoordinate)){
+        for (id in pl.regionData){
 
-                if (data.owner == p && data.status != "Lock")break
+            val data = id.value
 
-                    if (p == data.owner)break
+            if (isWithinRange(loc,data.startCoordinate,data.endCoordinate)){
+                if (data.status == "Lock")return false
+                if (data.owner == p)return true
 
-                    val ud = pl.regionUserData[Pair(p,region)]?:return false
+                val pd = pl.regionUserData[Pair(p,id.key)]?:return false
 
-                    if (ud.statsu != "Lock")break
+                if (pd.statsu == "Lock")return false
+                if (pd.type == 0)return true
+
+                //0:break 1:put 2:interact
+                when(eventType){
+                    0 -> {
+                        if (pd.type == 1)return true
+                        if (pd.type == 2)return true
+                    }
+                    1 ->{
+                        if (pd.type == 1)return true
+                        if (pd.type == 2)return true
+                    }
+                    2 ->{
+                        if (pd.type == 1)return true
+                        if (pd.type == 2)return true
+                        if (pd.type == 3)return true
+                    }
                 }
-
                 return false
             }
+
+        }
         return true
     }
 
@@ -101,6 +102,5 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         return true
 
     }
-
 
 }

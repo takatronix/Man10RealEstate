@@ -1,6 +1,5 @@
 package red.man10.realestate
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -11,7 +10,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
-import red.man10.realestate.protect.ProtectRegionEvent
+import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.Commands
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
