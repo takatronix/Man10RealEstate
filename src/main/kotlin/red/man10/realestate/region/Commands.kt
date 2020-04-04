@@ -20,14 +20,14 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
         if (sender !is Player)return false
 
-        val cmd = args[0]
-
         if (label == "mre"){
 
             if (args.isEmpty()){
                 help(sender,false)
                 return true
             }
+
+            val cmd = args[0]
 
             //範囲指定ワンド取得
             if (cmd == "wand"){
@@ -149,6 +149,16 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
+            //賃料支払い
+            if (cmd == "payrent"){
+                if (pdb.addDeposit(args[1].toInt(),sender,args[2].toDouble())){
+                    pl.sendMessage(sender,"§e§l支払い完了！$${args[2]} 支払いました！")
+                    return true
+                }
+                pl.sendMessage(sender,"§3§l支払いできませんでした")
+                return true
+            }
+
             return true
         }
 
@@ -160,6 +170,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
 
             if (!sender.hasPermission("mre.op"))return true
+
+            val cmd = args[0]
 
             //指定地点をテレポート地点にする
             if (cmd == "setteleport" && args.size == 2){

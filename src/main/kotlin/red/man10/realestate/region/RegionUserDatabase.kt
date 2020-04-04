@@ -20,7 +20,7 @@ class RegionUserDatabase (private val pl:Plugin){
                 "(`region_id`," +
                 " `type`," +
                 " `uuid`," +
-                " `name`," +
+                " `player`," +
                 " `created_time`," +
                 " `status`)" +
                 " VALUES " +
@@ -161,6 +161,26 @@ class RegionUserDatabase (private val pl:Plugin){
         return isLiked
 
     }
+    //////////////////////////
+    //支払い処理
+    //////////////////////////
+    fun addDeposit(id: Int,p:Player,price:Double):Boolean{
+
+        val pd = pl.regionUserData[Pair(p,id)]?:return false
+
+        if (!pd.isRent)return false
+
+        if (pl.vault.getBalance(p.uniqueId) < price)return false
+
+        pl.vault.withdraw(p.uniqueId,price)
+        pd.deposit += price
+
+        pd.statsu = "Share"
+
+        saveUserData(p,id)
+
+        return true
+    }
 
     class RegionUserData{
 
@@ -168,7 +188,7 @@ class RegionUserDatabase (private val pl:Plugin){
         var paid = Date()
         var statsu = ""
         var type = 0
-
+        var isRent = false
     }
 
 }

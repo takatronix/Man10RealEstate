@@ -72,6 +72,9 @@ class Plugin : JavaPlugin(), Listener {
 
         RegionDatabase(this).loadRegion()
 
+        mysqlQueue()
+        rentTimer()
+
     }
 
     override fun onDisable() { // Plugin shutdown logic
@@ -171,5 +174,40 @@ class Plugin : JavaPlugin(), Listener {
         }).start()
     }
 
+    /////////////////////////////////////
+    //貸出のタイマー(期限が過ぎたらロックされる)
+    //////////////////////////////////////
+    fun rentTimer(){
+        Thread(Runnable {
 
+            for (pd in regionUserData){
+
+                val data = regionData[pd.key.second]?:continue
+                val pdata = pd.value
+
+                if (!pdata.isRent)continue
+
+                val different = (Date().time - pdata.paid.time)/1000/3600/24
+
+                if (data.span == 0 && different < 30)continue
+                if (data.span == 1 && different < 7)continue
+                if (data.span == 2 && different < 1)continue
+
+                if (pdata.deposit <data.rent){
+                    if (pd.key.first.isOnline){
+                        sendMessage(pd.key.first,"${data.name}§3§lの賃料が支払えません！支払えるまでロックされます！")
+                    }
+                    pdata.statsu = "Lock"
+                }else{
+                    pdata.deposit -= data.rent
+                    pdata.paid = Date()
+                }
+
+                regionUserData[pd.key] = pdata
+                RegionUserDatabase(this).saveUserData(pd.key.first,pd.key.second)
+            }
+
+            Thread.sleep(3600000)
+        }).start()
+    }
 }
