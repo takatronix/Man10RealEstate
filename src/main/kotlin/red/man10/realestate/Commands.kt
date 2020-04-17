@@ -1,4 +1,4 @@
-package red.man10.realestate.region
+package red.man10.realestate
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -8,8 +8,8 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import red.man10.realestate.Constants
-import red.man10.realestate.Plugin
+import red.man10.realestate.region.RegionDatabase
+import red.man10.realestate.region.RegionUserDatabase
 
 class Commands (private val pl :Plugin):CommandExecutor{
 
@@ -156,6 +156,18 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     return true
                 }
                 pl.sendMessage(sender,"§3§l支払いできませんでした")
+                return true
+            }
+
+            //設置画面を開く
+            if(cmd == "setting"){
+
+                return true
+            }
+
+            //メニューを開く
+            if (cmd == "menu"){
+
                 return true
             }
 

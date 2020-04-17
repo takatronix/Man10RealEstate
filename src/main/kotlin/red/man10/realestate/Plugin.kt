@@ -11,7 +11,6 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
 import red.man10.realestate.region.ProtectRegionEvent
-import red.man10.realestate.region.Commands
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
