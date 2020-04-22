@@ -10,7 +10,6 @@ CREATE TABLE `region_user` (
   `isRent` TINYINT(1) DEFAULT '0' COMMENT '1:賃貸 0:賃貸じゃない',
   `deposit` double NOT NULL DEFAULT '0' COMMENT '支払った額',
   `paid_date` datetime NOT NULL DEFAULT now() COMMENT '最後に支払った日',
-  INDEX `uuid` (`uuid`),
   INDEX `region_id` (`region_id`),
   KEY `uuid` (`uuid`)
 

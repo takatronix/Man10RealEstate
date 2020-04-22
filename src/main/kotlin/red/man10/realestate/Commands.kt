@@ -15,6 +15,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
     val db = RegionDatabase(pl)
     val pdb = RegionUserDatabase(pl)
+    val inventory = InventoryMenu(pl)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -162,11 +163,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //設置画面を開く
             if(cmd == "setting"){
 
+                inventory.openOwnerSetting(sender,1)
+
                 return true
             }
 
             //メニューを開く
             if (cmd == "menu"){
+
+                inventory.openMainMenu(sender)
 
                 return true
             }
@@ -328,7 +333,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
             pl.sendMessage(p,"§e§l/mre removeuser <id> <user> : リージョンのユーザーを削除します")
             pl.sendMessage(p,"§e§l/mre tp <id> : 指定したidにテレポートします")
             pl.sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")
-            pl.sendMessage(p,"§e§l/mre span <id> <span> : 賃料を支払うスパンを設定します 0:月 1:週 0:日")
+            pl.sendMessage(p,"§e§l/mre span <id> <span> : 賃料を支払うスパンを設定します 0:月 1:週 2:日")
+            pl.sendMessage(p,"§e§l/mre setting : 自分のリージョンの管理をします")
+            pl.sendMessage(p,"§e§l/mre menu : メニューを開きます")
         }else{
             if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
             pl.sendMessage(p,"§e§l==============================================")

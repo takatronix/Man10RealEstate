@@ -51,6 +51,7 @@ class Plugin : JavaPlugin(), Listener {
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(regionEvent,this)
         server.pluginManager.registerEvents(protectEvent,this)
+        server.pluginManager.registerEvents(InventoryMenu(this),this)
 
         getCommand("mre")!!.setExecutor(cmd)
         getCommand("mreop")!!.setExecutor(cmd)

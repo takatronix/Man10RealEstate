@@ -80,7 +80,7 @@ class InventoryMenu(private val pl:Plugin) : Listener {
 
         for (i in first .. first+44){
 
-            if (!pl.isLiked[Pair(p,i)]!!)continue
+            if (!(pl.isLiked[Pair(p,i)]?:continue))continue
 
             val d = pl.regionData[i]?:continue
 
@@ -141,24 +141,23 @@ class InventoryMenu(private val pl:Plugin) : Listener {
     @EventHandler
     fun invEvent(e:InventoryClickEvent){
 
-        val name = e.eventName
+        val name = e.view.title
         val item = e.currentItem?:return
         val p = e.whoClicked as Player
 
         //メインメニュ
         if (name == mainMenu){
-
+            e.isCancelled = true
             when(getId(item)){
                 "manage"->openOwnerSetting(p,1)
                 "bookmark"->openBookMark(p,1)
             }
-
-            e.isCancelled = true
         }
 
         //オーナーメニュ
         if (name == ownerMenu){
-            if (e.slot <=45){
+            e.isCancelled = true
+            if (e.slot >=45){
                 when(getId(item)){
 
                     "back"->openMainMenu(p)
@@ -170,7 +169,8 @@ class InventoryMenu(private val pl:Plugin) : Listener {
 
         //いいね
         if (name == bookmark){
-            if (e.slot <=45){
+            e.isCancelled = true
+            if (e.slot >=45){
                 when(getId(item)){
 
                     "back"->openMainMenu(p)

@@ -1,11 +1,10 @@
-create table man10builder.region
+create table region
 (
     id         int auto_increment
         primary key,
     server     varchar(16)  not null comment 'サーバー名',
     world      varchar(16)  not null comment 'ワールド名',
-    owner_uuid varchar(36)  null comment '所有者のUUID
-nullならだれも所有していない',
+    owner_uuid varchar(36)  null comment '所有者のUUID nullならだれも所有していない',
     owner_name varchar(16)  null comment '所有者の名前',
     x          double       not null comment 'テレポートすると飛ぶ場所',
     y          double       not null comment 'テレポートすると飛ぶ場所',
@@ -19,8 +18,8 @@ nullならだれも所有していない',
     ey         double       null comment '終点',
     ez         double       null comment '終点',
     name       varchar(128) null comment '名称',
-    created    datetime     null comment '作成日',
-    status     varchar(16)  not null comment '"OnSale" 販売中 ：保護あり（admin,ownerのみ）
+    created    datetime     not null default now() comment '作成日',
+    status     varchar(16)  not null DEFAULT "OnSale" comment '"OnSale" 販売中 ：保護あり（admin,ownerのみ）
 "Free" 保護なし だれでもいじられるエリア
 "Protected" 保護あり :　admin,owner,userのみ
 "Lock" 違法などでロック中：　admin以外いじれない
@@ -30,9 +29,9 @@ nullならだれも所有していない',
 OnSale状態になったときに販売価格
 売り上げ金額は、売上テーブルに登録しオフラインでも売買できるとする
 ',
-    profit     double       null comment '土地の利益'
-    rent       double       null comment '賃料'
-span       Int          null comment '支払うスパン(0:moth 1:week 2:day)'
+    profit     double       not null default 0.0 comment '土地の利益',
+    rent       double       not null default 0.0 comment '賃料',
+    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)'
 )
     comment '領域管理のためのテーブル';
 
