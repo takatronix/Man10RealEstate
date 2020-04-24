@@ -6,6 +6,7 @@ import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.LinkedBlockingQueue
 
 class Constants(val p:Plugin) {
 
@@ -17,6 +18,9 @@ class Constants(val p:Plugin) {
         val regionUserData = ConcurrentHashMap<Pair<Player,Int>, RegionUserDatabase.RegionUserData>()
         //worldごとのリージョンid <ワールド名,ワールドないにあるリージョンのidのlist>
         val worldRegion = HashMap<String,MutableList<Int>>()
+
+        val mysqlQueue = LinkedBlockingQueue<String>()
+        val isLiked = HashMap<Pair<Player,Int>,Boolean>()
 
     }
 }

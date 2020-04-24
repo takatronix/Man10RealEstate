@@ -39,8 +39,8 @@ class Plugin : JavaPlugin(), Listener {
 //    val regionUserData = ConcurrentHashMap<Pair<Player,Int>,RegionUserDatabase.RegionUserData>()
 //    val worldRegion = HashMap<String,MutableList<Int>>()
 
-    val mysqlQueue = LinkedBlockingQueue<String>()
-    val isLiked = HashMap<Pair<Player,Int>,Boolean>()
+//    val mysqlQueue = LinkedBlockingQueue<String>()
+//    val isLiked = HashMap<Pair<Player,Int>,Boolean>()
 
     val vault = VaultManager(this)
 
@@ -172,7 +172,7 @@ class Plugin : JavaPlugin(), Listener {
             try{
                 val sql = MySQLManager(this,"man10realestate queue")
                 while (true){
-                    val take = mysqlQueue.take()
+                    val take = Constants.mysqlQueue.take()
                     sql.execute(take)
                 }
             }catch (e:InterruptedException){

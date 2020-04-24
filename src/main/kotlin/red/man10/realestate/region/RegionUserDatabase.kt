@@ -1,6 +1,8 @@
 package red.man10.realestate.region
 
 import org.bukkit.entity.Player
+import red.man10.realestate.Constants.Companion.isLiked
+import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
@@ -32,7 +34,7 @@ class RegionUserDatabase (private val pl:Plugin){
                 " now()," +
                 " '$status');"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
 
         data.type = type
         data.statsu = status
@@ -44,7 +46,7 @@ class RegionUserDatabase (private val pl:Plugin){
     //ユーザーデータを削除
     ///////////////////////
     fun removeUserData(regionId: Int,user: Player){
-        pl.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$regionId' AND `uuid`='${user.uniqueId}';")
+        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$regionId' AND `uuid`='${user.uniqueId}';")
     }
 
 
@@ -84,9 +86,9 @@ class RegionUserDatabase (private val pl:Plugin){
             val id = rs2.getInt("region_id")
 
             if (isLike == 1){
-                pl.isLiked[Pair(p,id)] = true
+                isLiked[Pair(p,id)] = true
             }else if (isLike == 0){
-                pl.isLiked[Pair(p,id)] = false
+                isLiked[Pair(p,id)] = false
             }
         }
 
@@ -108,7 +110,7 @@ class RegionUserDatabase (private val pl:Plugin){
                 "SET `type`='${data.type}', `status`='${data.statsu}'," +
                 " `deposit`='${data.deposit}', `paid_date`='${data.paid}'" +
                 " WHERE `uuid`='${p.uniqueId}' AND `region_id`='$id';"
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
 
     }
 
@@ -121,7 +123,7 @@ class RegionUserDatabase (private val pl:Plugin){
 
          val sql = "UPDATE `user_index` SET `received`='1' WHERE `uuid`='${p.uniqueId}';"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
     }
 
     /////////////////////////////
@@ -146,20 +148,20 @@ class RegionUserDatabase (private val pl:Plugin){
     fun setLike(p:Player,id:Int):Boolean{
 
         val key = Pair(p,id)
-        var isLiked = pl.isLiked[key]
+        var isLike = isLiked[key]
 
-        if (isLiked == null){
-            isLiked = true
-            pl.mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('0', 'aaa', 'aaa', '0');")
+        if (isLike == null){
+            isLike = true
+            mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('$id', '${p.name}', '${p.uniqueId}', '0');")
         }else{
-            isLiked != isLiked
+            isLike = !isLike
         }
 
-        pl.isLiked[key] = isLiked
+        isLiked[key] = isLike
 
-        pl.mysqlQueue.add("UPDATE `liked_index` SET `is_like`='${if (isLiked){ 1 }else{ 0 }}';")
+        mysqlQueue.add("UPDATE `liked_index` SET `is_like`='${if (isLike){ 1 }else{ 0 }}' WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
 
-        return isLiked
+        return isLike
 
     }
     //////////////////////////

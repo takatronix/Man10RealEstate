@@ -9,6 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import red.man10.realestate.Constants.Companion.isLiked
 import red.man10.realestate.Constants.Companion.regionData
 
 class InventoryMenu(private val pl:Plugin) : Listener {
@@ -30,15 +31,10 @@ class InventoryMenu(private val pl:Plugin) : Listener {
 
             if (d.owner_uuid != p.uniqueId)continue
 
-            val icon = ItemStack(Material.PAPER)
-            val meta = icon.itemMeta
-            meta.setDisplayName(d.name)
-            meta.lore = mutableListOf(
+            val icon = IS(Material.PAPER,d.name,mutableListOf(
                     "§e§lID:${i}",
                     "§a§lStatus:${d.status}"
-            )
-            meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.INTEGER,i)
-            icon.itemMeta = meta
+            ),i.toString())
             inv.addItem(icon)
         }
 
@@ -81,7 +77,7 @@ class InventoryMenu(private val pl:Plugin) : Listener {
 
         for (i in first .. first+44){
 
-            if (!(pl.isLiked[Pair(p,i)]?:continue))continue
+            if (!(isLiked[Pair(p,i)]?:continue))continue
 
             val d = regionData[i]?:continue
 
@@ -165,6 +161,7 @@ class InventoryMenu(private val pl:Plugin) : Listener {
                     "next"->openOwnerSetting(p,getId(e.inventory.getItem(44)!!).toInt())
                     "previous"->openOwnerSetting(p,1)//TODO:うまく戻る方法を考える
                 }
+                return
             }
         }
 
@@ -178,7 +175,10 @@ class InventoryMenu(private val pl:Plugin) : Listener {
                     "next"->openBookMark(p,getId(e.inventory.getItem(44)!!).toInt())
                     "previous"->openBookMark(p,1)//TODO:うまく戻る方法を考える
                 }
+                return
             }
+            p.performCommand("mre tp ${getId(item)}")
+            return
         }
 
 

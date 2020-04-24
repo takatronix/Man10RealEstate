@@ -203,8 +203,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
                             loc.x,
                             loc.y,
                             loc.z,
-                            loc.pitch.toDouble(),
-                            loc.yaw.toDouble()
+                            loc.yaw.toDouble(),
+                            loc.pitch.toDouble()
                     ))
 
                 }).start()
@@ -279,8 +279,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         sender.location.x,
                         sender.location.y,
                         sender.location.z,
-                        sender.location.pitch.toDouble(),
-                        sender.location.yaw.toDouble()
+                        sender.location.yaw.toDouble(),
+                        sender.location.pitch.toDouble()
                 )
 
 

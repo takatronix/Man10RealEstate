@@ -2,6 +2,7 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.worldRegion
 import red.man10.realestate.MySQLManager
@@ -39,7 +40,7 @@ class RegionDatabase(private val pl: Plugin) {
                 "'${data.endCoordinate.second}', " +
                 "'${data.endCoordinate.third}');"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
 
         regionData[id] = data
 
@@ -65,7 +66,7 @@ class RegionDatabase(private val pl: Plugin) {
         val sql = "UPDATE `region` SET `x`=${tp[0]},`y`=${tp[1]},`z`=${tp[2]}," +
                 "`pitch`=${tp[3]},`yaw`=${tp[4]} WHERE `id`='$id';"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
 
     }
 
@@ -78,7 +79,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql =  "UPDATE `region` SET `price`='$price' WHERE  `id`='$id';"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
 
     }
 
@@ -91,7 +92,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql =  "UPDATE `region` SET `status`='$status' WHERE  `id`='$id';"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
     }
 
     //オーナーの変更
@@ -103,7 +104,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name='${owner.name}' WHERE `id`='$id';"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
 
     }
 
@@ -113,7 +114,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.rent = rent
         regionData[id] = data
 
-        pl.mysqlQueue.add("UPDATE `region` SET `rent`=$rent WHERE `id`='$id';")
+        mysqlQueue.add("UPDATE `region` SET `rent`=$rent WHERE `id`='$id';")
     }
 
     //スパンの変更
@@ -122,7 +123,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.span = span
         regionData[id] = data
 
-        pl.mysqlQueue.add("UPDATE `region` SET `span`=$span WHERE `id`='$id';")
+        mysqlQueue.add("UPDATE `region` SET `span`=$span WHERE `id`='$id';")
     }
 
     //土地の購入
@@ -167,7 +168,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         val sql = "DELETE FROM `region` WHERE  `id`=$id;"
 
-        pl.mysqlQueue.add(sql)
+        mysqlQueue.add(sql)
     }
 
     ////////////////////////////////////
