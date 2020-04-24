@@ -45,7 +45,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //onSaleの土地を購入する
             if (cmd == "buy"){
 
-                Bukkit.getScheduler().runTask(pl, Runnable {
+                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
                     RegionDatabase(pl).buy(args[1].toInt(),sender)
                 })
                 return true
@@ -67,7 +67,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //取り出し
             if (cmd == "withdraw"){
-                Bukkit.getScheduler().runTask(pl, Runnable {
+                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
                     pdb.takeProfit(sender)
                 })
                 return true
@@ -75,14 +75,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //利益を表示
             if (cmd == "bal"){
-                Bukkit.getScheduler().runTask(pl, Runnable {
+                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
                     val profit = pdb.getProfit(sender)
 
                     pl.sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
 
                     if (profit >0){
-                        //TODO:利益があればチャットクリックで受け取れるようにする
+
+                        pl.sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n$profit","mre withdraw")
                     }
                 })
                 return true
@@ -306,11 +307,25 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //TODO:ページ切り替えをして見れるようにする
             if (cmd == "list"){
-                for (i in 1 .. regionData.size){
-                    pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
+
+                if (args.size == 2){
+                    for (i in args[1].toInt() .. args[1].toInt()+15){
+                        if (i > regionData.size)break
+                        pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
+                    }
+
+                    pl.sendHoverText(sender,"§e§l[NEXT]","","mre list ${args[1].toInt()+16}")
+                    pl.sendHoverText(sender,"§e§l[Previous]","","mre list ${args[1].toInt()-16}")
+
+                }else{
+                    for (i in 1 .. 16){
+                        if (i > regionData.size)break
+                        pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
+                    }
+                    pl.sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
                 }
+
                 return true
             }
 
