@@ -8,6 +8,8 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import red.man10.realestate.Constants.Companion.regionData
+import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionUserDatabase
 
@@ -114,7 +116,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //tp
             if (cmd == "tp" && args.size == 2){
-                val data = pl.regionData[args[1].toInt()]?:return false
+                val data = regionData[args[1].toInt()]?:return false
 
                 sender.teleport(Location(
                         Bukkit.getWorld(data.world),
@@ -256,7 +258,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 data.name = args[1]
                 data.status = args[2]
 
-                data.owner = Bukkit.getPlayer(lore[0].replace("§aOwner:§f",""))
+                data.owner_uuid = Bukkit.getPlayer(lore[0].replace("§aOwner:§f",""))!!.uniqueId
                 data.server = lore[1].replace("§aServer:§f","")
                 data.world = lore[2].replace("§aWorld:§f","")
 
@@ -282,7 +284,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 )
 
 
-                val id = pl.regionData.size+1
+                val id = regionData.size+1
 
                 Thread(Runnable {
                     //リージョンをDBに登録
@@ -306,8 +308,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //TODO:ページ切り替えをして見れるようにする
             if (cmd == "list"){
-                for (i in 1 .. pl.regionData.size){
-                    pl.sendMessage(sender,"$i : §b§l${pl.regionData[i]!!.name}")
+                for (i in 1 .. regionData.size){
+                    pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
                 }
                 return true
             }
@@ -356,10 +358,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
     fun hasRegionAdmin(p:Player,id:Int):Boolean{
         if (p.hasPermission("mre.op"))return true
 
-        val data = pl.regionData[id]?:return false
-        if (data.owner == p)return true
+        val data = regionData[id]?:return false
+        if (data.owner_uuid == p.uniqueId)return true
 
-        val userdata = pl.regionUserData[Pair(p,id)]?:return false
+        val userdata = regionUserData[Pair(p,id)]?:return false
         if (userdata.type == 0 && userdata.statsu == "Share")return true
 
         return false

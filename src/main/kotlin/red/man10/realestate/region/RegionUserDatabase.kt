@@ -1,6 +1,7 @@
 package red.man10.realestate.region
 
 import org.bukkit.entity.Player
+import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import java.util.*
@@ -36,7 +37,7 @@ class RegionUserDatabase (private val pl:Plugin){
         data.type = type
         data.statsu = status
 
-        pl.regionUserData[Pair(user,regionId)] = data
+        regionUserData[Pair(user,regionId)] = data
     }
 
     ///////////////////////
@@ -67,7 +68,7 @@ class RegionUserDatabase (private val pl:Plugin){
             data.statsu = rs1.getString("deposit")
             data.type = rs1.getInt("type")
 
-            pl.regionUserData[key] = data
+            regionUserData[key] = data
 
         }
 
@@ -101,7 +102,7 @@ class RegionUserDatabase (private val pl:Plugin){
 
         val key = Pair(p,id)
 
-        val data = pl.regionUserData[key]?:return
+        val data = regionUserData[key]?:return
 
         val sql = "UPDATE `region_user` " +
                 "SET `type`='${data.type}', `status`='${data.statsu}'," +
@@ -166,7 +167,7 @@ class RegionUserDatabase (private val pl:Plugin){
     //////////////////////////
     fun addDeposit(id: Int,p:Player,price:Double):Boolean{
 
-        val pd = pl.regionUserData[Pair(p,id)]?:return false
+        val pd = regionUserData[Pair(p,id)]?:return false
 
         if (!pd.isRent)return false
 

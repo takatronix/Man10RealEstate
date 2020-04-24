@@ -2,8 +2,11 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import red.man10.realestate.Constants.Companion.regionData
+import red.man10.realestate.Constants.Companion.worldRegion
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import java.util.*
 
 class RegionDatabase(private val pl: Plugin) {
 
@@ -20,8 +23,8 @@ class RegionDatabase(private val pl: Plugin) {
                 "VALUES (" +
                 "'${data.server}', " +
                 "'${data.world}', " +
-                "'${data.owner!!.uniqueId}', " +
-                "'${data.owner!!.name}' ," +
+                "'${data.owner_uuid}', " +
+                "'${Bukkit.getPlayer(data.owner_uuid)}' ," +
                 "'${data.name}', " +
                 "'${data.status}', " +
                 "'${data.teleport[0]}', "+
@@ -38,11 +41,11 @@ class RegionDatabase(private val pl: Plugin) {
 
         pl.mysqlQueue.add(sql)
 
-        pl.regionData[id] = data
+        regionData[id] = data
 
-        val list = pl.worldRegion[data.world]?: mutableListOf()
+        val list = worldRegion[data.world]?: mutableListOf()
         list.add(id)
-        pl.worldRegion[data.world] = list
+        worldRegion[data.world] = list
 
     }
 
@@ -55,9 +58,9 @@ class RegionDatabase(private val pl: Plugin) {
      */
     fun setRegionTeleport(id:Int,tp:MutableList<Double>){
 
-        val data = pl.regionData[id]?:return
+        val data = regionData[id]?:return
         data.teleport = tp
-        pl.regionData[id] = data
+        regionData[id] = data
 
         val sql = "UPDATE `region` SET `x`=${tp[0]},`y`=${tp[1]},`z`=${tp[2]}," +
                 "`pitch`=${tp[3]},`yaw`=${tp[4]} WHERE `id`='$id';"
@@ -69,9 +72,9 @@ class RegionDatabase(private val pl: Plugin) {
     //リージョンの値段を変更
     fun setPrice(id:Int,price:Double){
 
-        val data = pl.regionData[id]?:return
+        val data = regionData[id]?:return
         data.price = price
-        pl.regionData[id] = data
+        regionData[id] = data
 
         val sql =  "UPDATE `region` SET `price`='$price' WHERE  `id`='$id';"
 
@@ -82,9 +85,9 @@ class RegionDatabase(private val pl: Plugin) {
     //ステータスの変更
     fun setRegionStatus(id:Int,status: String){
 
-        val data = pl.regionData[id]?:return
+        val data = regionData[id]?:return
         data.status = status
-        pl.regionData[id] = data
+        regionData[id] = data
 
         val sql =  "UPDATE `region` SET `status`='$status' WHERE  `id`='$id';"
 
@@ -94,9 +97,9 @@ class RegionDatabase(private val pl: Plugin) {
     //オーナーの変更
     fun setRegionOwner(id:Int,owner: Player){
 
-        val data = pl.regionData[id]?:return
-        data.owner = owner
-        pl.regionData[id] = data
+        val data = regionData[id]?:return
+        data.owner_uuid = owner.uniqueId
+        regionData[id] = data
 
         val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name='${owner.name}' WHERE `id`='$id';"
 
@@ -106,18 +109,18 @@ class RegionDatabase(private val pl: Plugin) {
 
     //賃料の変更
     fun setRent(id:Int,rent:Double){
-        val data = pl.regionData[id]?:return
+        val data = regionData[id]?:return
         data.rent = rent
-        pl.regionData[id] = data
+        regionData[id] = data
 
         pl.mysqlQueue.add("UPDATE `region` SET `rent`=$rent WHERE `id`='$id';")
     }
 
     //スパンの変更
     fun setSpan(id:Int,span:Int){
-        val data = pl.regionData[id]?:return
+        val data = regionData[id]?:return
         data.span = span
-        pl.regionData[id] = data
+        regionData[id] = data
 
         pl.mysqlQueue.add("UPDATE `region` SET `span`=$span WHERE `id`='$id';")
     }
@@ -125,14 +128,14 @@ class RegionDatabase(private val pl: Plugin) {
     //土地の購入
     fun buy(id: Int,user:Player){
 
-        val data = pl.regionData[id]?:when{
+        val data = regionData[id]?:when{
             else -> {
                 pl.sendMessage(user,"§3§l購入失敗！ 存在しないidです！")
                 return
             }
         }
 
-        if (user == data.owner){
+        if (user.uniqueId == data.owner_uuid){
             pl.sendMessage(user,"§3§lあなたはこのリージョンのオーナーです！")
             return
         }
@@ -160,7 +163,7 @@ class RegionDatabase(private val pl: Plugin) {
 
     //リージョンの削除
     fun deleteRegion(id:Int){
-        pl.regionData.remove(id)
+        regionData.remove(id)
 
         val sql = "DELETE FROM `region` WHERE  `id`=$id;"
 
@@ -172,7 +175,7 @@ class RegionDatabase(private val pl: Plugin) {
     ////////////////////////////////////
     fun loadRegion(){
 
-        pl.regionData.clear()
+        regionData.clear()
 
         val sql = "SELECT * FROM `region`;"
 
@@ -189,7 +192,7 @@ class RegionDatabase(private val pl: Plugin) {
             data.name = rs.getString("name")
             data.world = rs.getString("world")
             data.server = rs.getString("server")
-            data.owner = Bukkit.getPlayer(rs.getString("owner_uuid"))
+            data.owner_uuid = UUID.fromString(rs.getString("owner_uuid"))
             data.status = rs.getString("status")
             data.price = rs.getDouble("price")
 
@@ -214,11 +217,11 @@ class RegionDatabase(private val pl: Plugin) {
                     rs.getDouble("ez")
             )
 
-            pl.regionData[id] = data
+            regionData[id] = data
 
-            val list = pl.worldRegion[data.world]?: mutableListOf()
+            val list = worldRegion[data.world]?: mutableListOf()
             list.add(id)
-            pl.worldRegion[data.world] = list
+            worldRegion[data.world] = list
         }
         rs.close()
         mysql.close()
@@ -231,7 +234,7 @@ class RegionDatabase(private val pl: Plugin) {
     class RegionData{
 
         var name = "RegionName"
-        var owner : Player? = null
+        var owner_uuid : UUID = UUID.randomUUID()
         var status = "OnSale"
 
         var world = "world"

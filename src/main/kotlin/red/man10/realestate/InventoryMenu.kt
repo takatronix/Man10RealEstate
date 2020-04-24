@@ -9,6 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import red.man10.realestate.Constants.Companion.regionData
 
 class InventoryMenu(private val pl:Plugin) : Listener {
 
@@ -25,9 +26,9 @@ class InventoryMenu(private val pl:Plugin) : Listener {
 
         for (i in first .. first+44){
 
-            val d = pl.regionData[i]?:continue
+            val d = regionData[i]?:continue
 
-            if (d.owner != p)continue
+            if (d.owner_uuid != p.uniqueId)continue
 
             val icon = ItemStack(Material.PAPER)
             val meta = icon.itemMeta
@@ -82,11 +83,11 @@ class InventoryMenu(private val pl:Plugin) : Listener {
 
             if (!(pl.isLiked[Pair(p,i)]?:continue))continue
 
-            val d = pl.regionData[i]?:continue
+            val d = regionData[i]?:continue
 
             val icon = IS(Material.PAPER,d.name,mutableListOf(
                     "§e§lID:${i}",
-                    "§b§lOwner:${d.owner!!.name}",
+                    "§b§lOwner:${Bukkit.getOfflinePlayer(d.owner_uuid).name}",
                     "§a§lStatus:${d.status}"
             ),i.toString())
 

@@ -7,6 +7,8 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import red.man10.realestate.Constants.Companion.regionData
+import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Plugin
 
 // test TODO: delete later
@@ -51,15 +53,15 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         //adminなどはプロテクト無視
         if (p.hasPermission("mre.op"))return true
 
-        for (id in pl.regionData){
+        for (id in regionData){
 
             val data = id.value
 
             if (isWithinRange(loc,data.startCoordinate,data.endCoordinate)){
                 if (data.status == "Lock")return false
-                if (data.owner == p)return true
+                if (data.owner_uuid == p.uniqueId)return true
 
-                val pd = pl.regionUserData[Pair(p,id.key)]?:return false
+                val pd = regionUserData[Pair(p,id.key)]?:return false
 
                 if (pd.statsu == "Lock")return false
                 if (pd.type == 0)return true

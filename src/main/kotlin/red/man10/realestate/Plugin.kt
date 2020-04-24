@@ -12,6 +12,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
+import red.man10.realestate.Constants.Companion.regionData
+import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
@@ -33,9 +35,9 @@ class Plugin : JavaPlugin(), Listener {
     var wandEndLocation: Location? = null
     var particleTime:Int = 0
 
-    val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
-    val regionUserData = ConcurrentHashMap<Pair<Player,Int>,RegionUserDatabase.RegionUserData>()
-    val worldRegion = HashMap<String,MutableList<Int>>()
+//    val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
+//    val regionUserData = ConcurrentHashMap<Pair<Player,Int>,RegionUserDatabase.RegionUserData>()
+//    val worldRegion = HashMap<String,MutableList<Int>>()
 
     val mysqlQueue = LinkedBlockingQueue<String>()
     val isLiked = HashMap<Pair<Player,Int>,Boolean>()
@@ -157,7 +159,7 @@ class Plugin : JavaPlugin(), Listener {
 
         //////////////////////////////////////////
         //   クリックイベントを作成する
-        val clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, command)
+        val clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$command")
         val message = ComponentBuilder(text).event(hoverEvent).event(clickEvent).create()
         p.spigot().sendMessage(*message)
     }

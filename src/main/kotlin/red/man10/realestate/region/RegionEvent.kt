@@ -1,20 +1,16 @@
 package red.man10.realestate.region
 
-import org.apache.commons.lang.Validate
 import org.bukkit.*
-import org.bukkit.block.data.type.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import red.man10.realestate.Constants
+import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Plugin
 import java.lang.Exception
-import java.util.*
 
 
 class RegionEvent (private val pl :Plugin) : Listener{
@@ -93,11 +89,11 @@ class RegionEvent (private val pl :Plugin) : Listener{
                 return
             }
 
-            val data = pl.regionData[id]?:return
+            val data = regionData[id]?:return
 
             e.setLine(0,"§eID:$id")
             e.setLine(1,data.name)
-            e.setLine(2,"§d§l${data.owner!!.name}")
+            e.setLine(2,"§d§l${Bukkit.getOfflinePlayer(data.owner_uuid).name}")
             e.setLine(3,"§b§l${data.status}")
 
             pl.sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
@@ -111,7 +107,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
     fun signClickEvent(e:PlayerInteractEvent){
 
         if (e.action != Action.RIGHT_CLICK_BLOCK)return
-        if (e.clickedBlock!!.type != Material.OAK_SIGN)return
+        if (e.clickedBlock!!.type != Material.OAK_WALL_SIGN)return
 
         val b= e.clickedBlock?:return
         val sign : org.bukkit.block.Sign
@@ -127,7 +123,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         val id = lines[0].replace("§eID:","").toInt()
 
-        val data = pl.regionData[id]?:return
+        val data = regionData[id]?:return
 
         val p = e.player
 
@@ -135,13 +131,13 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         pl.sendMessage(p,"§a土地名:${data.name}")
         pl.sendMessage(p,"§a現在のステータス:${data.status}")
-        pl.sendMessage(p,"§a現在のオーナー:${data.owner!!.name}")
+        pl.sendMessage(p,"§a現在のオーナー:${Bukkit.getOfflinePlayer(data.owner_uuid).name}")
         pl.sendMessage(p,"§a値段:${data.price}")
 
         pl.sendMessage(p,"§a§l==========================================")
 
-        pl.sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","test","")
-        pl.sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","test","")
+        pl.sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
+        pl.sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","")
 
     }
 
