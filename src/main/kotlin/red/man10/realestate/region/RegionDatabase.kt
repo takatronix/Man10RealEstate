@@ -25,7 +25,7 @@ class RegionDatabase(private val pl: Plugin) {
                 "'${data.server}', " +
                 "'${data.world}', " +
                 "'${data.owner_uuid}', " +
-                "'${Bukkit.getPlayer(data.owner_uuid)}' ," +
+                "'${Bukkit.getPlayer(data.owner_uuid)!!.name}' ," +
                 "'${data.name}', " +
                 "'${data.status}', " +
                 "'${data.teleport[0]}', "+
