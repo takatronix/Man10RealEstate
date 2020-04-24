@@ -329,7 +329,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             pl.sendMessage(p,"§e§l/mre wand : 範囲指定用のワンドを取得")
             pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
             pl.sendMessage(p,"§e§l/mre buy <id> : 指定idが販売中なら購入します")
-            pl.sendMessage(p,"§e§l/mre adduser <id> <user> <type> <id> : リージョンにユーザーを追加します")
+            pl.sendMessage(p,"§e§l/mre adduser <id> <user> <type> <status> : リージョンにユーザーを追加します")
             pl.sendMessage(p,"§e§l/mre removeuser <id> <user> : リージョンのユーザーを削除します")
             pl.sendMessage(p,"§e§l/mre tp <id> : 指定したidにテレポートします")
             pl.sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")

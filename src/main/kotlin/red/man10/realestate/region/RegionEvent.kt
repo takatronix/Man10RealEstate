@@ -79,6 +79,8 @@ class RegionEvent (private val pl :Plugin) : Listener{
         val lines = e.lines
         val p = e.player
 
+        pl.logger.info("change sign")
+
         if (lines[0].indexOf("mre:") == 0){
 
             val id : Int
@@ -138,8 +140,8 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         pl.sendMessage(p,"§a§l==========================================")
 
-        pl.sendHoverText(p,"§d§lいいねする！＝＞","§d§l[いいね！]","")
-        pl.sendHoverText(p,"土地の購入など＝＞","[購入について]","")
+        pl.sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","test","")
+        pl.sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","test","")
 
     }
 
