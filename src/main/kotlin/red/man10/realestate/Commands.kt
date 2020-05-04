@@ -25,6 +25,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
         if (label == "mre"){
 
+            if (!sender.hasPermission("mre.user")){
+                return false
+            }
+
             if (args.isEmpty()){
                 help(sender,false)
                 return true
@@ -212,6 +216,59 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
+            //指定地点をテレポート地点にする
+            if (cmd == "settp" && args.size == 2){
+
+                if (!hasRegionAdmin(sender,args[1].toInt()))return false
+
+                val loc = sender.location
+
+                db.setRegionTeleport(args[1].toInt(), mutableListOf(
+                        loc.x,
+                        loc.y,
+                        loc.z,
+                        loc.yaw.toDouble(),
+                        loc.pitch.toDouble()
+                ))
+
+                pl.sendMessage(sender,"§e§l登録完了！")
+                return true
+            }
+
+            //owner変更
+            if (cmd == "changeowner"){
+
+                if (!hasRegionAdmin(sender,args[1].toInt()))return false
+
+                RegionDatabase(pl).setRegionOwner(args[1].toInt(),Bukkit.getPlayer(args[1])!!)
+
+                pl.sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
+                return true
+            }
+
+            if (cmd == "changestatus" && args.size == 3){
+
+                if (!hasRegionAdmin(sender,args[1].toInt()))return false
+
+                if (sender.hasPermission("mre.op") && args[2]=="Lock"){
+                    pl.sendMessage(sender,"§3§lリージョンのロックは運営しか出来ません！")
+                    return true
+                }
+
+                pl.sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
+                return true
+            }
+
+            if (cmd == "changeprice" && args.size == 3){
+
+                if (!hasRegionAdmin(sender,args[1].toInt()))return false
+
+                db.setPrice(args[1].toInt(),args[2].toDouble())
+
+                pl.sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
+                return true
+            }
+
             return true
         }
 
@@ -225,51 +282,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
             if (!sender.hasPermission("mre.op"))return true
 
             val cmd = args[0]
-
-            //指定地点をテレポート地点にする
-            if (cmd == "setteleport" && args.size == 2){
-
-                Thread(Runnable {
-
-                    val loc = sender.location
-
-                    db.setRegionTeleport(args[1].toInt(), mutableListOf(
-                            loc.x,
-                            loc.y,
-                            loc.z,
-                            loc.yaw.toDouble(),
-                            loc.pitch.toDouble()
-                    ))
-
-                }).start()
-
-                pl.sendMessage(sender,"§e§l登録完了！")
-                return true
-            }
-
-            if (cmd == "changestatus" && args.size == 3){
-                Thread(Runnable {
-                    db.setRegionStatus(args[1].toInt(),args[2])
-                }).start()
-                pl.sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
-                return true
-            }
-
-            if (cmd == "changeprice" && args.size == 3){
-                Thread(Runnable {
-                    db.setPrice(args[1].toInt(),args[2].toDouble())
-                }).start()
-                pl.sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
-                return true
-            }
-
-            if (cmd == "changeowner"){
-                Thread(Runnable {
-                    RegionDatabase(pl).setRegionOwner(args[1].toInt(),Bukkit.getPlayer(args[1])!!)
-                }).start()
-                pl.sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
-                return true
-            }
 
             if (cmd == "create" && args.size == 3){
 
@@ -401,21 +413,21 @@ class Commands (private val pl :Plugin):CommandExecutor{
             pl.sendMessage(p,"§e§l/mre tp <id> : 指定したidにテレポートします")
             pl.sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")
             pl.sendMessage(p,"§e§l/mre span <id> <span> : 賃料を支払うスパンを設定します 0:月 1:週 2:日")
+            pl.sendMessage(p,"§e§l/mre settp <id> : 現在地点をテレポート地点に設定します")
+            pl.sendMessage(p,"§e§l/mreop changestatus <id> <status> : 指定idのステータスを変更します")
+            pl.sendMessage(p,"§e§l/mreop changeprice <id> <price> : 指定idの金額を変更します")
+            pl.sendMessage(p,"§e§l/mreop changeowner <id> <owner> : 指定idのオーナーを変更します")
             pl.sendMessage(p,"§e§l/mre setting : 自分のリージョンの管理をします")
             pl.sendMessage(p,"§e§l/mre menu : メニューを開きます")
         }else{
             if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
             pl.sendMessage(p,"§e§l==============================================")
             pl.sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
-            pl.sendMessage(p,"§e§l/mreop setteleport <id> : 現在地点をテレポート地点に設定します")
-            pl.sendMessage(p,"§e§l/mreop changestatus <id> <status> : 指定idのステータスを変更します")
-            pl.sendMessage(p,"§e§l/mreop changeprice <id> <price> : 指定idの金額を変更します")
-            pl.sendMessage(p,"§e§l/mreop changeowner <id> <owner> : 指定idのオーナーを変更します")
             pl.sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
             pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§e§lを持ってコマンドを実行してください")
             pl.sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
             pl.sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
-            pl.sendMessage(p,"§e§l/mreop reloadregion : リージョンデータの再読み込みをします")
+            pl.sendMessage(p,"§e§l/mreop reload : 再読み込みをします")
         }
     }
 
@@ -424,6 +436,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
         if (p.hasPermission("mre.op"))return true
 
         val data = regionData[id]?:return false
+
+        if (data.status == "Lock")
+
         if (data.owner_uuid == p.uniqueId)return true
 
         val userdata = regionUserData[Pair(p,id)]?:return false
