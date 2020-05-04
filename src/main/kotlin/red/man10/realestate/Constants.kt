@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue
 class Constants(val p:Plugin) {
 
     companion object {
-        const val WAND_NAME = "_____MRE_WAND____"
+        const val WAND_NAME = "範囲指定ワンド"
         //リージョンのデータ
         val regionData = ConcurrentHashMap<Int, RegionDatabase.RegionData>()
         //プレイヤーごとのリージョン情報

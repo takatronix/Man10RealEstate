@@ -21,50 +21,84 @@ class RegionEvent (private val pl :Plugin) : Listener{
     //"wand"と書いた木の棒で設定(変更する可能性あり)
     /////////////////////////
     @EventHandler
-    fun setCoordinateEvent(e:PlayerInteractEvent){
+    fun setFirstPosition(e:PlayerInteractEvent){
         val p = e.player
 
-        if (!p.hasPermission("mre.wand"/*仮パーミッション*/))return
-
-        if (e.action != Action.LEFT_CLICK_BLOCK)return
+        if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
 
         val wand = e.item?:return
         if (wand.type != Material.STICK)return
         if (!wand.hasItemMeta())return
-        if(wand.itemMeta.displayName != Constants.WAND_NAME)
-            return
+        if(wand.itemMeta.displayName != Constants.WAND_NAME) return
 
         val lore = wand.lore?: mutableListOf()
-        val loc = e.clickedBlock!!.location
 
-        if (lore.size>=5){ lore.clear() }
+        val loc = when(e.action){
+            Action.LEFT_CLICK_AIR -> p.location
+            Action.LEFT_CLICK_BLOCK -> e.clickedBlock!!.location
+            else ->return
+        }
 
-        if (lore.isEmpty()){
+        if (lore.size>=5){
+            lore[0] = ("§aOwner:§f${p.name}")
+            lore[1] = ("§aServer:§f"+p.server.name)
+            lore[2] = ("§aWorld:§f"+p.world.name)
+            lore[3] = ("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+        }else{
             lore.add("§aOwner:§f${p.name}")
             lore.add("§aServer:§f"+p.server.name)
             lore.add("§aWorld:§f"+p.world.name)
             lore.add("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
-            pl.sendMessage(p,"§e§lSet Start:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
-
-            //      TODO:二人同時に編集できないのをいつか直す
-            pl.wandStartLocation = loc.clone()
-        }else{
-
-
-            lore.add("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
-            pl.sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
-            //      TODO:二人同時に編集できないのをいつか直す
-            pl.wandEndLocation = loc.clone()
-
         }
 
+        pl.sendMessage(p,"§e§lSet Start:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
 
-
-
+        pl.wandStartLocation = loc.clone()
 
         wand.lore = lore
 
         e.isCancelled = true
+
+    }
+
+    //////////////////////////////
+    //範囲指定(Pos2)
+    ///////////////////////////////
+    @EventHandler
+    fun setSecondPosition(e:PlayerInteractEvent){
+
+        val p = e.player
+
+        if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
+
+        val wand = e.item?:return
+        if (wand.type != Material.STICK)return
+        if (!wand.hasItemMeta())return
+        if(wand.itemMeta.displayName != Constants.WAND_NAME) return
+
+        val lore = wand.lore?: mutableListOf("","","","","")
+
+        val loc = when(e.action){
+            Action.RIGHT_CLICK_AIR -> p.location
+            Action.RIGHT_CLICK_BLOCK -> e.clickedBlock!!.location
+            else ->return
+        }
+
+        if (lore.size == 5){
+            lore[4] = "§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}"
+        }else{
+            lore.add("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+        }
+        pl.sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+        //      TODO:二人同時に編集できないのをいつか直す
+        pl.wandEndLocation = loc.clone()
+
+        wand.lore = lore
+
+        e.isCancelled = true
+        return
+
+
     }
 
     /////////////////////
@@ -121,7 +155,13 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         val lines = sign.lines
 
-        val id = lines[0].replace("§eID:","").toInt()
+        var id = 0
+
+        try {
+            id = lines[0].replace("§eID:","").toInt()
+        }catch (e:Exception){
+            return
+        }
 
         val data = regionData[id]?:return
 

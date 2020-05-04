@@ -35,13 +35,6 @@ class Plugin : JavaPlugin(), Listener {
     var wandEndLocation: Location? = null
     var particleTime:Int = 0
 
-//    val regionData = ConcurrentHashMap<Int,RegionDatabase.RegionData>()
-//    val regionUserData = ConcurrentHashMap<Pair<Player,Int>,RegionUserDatabase.RegionUserData>()
-//    val worldRegion = HashMap<String,MutableList<Int>>()
-
-//    val mysqlQueue = LinkedBlockingQueue<String>()
-//    val isLiked = HashMap<Pair<Player,Int>,Boolean>()
-
     val vault = VaultManager(this)
 
     override fun onEnable() { // Plugin startup logic

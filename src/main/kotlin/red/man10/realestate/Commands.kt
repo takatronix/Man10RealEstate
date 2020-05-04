@@ -311,7 +311,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (args.size == 2){
                     for (i in args[1].toInt() .. args[1].toInt()+15){
-                        if (i > regionData.size)break
+                        if (i >= regionData.size)break
                         pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
                     }
 
@@ -320,7 +320,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 }else{
                     for (i in 1 .. 16){
-                        if (i > regionData.size)break
+                        if (i >= regionData.size)break
+                        if (regionData[i] == null)continue
                         pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
                     }
                     pl.sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
@@ -331,9 +332,11 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //リージョンデータのリロード
             if (cmd == "reloadregion"){
-                Thread(Runnable {
+                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
                     db.loadRegion()
-                }).start()
+                    pl.sendMessage(sender,"§e§lリロード完了")
+
+                })
             }
         }
 
