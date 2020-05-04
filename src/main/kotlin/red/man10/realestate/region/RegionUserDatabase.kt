@@ -15,20 +15,18 @@ class RegionUserDatabase (private val pl:Plugin){
     //////////////////////////////////
     //ユーザーデータを新規作成
     //////////////////////////////////
-    fun createUserData(regionId:Int,user:Player,type:Int,status: String){
+    fun createUserData(regionId:Int,user:Player,status: String){
 
         val data = RegionUserData()
 
         val sql = "INSERT INTO `region_user` " +
                 "(`region_id`," +
-                " `type`," +
                 " `uuid`," +
                 " `player`," +
                 " `created_time`," +
                 " `status`)" +
                 " VALUES " +
                 "('$regionId'," +
-                " '$type'," +
                 " '${user.uniqueId}'," +
                 " '${user.name}'," +
                 " now()," +
@@ -36,7 +34,6 @@ class RegionUserDatabase (private val pl:Plugin){
 
         mysqlQueue.add(sql)
 
-        data.type = type
         data.statsu = status
 
         regionUserData[Pair(user,regionId)] = data
@@ -46,6 +43,7 @@ class RegionUserDatabase (private val pl:Plugin){
     //ユーザーデータを削除
     ///////////////////////
     fun removeUserData(regionId: Int,user: Player){
+        regionUserData.remove(Pair(user,regionId))
         mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$regionId' AND `uuid`='${user.uniqueId}';")
     }
 
@@ -68,7 +66,11 @@ class RegionUserDatabase (private val pl:Plugin){
             data.paid = rs1.getDate("paid_date")
             data.deposit = rs1.getDouble("deposit")
             data.statsu = rs1.getString("deposit")
-            data.type = rs1.getInt("type")
+
+            data.allowAll = rs1.getInt("allow_all")==1
+            data.allowBlock = rs1.getInt("allow_block")==1
+            data.allowInv = rs1.getInt("allow_inv")==1
+            data.allowDoor = rs1.getInt("allow_door")==1
 
             regionUserData[key] = data
 
@@ -85,11 +87,7 @@ class RegionUserDatabase (private val pl:Plugin){
             val isLike = rs2.getInt("is_like")
             val id = rs2.getInt("region_id")
 
-            if (isLike == 1){
-                isLiked[Pair(p,id)] = true
-            }else if (isLike == 0){
-                isLiked[Pair(p,id)] = false
-            }
+            isLiked[Pair(p,id)] = isLike == 1
         }
 
         rs2.close()
@@ -107,8 +105,14 @@ class RegionUserDatabase (private val pl:Plugin){
         val data = regionUserData[key]?:return
 
         val sql = "UPDATE `region_user` " +
-                "SET `type`='${data.type}', `status`='${data.statsu}'," +
-                " `deposit`='${data.deposit}', `paid_date`='${data.paid}'" +
+                "SET " +
+                "`status`='${data.statsu}'," +
+                "`deposit`='${data.deposit}'," +
+                "`paid_date`='${data.paid}'," +
+                "`allow_all`='${if (data.allowAll){1}else{0}}'," +
+                "`allow_block`='${if (data.allowBlock){1}else{0}}'," +
+                "`allow_inv`='${if (data.allowInv){1}else{0}}'," +
+                "`allow_door`='${if (data.allowDoor){1}else{0}}'" +
                 " WHERE `uuid`='${p.uniqueId}' AND `region_id`='$id';"
         mysqlQueue.add(sql)
 
@@ -190,8 +194,12 @@ class RegionUserDatabase (private val pl:Plugin){
         var deposit : Double = 0.0
         var paid = Date()
         var statsu = ""
-        var type = 0
         var isRent = false
+
+        var allowAll = false
+        var allowBlock = false
+        var allowInv = false
+        var allowDoor = false
     }
 
 }

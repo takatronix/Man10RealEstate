@@ -89,16 +89,27 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //共同者を追加する ex)/mre adduser [id] [user] [type] [status]
+            //共同者を追加する ex)/mre adduser [id] [user] [status]
             //def: type:2 status:Share
-            if (cmd == "adduser" && args.size == 5){
+            if (cmd == "adduser" && args.size == 4){
 
                 val id = args[1].toInt()
 
+                val data = regionData[id]?:return true
+
                 if (!hasRegionAdmin(sender,id)){ return true }
 
-                pdb.createUserData(id,Bukkit.getPlayer(args[2])?:return false,args[3].toInt(),args[4])
-                pl.sendMessage(sender,"§e§l${args[2]}§a§lを共同者に追加しました！")
+                val p = Bukkit.getPlayer(args[2])?:return false
+
+                pdb.createUserData(id,p,args[4])
+                pl.sendMessage(sender,"§e§l${args[2]}§a§lを居住者に追加しました！")
+
+                pl.sendMessage(p,"§e§lあなたは居住者に追加されました")
+                pl.sendMessage(p,"§a§l=================土地の情報==================")
+                pl.sendMessage(p,"§a§lオーナー：${Bukkit.getPlayer(data.owner_uuid)!!.name}")
+                pl.sendMessage(p,"§a§l土地の名前：${data.name}")
+                pl.sendMessage(p,"§a§l土地のステータス：${data.status}")
+                pl.sendMessage(p,"§a§l===========================================")
                 return true
 
             }
@@ -161,6 +172,28 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 }
                 pl.sendMessage(sender,"§3§l支払いできませんでした")
                 return true
+            }
+
+            //権限設定 [id] [user] [permname] [true or false]
+            if (cmd == "setperm"){
+
+                val p = Bukkit.getPlayer(args[2])?:return true
+
+                val pd = regionUserData[Pair(p,args[1].toInt())]?:return true
+
+                when(args[3]) {
+                    "all" -> pd.allowAll = args[4].toBoolean()
+                    "block" -> pd.allowBlock = args[4].toBoolean()
+                    "inv" -> pd.allowInv = args[4].toBoolean()
+                    "door" -> pd.allowDoor = args[4].toBoolean()
+                    else ->return true
+                }
+
+                regionUserData[Pair(p,args[1].toInt())] = pd
+                pdb.saveUserData(p,args[1].toInt())
+
+                pl.sendMessage(sender,"§e§l設定完了！")
+
             }
 
             //設置画面を開く
@@ -284,16 +317,25 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         sender.location.pitch.toDouble()
                 )
 
+                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
-                val id = regionData.size+1
+                    pl.sendMessage(sender,"§a§l現在登録中です・・・")
 
-                Thread(Runnable {
-                    //リージョンをDBに登録
+                    val mysql = MySQLManager(pl,"mre")
+
+                    val rs = mysql.query("SELECT id FROM region ORDER BY id DESC LIMIT 1")?:return@Runnable
+                    rs.next()
+                    val id = rs.getInt(0)+1
+
+                    rs.close()
+                    mysql.close()
+
                     db.registerRegion(data,id)
-                }).start()
 
-                pl.sendMessage(sender,"§a§l登録完了！")
-                pl.sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
+                    pl.sendMessage(sender,"§a§l登録完了！")
+                    pl.sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
+
+                })
 
                 return true
             }
@@ -331,9 +373,14 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
 
             //リージョンデータのリロード
-            if (cmd == "reloadregion"){
+            if (cmd == "reload"){
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
                     db.loadRegion()
+
+                    for (p in Bukkit.getOnlinePlayers()){
+                        pdb.loadUserData(p)
+                    }
+
                     pl.sendMessage(sender,"§e§lリロード完了")
 
                 })
@@ -349,7 +396,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             pl.sendMessage(p,"§e§l/mre wand : 範囲指定用のワンドを取得")
             pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
             pl.sendMessage(p,"§e§l/mre buy <id> : 指定idが販売中なら購入します")
-            pl.sendMessage(p,"§e§l/mre adduser <id> <user> <type> <status> : リージョンにユーザーを追加します")
+            pl.sendMessage(p,"§e§l/mre adduser <id> <user> <status> : リージョンにユーザーを追加します")
             pl.sendMessage(p,"§e§l/mre removeuser <id> <user> : リージョンのユーザーを削除します")
             pl.sendMessage(p,"§e§l/mre tp <id> : 指定したidにテレポートします")
             pl.sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")
@@ -380,7 +427,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
         if (data.owner_uuid == p.uniqueId)return true
 
         val userdata = regionUserData[Pair(p,id)]?:return false
-        if (userdata.type == 0 && userdata.statsu == "Share")return true
+        if (userdata.allowAll && userdata.statsu == "Share")return true
 
         return false
     }

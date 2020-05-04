@@ -109,7 +109,6 @@ class RegionEvent (private val pl :Plugin) : Listener{
         val lines = e.lines
         val p = e.player
 
-        pl.logger.info("change sign")
 
         if (lines[0].indexOf("mre:") == 0){
 
@@ -118,7 +117,6 @@ class RegionEvent (private val pl :Plugin) : Listener{
             try {
                 id = lines[0].replace("mre:","").toInt()
             }catch (e:Exception){
-                println(e)
                 pl.sendMessage(p,"§3§l入力方法：”mre:<id>”")
                 return
             }
@@ -141,7 +139,6 @@ class RegionEvent (private val pl :Plugin) : Listener{
     fun signClickEvent(e:PlayerInteractEvent){
 
         if (e.action != Action.RIGHT_CLICK_BLOCK)return
-        if (e.clickedBlock!!.type != Material.OAK_WALL_SIGN)return
 
         val b= e.clickedBlock?:return
         val sign : org.bukkit.block.Sign
@@ -149,13 +146,12 @@ class RegionEvent (private val pl :Plugin) : Listener{
         try{
             sign = b.state as org.bukkit.block.Sign
         }catch (e:Exception){
-            println(e.message)
             return
         }
 
         val lines = sign.lines
 
-        var id = 0
+        val id: Int
 
         try {
             id = lines[0].replace("§eID:","").toInt()

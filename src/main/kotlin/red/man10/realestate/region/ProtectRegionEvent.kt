@@ -1,17 +1,18 @@
 package red.man10.realestate.region
 
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Plugin
 
-// test TODO: delete later
 class ProtectRegionEvent(private val pl:Plugin):Listener{
 
     @EventHandler
@@ -19,7 +20,7 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
         val p = e.player
 
-        if (!canBreak(p,e.block.location,0)){
+        if (!canBreak(p,e.block.location,e)){
             pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを破壊する権限がありません！")
             e.isCancelled = true
         }
@@ -29,7 +30,7 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
     fun blockPlaceEvent(e:BlockPlaceEvent){
         val p = e.player
 
-        if (!canBreak(p,e.block.location,1)){
+        if (!canBreak(p,e.block.location,e)){
             pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
             e.isCancelled = true
         }
@@ -42,13 +43,24 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
         val p = e.player
 
-        if (!canBreak(p,e.clickedBlock!!.location,2)){
+        if (!canBreak(p,e.clickedBlock!!.location,e)){
             pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
         }
     }
 
-    fun canBreak(p:Player,loc: org.bukkit.Location,eventType:Int):Boolean{
+    @EventHandler
+    fun invOpenEvent(e:InventoryOpenEvent){
+        val p = e.player as Player
+
+        if (!canBreak(p,p.location,e)){
+            pl.sendMessage(p,"§4§lあなたにはこの場所でインベントリを開く権限がありません！")
+            e.isCancelled = true
+        }
+
+    }
+
+    fun canBreak(p:Player,loc: org.bukkit.Location,eventType:Any):Boolean{
 
         //adminなどはプロテクト無視
         if (p.hasPermission("mre.op"))return true
@@ -64,27 +76,13 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
                 val pd = regionUserData[Pair(p,id.key)]?:return false
 
                 if (pd.statsu == "Lock")return false
-                if (pd.type == 0)return true
+                if (pd.allowAll)return true
 
-                //0:break 1:put 2:interact
-                when(eventType){
-                    0 -> {
-                        if (pd.type == 1)return true
-                        if (pd.type == 2)return true
-                    }
-                    1 ->{
-                        if (pd.type == 1)return true
-                        if (pd.type == 2)return true
-                    }
-                    2 ->{
-                        if (pd.type == 1)return true
-                        if (pd.type == 2)return true
-                        if (pd.type == 3)return true
-                    }
-                }
+                if ((eventType is BlockBreakEvent || eventType is BlockPlaceEvent) && pd.allowBlock)return true
+                if (eventType is PlayerInteractEvent && pd.allowDoor)return true
+                if (eventType is InventoryOpenEvent && pd.allowInv)return true
                 return false
             }
-
         }
         return true
     }
