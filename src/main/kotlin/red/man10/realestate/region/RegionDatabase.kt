@@ -166,9 +166,8 @@ class RegionDatabase(private val pl: Plugin) {
     fun deleteRegion(id:Int){
         regionData.remove(id)
 
-        val sql = "DELETE FROM `region` WHERE  `id`=$id;"
-
-        mysqlQueue.add(sql)
+        mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
+        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$id;")
     }
 
     ////////////////////////////////////

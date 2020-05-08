@@ -17,6 +17,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
+import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.region.ProtectRegionEvent
@@ -25,6 +26,7 @@ import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
 import java.lang.reflect.InvocationTargetException
 import java.util.*
+import javax.xml.crypto.Data
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -34,10 +36,13 @@ class Plugin : JavaPlugin(), Listener {
     lateinit var protectEvent: ProtectRegionEvent
     lateinit var cmd : Commands
     lateinit var protocolManager : ProtocolManager
+    lateinit var mysql : MySQLManager
+
 
     var wandStartLocation: Location? = null
     var wandEndLocation: Location? = null
     var particleTime:Int = 0
+    var debugMode = false
 
     val vault = VaultManager(this)
 
@@ -71,6 +76,16 @@ class Plugin : JavaPlugin(), Listener {
                 particleTime++;
             }
         }.runTaskTimer(this, 0, 10)
+
+        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
+
+            mysql = MySQLManager(this,"mreRentThread")
+
+            while (true){
+                rentTimer()
+                Thread.sleep(3600000)
+            }
+        })
 
         RegionDatabase(this).loadRegion()
 
@@ -197,36 +212,62 @@ class Plugin : JavaPlugin(), Listener {
     //貸出のタイマー(期限が過ぎたらロックされる)
     //////////////////////////////////////
     fun rentTimer(){
-        Thread(Runnable {
+        val rs = mysql.query("SELECT * FROM region_user;")!!
+        val db = RegionUserDatabase(this)
 
-            for (pd in regionUserData){
+        while (rs.next()){
 
-                val data = regionData[pd.key.second]?:continue
-                val pdata = pd.value
+            if (rs.getInt("isRent") == 0)continue
 
-                if (!pdata.isRent)continue
+            val uuid = UUID.fromString( rs.getString("uuid"))
+            val id = rs.getInt("region_id")
+            val p = Bukkit.getPlayer(uuid)
 
-                val different = (Date().time - pdata.paid.time)/1000/3600/24
+            //1時間ごと
+            val different = (Date().time - rs.getDate("paid_date").time)/1000/3600/24
 
+            val data = regionData[id]?:continue
+
+            if (!debugMode){
                 if (data.span == 0 && different < 30)continue
                 if (data.span == 1 && different < 7)continue
                 if (data.span == 2 && different < 1)continue
-
-                if (pdata.deposit <data.rent){
-                    if (pd.key.first.isOnline){
-                        sendMessage(pd.key.first,"${data.name}§3§lの賃料が支払えません！支払えるまでロックされます！")
-                    }
-                    pdata.statsu = "Lock"
-                }else{
-                    pdata.deposit -= data.rent
-                    pdata.paid = Date()
-                }
-
-                regionUserData[pd.key] = pdata
-                RegionUserDatabase(this).saveUserData(pd.key.first,pd.key.second)
             }
 
-            Thread.sleep(3600000)
-        }).start()
+            //ユーザーがオンラインのとき
+            if (p != null&&regionUserData[Pair(p,id)]!=null){
+
+                val pd = regionUserData[Pair(p,id)]!!
+
+                if (vault.getBalance(uuid) <data.rent){
+                    sendMessage(p,"${data.name}§3§lの賃料が支払えません！支払えるまでロックされます！")
+                    pd.statsu = "Lock"
+                }else{
+                    sendMessage(p,"${data.name}§3§lの賃料の賃料を支払いました！")
+                    vault.withdraw(uuid,data.rent)
+
+                    pd.statsu = "Share"
+                    db.addProfit(data.owner_uuid,data.rent)
+                }
+
+                regionUserData[Pair(p,id)] = pd
+                db.saveUserData(p,id)
+                continue
+            }
+
+            //オフラインのとき
+            if (vault.getBalance(uuid) < data.rent){
+
+                mysqlQueue.add("UPDATE `region_user` SET status='Lock' WHERE uuid='$uuid' AND region_id=$id;")
+                continue
+            }
+
+            vault.withdraw(uuid,data.rent)
+            mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$uuid' AND region_id=$id;")
+            db.addProfit(data.owner_uuid,data.rent)
+
+        }
+        rs.close()
+        mysql.close()
     }
 }

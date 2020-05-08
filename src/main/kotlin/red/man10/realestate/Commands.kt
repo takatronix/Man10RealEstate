@@ -30,11 +30,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
 
             if (args.isEmpty()){
-                help(sender,false)
+                inventory.openMainMenu(sender)
                 return true
             }
 
             val cmd = args[0]
+
+            if (cmd == "help"){
+                help(sender,false)
+            }
 
             //範囲指定ワンド取得
             if (cmd == "wand"){
@@ -168,15 +172,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //賃料支払い
-            if (cmd == "payrent"){
-                if (pdb.addDeposit(args[1].toInt(),sender,args[2].toDouble())){
-                    pl.sendMessage(sender,"§e§l支払い完了！$${args[2]} 支払いました！")
-                    return true
-                }
-                pl.sendMessage(sender,"§3§l支払いできませんでした")
-                return true
-            }
 
             //権限設定 [id] [user] [permname] [true or false]
             if (cmd == "setperm"){
@@ -208,13 +203,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //メニューを開く
-            if (cmd == "menu"){
-
-                inventory.openMainMenu(sender)
-
-                return true
-            }
 
             //指定地点をテレポート地点にする
             if (cmd == "settp" && args.size == 2){
@@ -397,6 +385,17 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 })
             }
+
+            if (cmd == "debug"){
+                pl.debugMode = !pl.debugMode
+                pl.sendMessage(sender,pl.debugMode.toString())
+            }
+
+            if (cmd == "rentTimer"){
+                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
+                    pl.rentTimer()
+                })
+            }
         }
 
         return false
@@ -414,9 +413,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
             pl.sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")
             pl.sendMessage(p,"§e§l/mre span <id> <span> : 賃料を支払うスパンを設定します 0:月 1:週 2:日")
             pl.sendMessage(p,"§e§l/mre settp <id> : 現在地点をテレポート地点に設定します")
-            pl.sendMessage(p,"§e§l/mreop changestatus <id> <status> : 指定idのステータスを変更します")
-            pl.sendMessage(p,"§e§l/mreop changeprice <id> <price> : 指定idの金額を変更します")
-            pl.sendMessage(p,"§e§l/mreop changeowner <id> <owner> : 指定idのオーナーを変更します")
+            pl.sendMessage(p,"§e§l/mre changestatus <id> <status> : 指定idのステータスを変更します")
+            pl.sendMessage(p,"§e§l/mre changeprice <id> <price> : 指定idの金額を変更します")
+            pl.sendMessage(p,"§e§l/mre changeowner <id> <owner> : 指定idのオーナーを変更します")
             pl.sendMessage(p,"§e§l/mre setting : 自分のリージョンの管理をします")
             pl.sendMessage(p,"§e§l/mre menu : メニューを開きます")
         }else{

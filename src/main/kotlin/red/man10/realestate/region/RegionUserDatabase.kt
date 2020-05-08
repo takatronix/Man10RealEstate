@@ -1,8 +1,10 @@
 package red.man10.realestate.region
 
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import red.man10.realestate.Constants.Companion.isLiked
 import red.man10.realestate.Constants.Companion.mysqlQueue
+import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
@@ -61,10 +63,12 @@ class RegionUserDatabase (private val pl:Plugin){
 
             val key = Pair(p,rs1.getInt("region_id"))
 
+            val d = regionData[key.second]?:continue
+
             val data = RegionUserData()
 
             data.paid = rs1.getDate("paid_date")
-            data.deposit = rs1.getDouble("deposit")
+//            data.deposit = rs1.getDouble("deposit")
             data.statsu = rs1.getString("deposit")
 
             data.allowAll = rs1.getInt("allow_all")==1
@@ -74,6 +78,9 @@ class RegionUserDatabase (private val pl:Plugin){
 
             regionUserData[key] = data
 
+            if (data.statsu=="Lock"){
+                pl.sendMessage(p,"§4§lLockされたリージョン:${d.name}")
+            }
         }
 
         rs1.close()
@@ -107,7 +114,7 @@ class RegionUserDatabase (private val pl:Plugin){
         val sql = "UPDATE `region_user` " +
                 "SET " +
                 "`status`='${data.statsu}'," +
-                "`deposit`='${data.deposit}'," +
+//                "`deposit`='${data.deposit}'," +
                 "`paid_date`='${data.paid}'," +
                 "`allow_all`='${if (data.allowAll){1}else{0}}'," +
                 "`allow_block`='${if (data.allowBlock){1}else{0}}'," +
@@ -146,6 +153,16 @@ class RegionUserDatabase (private val pl:Plugin){
         return profit
     }
 
+    fun addProfit(uuid:UUID,amount:Double){
+        val p = Bukkit.getOfflinePlayer(uuid)
+
+        if (p.isOnline && p.player != null){
+            pl.sendMessage(p.player!!,"§e§l入金情報:$${amount}")
+        }
+        mysqlQueue.add("INSERT INTO user_index (uuid, player, profit, type, received, date) " +
+                "VALUES ('$uuid', '${p.name}', '$amount', DEFAULT, DEFAULT, DEFAULT)")
+    }
+
     ///////////////////////////////
     //いいね、いいね解除する
     ///////////////////////////////
@@ -171,30 +188,30 @@ class RegionUserDatabase (private val pl:Plugin){
     //////////////////////////
     //支払い処理
     //////////////////////////
-    fun addDeposit(id: Int,p:Player,price:Double):Boolean{
-
-        val pd = regionUserData[Pair(p,id)]?:return false
-
-        if (!pd.isRent)return false
-
-        if (pl.vault.getBalance(p.uniqueId) < price)return false
-
-        pl.vault.withdraw(p.uniqueId,price)
-        pd.deposit += price
-
-        pd.statsu = "Share"
-
-        saveUserData(p,id)
-
-        return true
-    }
+//    fun addDeposit(id: Int,p:Player,price:Double):Boolean{
+//
+//        val pd = regionUserData[Pair(p,id)]?:return false
+//
+//        if (!pd.isRent)return false
+//
+//        if (pl.vault.getBalance(p.uniqueId) < price)return false
+//
+//        pl.vault.withdraw(p.uniqueId,price)
+//        pd.deposit += price
+//
+//        pd.statsu = "Share"
+//
+//        saveUserData(p,id)
+//
+//        return true
+//    }
 
     class RegionUserData{
 
-        var deposit : Double = 0.0
-        var paid = Date()
+//        var deposit : Double = 0.0  //この金がなくなったら支払えなくなる
+        var paid = Date()  //最後に支払った日
         var statsu = ""
-        var isRent = false
+        var isRent = false //賃貸の場合true
 
         var allowAll = false
         var allowBlock = false
