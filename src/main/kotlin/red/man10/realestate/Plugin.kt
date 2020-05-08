@@ -1,5 +1,10 @@
 package red.man10.realestate
 
+import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.ProtocolLibrary
+import com.comphenix.protocol.ProtocolManager
+import com.comphenix.protocol.events.PacketContainer
+import com.comphenix.protocol.wrappers.EnumWrappers
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
@@ -18,10 +23,8 @@ import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
+import java.lang.reflect.InvocationTargetException
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.LinkedBlockingQueue
-import kotlin.collections.HashMap
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -30,6 +33,7 @@ class Plugin : JavaPlugin(), Listener {
     lateinit var regionEvent: RegionEvent
     lateinit var protectEvent: ProtectRegionEvent
     lateinit var cmd : Commands
+    lateinit var protocolManager : ProtocolManager
 
     var wandStartLocation: Location? = null
     var wandEndLocation: Location? = null
@@ -44,6 +48,7 @@ class Plugin : JavaPlugin(), Listener {
         regionEvent = RegionEvent(this)
         protectEvent = ProtectRegionEvent(this)
         cmd = Commands(this)
+        protocolManager = ProtocolLibrary.getProtocolManager()
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(regionEvent,this)
@@ -108,6 +113,20 @@ class Plugin : JavaPlugin(), Listener {
         getCube(pos1,pos2)?.forEach { ele->
             ele.world.spawnParticle(Particle.HEART, ele.getX(), ele.getY(), ele.getZ(), 1)
         }
+
+//        val packet = PacketContainer(PacketType.Play.Server.WORLD_PARTICLES)
+//        for (l in getCube(pos1,pos2)?:return){
+//            packet.doubles.write(0,pos1.x)
+//            packet.doubles.write(1,pos1.y)
+//            packet.doubles.write(2,pos1.z)
+//            packet.particles.write(0,EnumWrappers.Particle.HEART)
+//
+//            try {
+//                protocolManager.sendServerPacket(p,packet)
+//            }catch (e:InvocationTargetException){
+//            }
+//        }
+
     }
 
     fun getCube(corner1: Location, corner2: Location): List<Location>? {

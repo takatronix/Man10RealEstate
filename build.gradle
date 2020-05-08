@@ -44,6 +44,13 @@ processResources {
     }
 }
 repositories {
+    maven { url "https://repo.dmulloy2.net/nexus/repository/public/" }
+}
+
+dependencies {
+    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.5.0";
+}
+repositories {
     maven { url 'https://jitpack.io' }
 }
 dependencies {
