@@ -15,12 +15,13 @@ class Constants(val p:Plugin) {
         //リージョンのデータ
         val regionData = ConcurrentHashMap<Int, RegionDatabase.RegionData>()
         //プレイヤーごとのリージョン情報
-        val regionUserData = ConcurrentHashMap<Pair<Player,Int>, RegionUserDatabase.RegionUserData>()
+        val regionUserData = ConcurrentHashMap<Player, HashMap<Int,RegionUserDatabase.RegionUserData>>()
         //worldごとのリージョンid <ワールド名,ワールドないにあるリージョンのidのlist>
         val worldRegion = HashMap<String,MutableList<Int>>()
 
         val mysqlQueue = LinkedBlockingQueue<String>()
-        val isLiked = HashMap<Pair<Player,Int>,Boolean>()
+
+        val isLike = HashMap<Player,MutableList<Int>>()
 
     }
 }

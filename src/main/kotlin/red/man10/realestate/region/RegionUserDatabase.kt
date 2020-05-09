@@ -2,13 +2,14 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.realestate.Constants.Companion.isLiked
+import red.man10.realestate.Constants.Companion.isLike
 import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import java.util.*
+import kotlin.collections.HashMap
 
 class RegionUserDatabase (private val pl:Plugin){
 
@@ -36,16 +37,16 @@ class RegionUserDatabase (private val pl:Plugin){
 
         mysqlQueue.add(sql)
 
-        data.statsu = status
+        data.status = status
 
-        regionUserData[Pair(user,regionId)] = data
+        saveMap(user,data,regionId)
     }
 
     ///////////////////////
     //ユーザーデータを削除
     ///////////////////////
     fun removeUserData(regionId: Int,user: Player){
-        regionUserData.remove(Pair(user,regionId))
+        regionUserData[user]!!.remove(regionId)
         mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$regionId' AND `uuid`='${user.uniqueId}';")
     }
 
@@ -61,24 +62,23 @@ class RegionUserDatabase (private val pl:Plugin){
 
         while (rs1.next()){
 
-            val key = Pair(p,rs1.getInt("region_id"))
+            val id = rs1.getInt("region_id")
 
-            val d = regionData[key.second]?:continue
+            val d = regionData[id]?:continue
 
             val data = RegionUserData()
 
             data.paid = rs1.getDate("paid_date")
-//            data.deposit = rs1.getDouble("deposit")
-            data.statsu = rs1.getString("deposit")
+            data.status = rs1.getString("status")
 
             data.allowAll = rs1.getInt("allow_all")==1
             data.allowBlock = rs1.getInt("allow_block")==1
             data.allowInv = rs1.getInt("allow_inv")==1
             data.allowDoor = rs1.getInt("allow_door")==1
 
-            regionUserData[key] = data
+            saveMap(p,data,id)
 
-            if (data.statsu=="Lock"){
+            if (data.status=="Lock"){
                 pl.sendMessage(p,"§4§lLockされたリージョン:${d.name}")
             }
         }
@@ -89,16 +89,26 @@ class RegionUserDatabase (private val pl:Plugin){
         //いいねデータ
         val rs2 = mysql.query("SELECT * FROM `liked_index` WHERE `uuid`='${p.uniqueId}';")?:return
 
+        val list = mutableListOf<Int>()
+
         while (rs2.next()){
 
             val isLike = rs2.getInt("is_like")
             val id = rs2.getInt("region_id")
 
-            isLiked[Pair(p,id)] = isLike == 1
+            if (isLike == 1){
+                list.add(id)
+            }
         }
+
+        isLike[p] = list
 
         rs2.close()
         mysql.close()
+
+        if (getProfit(p) > 0){
+            p.performCommand("mre bal")
+        }
 
     }
 
@@ -107,15 +117,13 @@ class RegionUserDatabase (private val pl:Plugin){
     ///////////////////////////////
     fun saveUserData(p:Player,id:Int){
 
-        val key = Pair(p,id)
-
-        val data = regionUserData[key]?:return
+        val data = regionUserData[p]!![id]?:return
 
         val sql = "UPDATE `region_user` " +
                 "SET " +
-                "`status`='${data.statsu}'," +
-//                "`deposit`='${data.deposit}'," +
+                "`status`='${data.status}'," +
                 "`paid_date`='${data.paid}'," +
+                "`is_rent`='${data.isRent}`,"
                 "`allow_all`='${if (data.allowAll){1}else{0}}'," +
                 "`allow_block`='${if (data.allowBlock){1}else{0}}'," +
                 "`allow_inv`='${if (data.allowInv){1}else{0}}'," +
@@ -132,7 +140,7 @@ class RegionUserDatabase (private val pl:Plugin){
 
         pl.vault.deposit(p.uniqueId,getProfit(p))
 
-         val sql = "UPDATE `user_index` SET `received`='1' WHERE `uuid`='${p.uniqueId}';"
+        val sql = "UPDATE `user_index` SET `received`='1' WHERE `uuid`='${p.uniqueId}';"
 
         mysqlQueue.add(sql)
     }
@@ -153,6 +161,9 @@ class RegionUserDatabase (private val pl:Plugin){
         return profit
     }
 
+    //////////////////////////////
+    //利益の追加
+    //////////////////////////////
     fun addProfit(uuid:UUID,amount:Double){
         val p = Bukkit.getOfflinePlayer(uuid)
 
@@ -166,51 +177,47 @@ class RegionUserDatabase (private val pl:Plugin){
     ///////////////////////////////
     //いいね、いいね解除する
     ///////////////////////////////
-    fun setLike(p:Player,id:Int):Boolean{
+    fun setLike(p:Player,id:Int){
 
-        val key = Pair(p,id)
-        var isLike = isLiked[key]
+        val list = isLike[p]?: mutableListOf()
 
-        if (isLike == null){
-            isLike = true
+        if (list.isEmpty()){
             mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('$id', '${p.name}', '${p.uniqueId}', '0');")
-        }else{
-            isLike = !isLike
+
+            list.add(id)
+            isLike[p] = list
+            pl.sendMessage(p,"§a§lいいねしました！")
+            return
         }
 
-        isLiked[key] = isLike
+        if (list.contains(id)){
+            list.remove(id)
+            pl.sendMessage(p,"§a§aいいね解除しました！")
+        }else{
+            list.add(id)
+            pl.sendMessage(p,"§a§lいいねしました！")
+        }
 
-        mysqlQueue.add("UPDATE `liked_index` SET `is_like`='${if (isLike){ 1 }else{ 0 }}' WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
+        isLike[p] = list
 
-        return isLike
+        mysqlQueue.add("UPDATE `liked_index` SET `is_like`='${if (list.contains(id)){ 1 }else{ 0 }}' WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
+
 
     }
-    //////////////////////////
-    //支払い処理
-    //////////////////////////
-//    fun addDeposit(id: Int,p:Player,price:Double):Boolean{
-//
-//        val pd = regionUserData[Pair(p,id)]?:return false
-//
-//        if (!pd.isRent)return false
-//
-//        if (pl.vault.getBalance(p.uniqueId) < price)return false
-//
-//        pl.vault.withdraw(p.uniqueId,price)
-//        pd.deposit += price
-//
-//        pd.statsu = "Share"
-//
-//        saveUserData(p,id)
-//
-//        return true
-//    }
+
+    fun saveMap(p:Player,data:RegionUserData,id:Int){
+
+        val map = regionUserData[p]?: HashMap()
+        map[id] = data
+        regionUserData[p] = map
+
+    }
 
     class RegionUserData{
 
 //        var deposit : Double = 0.0  //この金がなくなったら支払えなくなる
         var paid = Date()  //最後に支払った日
-        var statsu = ""
+        var status = ""
         var isRent = false //賃貸の場合true
 
         var allowAll = false

@@ -217,7 +217,7 @@ class Plugin : JavaPlugin(), Listener {
 
         while (rs.next()){
 
-            if (rs.getInt("isRent") == 0)continue
+            if (rs.getInt("is_rent") == 0)continue
 
             val uuid = UUID.fromString( rs.getString("uuid"))
             val id = rs.getInt("region_id")
@@ -235,22 +235,22 @@ class Plugin : JavaPlugin(), Listener {
             }
 
             //ユーザーがオンラインのとき
-            if (p != null&&regionUserData[Pair(p,id)]!=null){
+            if (p != null&&regionUserData[p]!=null){
 
-                val pd = regionUserData[Pair(p,id)]!!
+                val pd = regionUserData[p]!![id]?:continue
 
                 if (vault.getBalance(uuid) <data.rent){
                     sendMessage(p,"${data.name}§3§lの賃料が支払えません！支払えるまでロックされます！")
-                    pd.statsu = "Lock"
+                    pd.status = "Lock"
                 }else{
                     sendMessage(p,"${data.name}§3§lの賃料の賃料を支払いました！")
                     vault.withdraw(uuid,data.rent)
 
-                    pd.statsu = "Share"
+                    pd.status = "Share"
                     db.addProfit(data.owner_uuid,data.rent)
                 }
 
-                regionUserData[Pair(p,id)] = pd
+                db.saveMap(p,pd,id)
                 db.saveUserData(p,id)
                 continue
             }

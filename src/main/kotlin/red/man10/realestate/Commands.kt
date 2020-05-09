@@ -62,15 +62,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //いいね
             if (cmd == "good" && args.size == 2){
 
-                val isLike = pdb.setLike(sender,args[1].toInt())
-
-                if (isLike){
-                    pl.sendMessage(sender,"§a§aいいねしました！")
-                }else{
-                    pl.sendMessage(sender,"§a§aいいね解除しました！")
-                }
+                pdb.setLike(sender,args[1].toInt())
                 return true
-
             }
 
             //取り出し
@@ -90,7 +83,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     pl.sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
 
                     if (profit >0){
-
                         pl.sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n$profit","mre withdraw")
                     }
                 })
@@ -177,8 +169,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
             if (cmd == "setperm"){
 
                 val p = Bukkit.getPlayer(args[2])?:return true
+                val id = args[1].toInt()
 
-                val pd = regionUserData[Pair(p,args[1].toInt())]?:return true
+                val pd = (regionUserData[p]?:return true)[id]?:return true
 
                 when(args[3]) {
                     "all" -> pd.allowAll = args[4].toBoolean()
@@ -188,7 +181,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     else ->return true
                 }
 
-                regionUserData[Pair(p,args[1].toInt())] = pd
+                pdb.saveMap(p,pd,id)
                 pdb.saveUserData(p,args[1].toInt())
 
                 pl.sendMessage(sender,"§e§l設定完了！")
@@ -323,11 +316,18 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                     val mysql = MySQLManager(pl,"mre")
 
-                    val rs = mysql.query("SELECT id FROM region ORDER BY id DESC LIMIT 1")?:return@Runnable
-                    rs.next()
-                    val id = rs.getInt(0)+1
+                    //TODO:リージョンが一つもなかったときの処理
+                    val rs = mysql.query("SELECT id FROM region ORDER BY id DESC LIMIT 1")
 
-                    rs.close()
+                    val id : Int
+
+                    if (rs == null){
+                        id = 1
+                    }else{
+                        rs.next()
+                        id = rs.getInt(0)+1
+                        rs.close()
+                    }
                     mysql.close()
 
                     db.registerRegion(data,id)
@@ -440,8 +440,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
         if (data.owner_uuid == p.uniqueId)return true
 
-        val userdata = regionUserData[Pair(p,id)]?:return false
-        if (userdata.allowAll && userdata.statsu == "Share")return true
+        val userdata = (regionUserData[p]?:return false)[id]?:return false
+        if (userdata.allowAll && userdata.status == "Share")return true
 
         return false
     }
