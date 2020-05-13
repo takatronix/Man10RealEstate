@@ -1,12 +1,18 @@
 package red.man10.realestate
 
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ComponentBuilder
+import net.md_5.bungee.api.chat.HoverEvent
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
-import red.man10.realestate.region.ProtectRegionEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.region.RegionDatabase
-import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
+
 
 class Constants(val p:Plugin) {
 
@@ -22,6 +28,54 @@ class Constants(val p:Plugin) {
         val mysqlQueue = LinkedBlockingQueue<String>()
 
         val isLike = HashMap<Player,MutableList<Int>>()
+
+        val ownerData = HashMap<Player,MutableList<Int>>()//オーナーメニューを開くための辞書
+
+        fun IS(pl:Plugin,mateirial: Material, name:String, lore:MutableList<String>, id:String): ItemStack {
+
+            val item = ItemStack(mateirial)
+            val meta = item.itemMeta
+            meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,id)
+            meta.setDisplayName(name)
+            meta.lore = lore
+            item.itemMeta = meta
+            return item
+        }
+
+        ////////////////////
+        //nbttagを取得
+        /////////////////////
+        fun getId(item:ItemStack,pl:Plugin):String{
+            return item.itemMeta!!.persistentDataContainer[NamespacedKey(pl,"id"), PersistentDataType.STRING]?:""
+        }
+
+        //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
+        // [例1] sendHoverText(player,"ここをクリック",null,"/say おはまん");
+        // [例2] sendHoverText(player,"カーソルをあわせて","ヘルプメッセージとか",null);
+        // [例3] sendHoverText(player,"カーソルをあわせてクリック","ヘルプメッセージとか","/say おはまん");
+        fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
+            //////////////////////////////////////////
+            //      ホバーテキストとイベントを作成する
+            val hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(hoverText).create())
+
+            //////////////////////////////////////////
+            //   クリックイベントを作成する
+            val clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$command")
+            val message = ComponentBuilder(text).event(hoverEvent).event(clickEvent).create()
+            p.spigot().sendMessage(*message)
+        }
+
+        fun sendSuggest(p: Player, text: String?, command: String?) {
+
+            //////////////////////////////////////////
+            //   クリックイベントを作成する
+            var clickEvent: ClickEvent? = null
+            if (command != null) {
+                clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)
+            }
+            val message = ComponentBuilder(text).event(clickEvent).create()
+            p.spigot().sendMessage(*message)
+        }
 
     }
 }

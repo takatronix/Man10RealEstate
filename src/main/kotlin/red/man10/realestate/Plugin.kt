@@ -1,10 +1,7 @@
 package red.man10.realestate
 
-import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.ProtocolManager
-import com.comphenix.protocol.events.PacketContainer
-import com.comphenix.protocol.wrappers.EnumWrappers
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
@@ -20,13 +17,13 @@ import org.bukkit.scheduler.BukkitRunnable
 import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
+import red.man10.realestate.menu.InventoryMenu
+import red.man10.realestate.menu.OwnerMenu
 import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
-import java.lang.reflect.InvocationTargetException
 import java.util.*
-import javax.xml.crypto.Data
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -60,6 +57,7 @@ class Plugin : JavaPlugin(), Listener {
         server.pluginManager.registerEvents(regionEvent,this)
         server.pluginManager.registerEvents(protectEvent,this)
         server.pluginManager.registerEvents(InventoryMenu(this),this)
+        server.pluginManager.registerEvents(OwnerMenu(this),this)
 
         getCommand("mre")!!.setExecutor(cmd)
         getCommand("mreop")!!.setExecutor(cmd)
@@ -177,21 +175,6 @@ class Plugin : JavaPlugin(), Listener {
         return result
     }
 
-    //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
-    // [例1] sendHoverText(player,"ここをクリック",null,"/say おはまん");
-    // [例2] sendHoverText(player,"カーソルをあわせて","ヘルプメッセージとか",null);
-    // [例3] sendHoverText(player,"カーソルをあわせてクリック","ヘルプメッセージとか","/say おはまん");
-    fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
-        //////////////////////////////////////////
-        //      ホバーテキストとイベントを作成する
-        val hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(hoverText).create())
-
-        //////////////////////////////////////////
-        //   クリックイベントを作成する
-        val clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$command")
-        val message = ComponentBuilder(text).event(hoverEvent).event(clickEvent).create()
-        p.spigot().sendMessage(*message)
-    }
 
     ////////////////////////
     //dbのクエリキュー

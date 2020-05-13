@@ -7,6 +7,7 @@ import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.worldRegion
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import java.awt.print.Book
 import java.util.*
 
 class RegionDatabase(private val pl: Plugin) {
@@ -63,10 +64,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.teleport = tp
         regionData[id] = data
 
-        val sql = "UPDATE `region` SET `x`=${tp[0]},`y`=${tp[1]},`z`=${tp[2]}," +
-                "`pitch`=${tp[3]},`yaw`=${tp[4]} WHERE `id`='$id';"
-
-        mysqlQueue.add(sql)
+        saveRegion(id)
 
     }
 
@@ -77,9 +75,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.price = price
         regionData[id] = data
 
-        val sql =  "UPDATE `region` SET `price`='$price' WHERE  `id`='$id';"
-
-        mysqlQueue.add(sql)
+        saveRegion(id)
 
     }
 
@@ -90,9 +86,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.status = status
         regionData[id] = data
 
-        val sql =  "UPDATE `region` SET `status`='$status' WHERE  `id`='$id';"
-
-        mysqlQueue.add(sql)
+        saveRegion(id)
     }
 
     //オーナーの変更
@@ -102,9 +96,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.owner_uuid = owner.uniqueId
         regionData[id] = data
 
-        val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name`='${owner.name}' WHERE `id`='$id';"
-
-        mysqlQueue.add(sql)
+        saveRegion(id)
 
     }
 
@@ -114,7 +106,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.rent = rent
         regionData[id] = data
 
-        mysqlQueue.add("UPDATE `region` SET `rent`=$rent WHERE `id`='$id';")
+        saveRegion(id)
     }
 
     //スパンの変更
@@ -123,7 +115,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.span = span
         regionData[id] = data
 
-        mysqlQueue.add("UPDATE `region` SET `span`=$span WHERE `id`='$id';")
+        saveRegion(id)
     }
 
     //土地の購入
@@ -218,13 +210,33 @@ class RegionDatabase(private val pl: Plugin) {
             )
 
             regionData[id] = data
-
             val list = worldRegion[data.world]?: mutableListOf()
             list.add(id)
             worldRegion[data.world] = list
         }
         rs.close()
         mysql.close()
+    }
+
+    fun saveRegion(id:Int):Boolean{
+
+        val data = regionData[id]?:return false
+
+        mysqlQueue.add("UPDATE region t SET " +
+                "t.owner_uuid = '${data.owner_uuid}', " +
+                "t.owner_name = '${Bukkit.getOfflinePlayer(data.owner_uuid).name}', " +
+                "t.x = ${data.teleport[0]}," +
+                " t.y = ${data.teleport[1]}, " +
+                "t.z = ${data.teleport[2]}, " +
+                "t.pitch = ${data.teleport[3]}, " +
+                "t.yaw = ${data.teleport[4]}, " +
+                "t.status = '${data.status}', " +
+                "t.price = ${data.price}, " +
+                "t.profit = 0, " +
+                "t.span = ${data.span} " +
+                "WHERE t.id = $id")
+
+        return true
     }
 
 

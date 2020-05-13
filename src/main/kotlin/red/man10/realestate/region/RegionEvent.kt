@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import red.man10.realestate.Constants
 import red.man10.realestate.Constants.Companion.regionData
+import red.man10.realestate.Constants.Companion.sendHoverText
 import red.man10.realestate.Plugin
 import java.lang.Exception
 
@@ -172,8 +173,8 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         pl.sendMessage(p,"§a§l==========================================")
 
-        pl.sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
-        pl.sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")
+        sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
+        sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")
 
     }
 

@@ -10,6 +10,8 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
+import red.man10.realestate.Constants.Companion.sendHoverText
+import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionUserDatabase
 
@@ -66,7 +68,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 pl.sendMessage(sender,"§3§l料金：${data.price} 名前：${data.name}" +
                         " §a§l現在のオーナー名：${Bukkit.getOfflinePlayer(data.owner_uuid).name}")
                 pl.sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
-                pl.sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy ${args[1]}")
+                sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy ${args[1]}")
 
                 return true
             }
@@ -95,7 +97,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     pl.sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
 
                     if (profit >0){
-                        pl.sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n$profit","mre withdraw")
+                        sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n$profit","mre withdraw")
                     }
                 })
                 return true
@@ -199,15 +201,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 pl.sendMessage(sender,"§e§l設定完了！")
 
             }
-
-            //設置画面を開く
-            if(cmd == "setting"){
-
-                inventory.openOwnerSetting(sender,1)
-
-                return true
-            }
-
 
             //指定地点をテレポート地点にする
             if (cmd == "settp" && args.size == 2){
@@ -328,7 +321,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                     val mysql = MySQLManager(pl,"mre")
 
-                    //TODO:リージョンが一つもなかったときの処理
                     val rs = mysql.query("SELECT t.*\n" +
                             "                 FROM region t\n" +
                             "                 ORDER BY id DESC\n" +
@@ -372,8 +364,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
                     }
 
-                    pl.sendHoverText(sender,"§e§l[NEXT]","","mre list ${args[1].toInt()+16}")
-                    pl.sendHoverText(sender,"§e§l[Previous]","","mre list ${args[1].toInt()-16}")
+                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${args[1].toInt()+16}")
+                    sendHoverText(sender,"§e§l[Previous]","","mre list ${args[1].toInt()-16}")
 
                 }else{
                     for (i in 1 .. 16){
@@ -381,7 +373,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         if (regionData[i] == null)continue
                         pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
                     }
-                    pl.sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
+                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
                 }
 
                 return true
@@ -431,8 +423,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
             pl.sendMessage(p,"§e§l/mre changestatus <id> <status> : 指定idのステータスを変更します")
             pl.sendMessage(p,"§e§l/mre changeprice <id> <price> : 指定idの金額を変更します")
             pl.sendMessage(p,"§e§l/mre changeowner <id> <owner> : 指定idのオーナーを変更します")
-            pl.sendMessage(p,"§e§l/mre setting : 自分のリージョンの管理をします")
-            pl.sendMessage(p,"§e§l/mre menu : メニューを開きます")
         }else{
             if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
             pl.sendMessage(p,"§e§l==============================================")
