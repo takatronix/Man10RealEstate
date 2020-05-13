@@ -31,23 +31,6 @@ class Constants(val p:Plugin) {
 
         val ownerData = HashMap<Player,MutableList<Int>>()//オーナーメニューを開くための辞書
 
-        fun IS(pl:Plugin,mateirial: Material, name:String, lore:MutableList<String>, id:String): ItemStack {
-
-            val item = ItemStack(mateirial)
-            val meta = item.itemMeta
-            meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,id)
-            meta.setDisplayName(name)
-            meta.lore = lore
-            item.itemMeta = meta
-            return item
-        }
-
-        ////////////////////
-        //nbttagを取得
-        /////////////////////
-        fun getId(item:ItemStack,pl:Plugin):String{
-            return item.itemMeta!!.persistentDataContainer[NamespacedKey(pl,"id"), PersistentDataType.STRING]?:""
-        }
 
         //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
         // [例1] sendHoverText(player,"ここをクリック",null,"/say おはまん");

@@ -7,10 +7,10 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import red.man10.realestate.Constants
-import red.man10.realestate.Constants.Companion.IS
-import red.man10.realestate.Constants.Companion.getId
 import red.man10.realestate.Constants.Companion.sendSuggest
 import red.man10.realestate.Plugin
+import red.man10.realestate.menu.InventoryMenu.Companion.IS
+import red.man10.realestate.menu.InventoryMenu.Companion.getId
 
 class OwnerMenu(val pl : Plugin) : Listener{
 
@@ -20,6 +20,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
     val ownerMenu = "${pl.prefix}§a§lオーナーメニュー"
     val customRegionData = "${pl.prefix}§a§l土地の詳細設定"
     val customUserMenu = "${pl.prefix}§a§l住人の設定"
+    val customUserData = "${pl.prefix}§a§l住人の設定"
     val changeStatus = "${pl.prefix}§a§lステータスの変更"
     val changeRent = "${pl.prefix}§a§l賃料設定"
     val changeRentSpan = "${pl.prefix}§a§lスパン設定"
@@ -109,6 +110,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
     fun customUserData(p:Player,id:Int,user:String){
 
+        val inv = Bukkit.createInventory(null,54,customUserData)
+
+
     }
 
 
@@ -149,6 +153,14 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         }
 
+        if (first!=1){
+            val previous = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ", mutableListOf(),"previous")
+            inv.setItem(45,previous)
+            inv.setItem(46,previous)
+            inv.setItem(47,previous)
+
+        }
+
         p.openInventory(inv)
     }
 
@@ -170,7 +182,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 "back"->invmain.openMainMenu(p)
                 "next"->openOwnerSetting(p,getId(e.inventory.getItem(44)!!,pl).toInt()+1)
                 "previous"->openOwnerSetting(p,getId(e.inventory.getItem(44)!!,pl).toInt()-45)
-                else ->regionCustomMenu(p,getId(item,pl).toInt())
+                else ->{
+                    regionCustomMenu(p,(item.lore!!)[0].replace("§e§lID:","").toInt())
+                }
             }
         }
 
@@ -198,11 +212,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
             }
         }
 
-        if (name == customUserMenu){
-            e.isCancelled = true
-
-        }
-
+        //ステータス
         if (name == changeStatus){
             e.isCancelled = true
             when(e.slot){
@@ -212,6 +222,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
             }
         }
 
+        //賃料の設定
         if (name == changeRent){
             e.isCancelled = true
             when(e.slot){
@@ -221,6 +232,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         }
 
+        //スパンの変更
         if (name == changeRentSpan){
             e.isCancelled = true
             when(e.slot){
@@ -231,6 +243,13 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         }
 
+        if (name == customUserMenu){
+
+        }
+
+        if (name == customUserData){
+
+        }
 
     }
 

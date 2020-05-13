@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import red.man10.realestate.Constants.Companion.isLike
 import red.man10.realestate.Constants.Companion.mysqlQueue
+import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.MySQLManager
@@ -60,6 +61,8 @@ class RegionUserDatabase (private val pl:Plugin){
         //リージョンデータ
         val rs1 = mysql.query("SELECT * FROM `region_user` WHERE `uuid`='${p.uniqueId}';")?:return
 
+        val ownerList = mutableListOf<Int>()
+
         while (rs1.next()){
 
             val id = rs1.getInt("region_id")
@@ -77,6 +80,10 @@ class RegionUserDatabase (private val pl:Plugin){
             data.allowDoor = rs1.getInt("allow_door")==1
 
             saveMap(p,data,id)
+
+            if (data.allowAll){
+                ownerList.add(id)
+            }
 
             if (data.status=="Lock"){
                 pl.sendMessage(p,"§4§lLockされたリージョン:${d.name}")
@@ -109,6 +116,15 @@ class RegionUserDatabase (private val pl:Plugin){
         if (getProfit(p) > 0){
             p.performCommand("mre bal")
         }
+
+
+        for (region in regionData){
+            if (region.value.owner_uuid == p.uniqueId){
+                ownerList.add(region.key)
+            }
+        }
+
+        ownerData[p] = ownerList
 
     }
 

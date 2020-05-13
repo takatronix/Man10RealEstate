@@ -9,8 +9,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import red.man10.realestate.Constants.Companion.IS
-import red.man10.realestate.Constants.Companion.getId
 import red.man10.realestate.Constants.Companion.isLike
 import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.regionData
@@ -23,6 +21,27 @@ class InventoryMenu(private val pl: Plugin) : Listener {
 
     val ownerMenuClass = OwnerMenu(pl)
 
+
+    companion object{
+        fun IS(pl:Plugin,mateirial: Material, name:String, lore:MutableList<String>, id:String): ItemStack {
+
+            val item = ItemStack(mateirial)
+            val meta = item.itemMeta
+            meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,id)
+            meta.setDisplayName(name)
+            meta.lore = lore
+            item.itemMeta = meta
+            return item
+        }
+
+        ////////////////////
+        //nbttagを取得
+        /////////////////////
+        fun getId(item:ItemStack,pl:Plugin):String{
+            return item.itemMeta!!.persistentDataContainer[NamespacedKey(pl,"id"), PersistentDataType.STRING]?:""
+        }
+
+    }
 
     /////////////////////
     //メインメニュー
@@ -75,6 +94,14 @@ class InventoryMenu(private val pl: Plugin) : Listener {
 
         }
 
+        if (first!=1){
+            val previous = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ", mutableListOf(),"previous")
+            inv.setItem(45,previous)
+            inv.setItem(46,previous)
+            inv.setItem(47,previous)
+
+        }
+
         p.openInventory(inv)
 
     }
@@ -105,7 +132,9 @@ class InventoryMenu(private val pl: Plugin) : Listener {
                 "back"->openMainMenu(p)
                 "next"->openBookMark(p,getId(e.inventory.getItem(44)!!,pl).toInt()+1)
                 "previous"->openBookMark(p,getId(e.inventory.getItem(44)!!,pl).toInt()-45)
-                else ->p.performCommand("mre tp ${getId(item,pl)}")
+                else ->{
+                    p.performCommand("mre tp ${(item.lore!!)[0].replace("§e§lID:","").toInt()}")
+                }
 
             }
             return
