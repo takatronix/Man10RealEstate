@@ -54,8 +54,20 @@ class Commands (private val pl :Plugin):CommandExecutor{
             if (cmd == "buy"){
 
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-                    RegionDatabase(pl).buy(args[1].toInt(),sender)
+                    db.buy(args[1].toInt(),sender)
                 })
+                return true
+            }
+
+            if (cmd == "buycheck"){
+
+                val data = regionData[args[1].toInt()]?:return true
+
+                pl.sendMessage(sender,"§3§l料金：${data.price} 名前：${data.name}" +
+                        " §a§l現在のオーナー名：${Bukkit.getOfflinePlayer(data.owner_uuid).name}")
+                pl.sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
+                pl.sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy ${args[1]}")
+
                 return true
             }
 

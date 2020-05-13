@@ -37,6 +37,7 @@ class Plugin : JavaPlugin(), Listener {
     lateinit var cmd : Commands
     lateinit var protocolManager : ProtocolManager
     lateinit var mysql : MySQLManager
+    lateinit var vault : VaultManager
 
 
     var wandStartLocation: Location? = null
@@ -44,7 +45,6 @@ class Plugin : JavaPlugin(), Listener {
     var particleTime:Int = 0
     var debugMode = false
 
-    val vault = VaultManager(this)
 
     override fun onEnable() { // Plugin startup logic
         logger.info("Man10 Real Estate plugin enabled.")
@@ -54,6 +54,7 @@ class Plugin : JavaPlugin(), Listener {
         protectEvent = ProtectRegionEvent(this)
         cmd = Commands(this)
         protocolManager = ProtocolLibrary.getProtocolManager()
+        vault = VaultManager(this)
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(regionEvent,this)

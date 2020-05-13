@@ -173,7 +173,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
         pl.sendMessage(p,"§a§l==========================================")
 
         pl.sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
-        pl.sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","")
+        pl.sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")
 
     }
 

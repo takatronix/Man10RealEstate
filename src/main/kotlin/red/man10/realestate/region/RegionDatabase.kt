@@ -102,7 +102,7 @@ class RegionDatabase(private val pl: Plugin) {
         data.owner_uuid = owner.uniqueId
         regionData[id] = data
 
-        val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name='${owner.name}' WHERE `id`='$id';"
+        val sql = "UPDATE `region` SET `owner_uuid`='${owner.uniqueId}', `owner_name`='${owner.name}' WHERE `id`='$id';"
 
         mysqlQueue.add(sql)
 
@@ -141,7 +141,7 @@ class RegionDatabase(private val pl: Plugin) {
             return
         }
 
-        if (data.status != "onSale"){
+        if (data.status != "OnSale"){
             pl.sendMessage(user,"§3§lこのリージョンは販売中ではありません")
             return
         }
@@ -153,11 +153,11 @@ class RegionDatabase(private val pl: Plugin) {
 
         //旧オーナーに所持金を追加
         pl.vault.withdraw(user.uniqueId,data.price)
+        RegionUserDatabase(pl).addProfit(data.owner_uuid,data.price)
+
 
         setRegionOwner(id,user)
         setRegionStatus(id,"Protected")
-
-
 
         pl.sendMessage(user,"§a§l購入完了、土地の保護がされました！")
     }
