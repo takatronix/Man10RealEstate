@@ -77,9 +77,10 @@ class Plugin : JavaPlugin(), Listener {
             }
         }.runTaskTimer(this, 0, 10)
 
+        mysql = MySQLManager(this,"mreRentThread")
+
         Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
 
-            mysql = MySQLManager(this,"mreRentThread")
 
             while (true){
                 rentTimer()
@@ -217,7 +218,7 @@ class Plugin : JavaPlugin(), Listener {
 
         while (rs.next()){
 
-            if (rs.getInt("is_rent") == 0)continue
+            if (rs.getInt("isRent") == 0)continue
 
             val uuid = UUID.fromString( rs.getString("uuid"))
             val id = rs.getInt("region_id")

@@ -73,9 +73,9 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
                 if (data.status == "Lock")return false
                 if (data.owner_uuid == p.uniqueId)return true
 
-                val pd = regionUserData[Pair(p,id.key)]?:return false
+                val pd = (regionUserData[p]?:return false)[id.key]?:return false
 
-                if (pd.statsu == "Lock")return false
+                if (pd.status == "Lock")return false
                 if (pd.allowAll)return true
 
                 if ((eventType is BlockBreakEvent || eventType is BlockPlaceEvent) && pd.allowBlock)return true

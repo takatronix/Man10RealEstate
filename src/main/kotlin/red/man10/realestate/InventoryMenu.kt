@@ -9,7 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import red.man10.realestate.Constants.Companion.isLiked
+import red.man10.realestate.Constants.Companion.isLike
 import red.man10.realestate.Constants.Companion.regionData
 
 class InventoryMenu(private val pl:Plugin) : Listener {
@@ -75,11 +75,13 @@ class InventoryMenu(private val pl:Plugin) : Listener {
 
         val inv = Bukkit.createInventory(null,54,bookmark)
 
+        val list = isLike[p]!!
+
         for (i in first .. first+44){
 
-            if (!(isLiked[Pair(p,i)]?:continue))continue
+            if (list.size <=i)break
 
-            val d = regionData[i]?:continue
+            val d = regionData[list[i]]?:continue
 
             val icon = IS(Material.PAPER,d.name,mutableListOf(
                     "§e§lID:${i}",
@@ -172,8 +174,8 @@ class InventoryMenu(private val pl:Plugin) : Listener {
                 when(getId(item)){
 
                     "back"->openMainMenu(p)
-                    "next"->openBookMark(p,getId(e.inventory.getItem(44)!!).toInt())
-                    "previous"->openBookMark(p,1)//TODO:うまく戻る方法を考える
+                    "next"->openBookMark(p,getId(e.inventory.getItem(44)!!).toInt()+1)
+                    "previous"->openBookMark(p,getId(e.inventory.getItem(44)!!).toInt()-45)
                 }
                 return
             }
