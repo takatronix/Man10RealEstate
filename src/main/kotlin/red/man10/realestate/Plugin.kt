@@ -35,6 +35,8 @@ class Plugin : JavaPlugin(), Listener {
     lateinit var protocolManager : ProtocolManager
     lateinit var mysql : MySQLManager
     lateinit var vault : VaultManager
+    lateinit var invmain : InventoryMenu
+    lateinit var ownerInv : OwnerMenu
 
 
     var wandStartLocation: Location? = null
@@ -52,12 +54,14 @@ class Plugin : JavaPlugin(), Listener {
         cmd = Commands(this)
         protocolManager = ProtocolLibrary.getProtocolManager()
         vault = VaultManager(this)
+        invmain = InventoryMenu(this)
+        ownerInv = OwnerMenu(this)
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(regionEvent,this)
         server.pluginManager.registerEvents(protectEvent,this)
-        server.pluginManager.registerEvents(InventoryMenu(this),this)
-        server.pluginManager.registerEvents(OwnerMenu(this),this)
+        server.pluginManager.registerEvents(invmain,this)
+        server.pluginManager.registerEvents(ownerInv,this)
 
         getCommand("mre")!!.setExecutor(cmd)
         getCommand("mreop")!!.setExecutor(cmd)

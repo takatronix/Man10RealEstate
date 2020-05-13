@@ -19,8 +19,6 @@ class InventoryMenu(private val pl: Plugin) : Listener {
     val mainMenu = "${pl.prefix}§a§lメインメニュー"
     val bookmark = "${pl.prefix}§a§lいいねしたリスト"
 
-    val ownerMenuClass = OwnerMenu(pl)
-
 
     companion object{
         fun IS(pl:Plugin,mateirial: Material, name:String, lore:MutableList<String>, id:String): ItemStack {
@@ -75,7 +73,7 @@ class InventoryMenu(private val pl: Plugin) : Listener {
                     "§e§lID:${i}",
                     "§b§lOwner:${Bukkit.getOfflinePlayer(d.owner_uuid).name}",
                     "§a§lStatus:${d.status}"
-            ),i.toString())
+            ),list[i].toString())
 
             inv.addItem(icon)
         }
@@ -94,7 +92,7 @@ class InventoryMenu(private val pl: Plugin) : Listener {
 
         }
 
-        if (first!=1){
+        if (first!=0){
             val previous = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ", mutableListOf(),"previous")
             inv.setItem(45,previous)
             inv.setItem(46,previous)
@@ -118,8 +116,8 @@ class InventoryMenu(private val pl: Plugin) : Listener {
         if (name == mainMenu){
             e.isCancelled = true
             when(getId(item,pl)){
-                "manage"->ownerMenuClass.openOwnerSetting(p,1)
-                "bookmark"->openBookMark(p,1)
+                "manage"->pl.ownerInv.openOwnerSetting(p,0)
+                "bookmark"->openBookMark(p,0)
                 else ->{}
             }
         }
@@ -129,11 +127,12 @@ class InventoryMenu(private val pl: Plugin) : Listener {
             e.isCancelled = true
             when(getId(item,pl)){
 
+                //TODO:ページ式に変更
                 "back"->openMainMenu(p)
                 "next"->openBookMark(p,getId(e.inventory.getItem(44)!!,pl).toInt()+1)
                 "previous"->openBookMark(p,getId(e.inventory.getItem(44)!!,pl).toInt()-45)
                 else ->{
-                    p.performCommand("mre tp ${(item.lore!!)[0].replace("§e§lID:","").toInt()}")
+                    p.performCommand("mre tp ${getId(item,pl).toInt()}")
                 }
 
             }

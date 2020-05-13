@@ -7,14 +7,13 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import red.man10.realestate.Constants
+import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.sendSuggest
 import red.man10.realestate.Plugin
 import red.man10.realestate.menu.InventoryMenu.Companion.IS
 import red.man10.realestate.menu.InventoryMenu.Companion.getId
 
 class OwnerMenu(val pl : Plugin) : Listener{
-
-    val invmain = InventoryMenu(pl)
 
     val regionCustomMenu = "${pl.prefix}§a§l土地の設定"
     val ownerMenu = "${pl.prefix}§a§lオーナーメニュー"
@@ -124,16 +123,19 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         val inv = Bukkit.createInventory(null,54,ownerMenu)
 
+        val list = ownerData[p]?:return
+
         for (i in first .. first+44){
 
-            if ((Constants.ownerData[p]?:return).size >=i)break
+            if (list.size <=i)break
 
-            val data = Constants.regionData[(Constants.ownerData[p]?:return)[i]]?:continue
+            val d = Constants.regionData[list[i]]?:continue
 
-            val icon = IS(pl,Material.PAPER,data.name,mutableListOf(
-                    "§e§lID:${i}",
-                    "§a§lStatus:${data.status}"
-            ),i.toString())
+            val icon = IS(pl,Material.PAPER,d.name,mutableListOf(
+                    "§e§lID:${list[i]}",
+                    "§a§lStatus:${d.status}"
+            ),list[i].toString())
+
             inv.addItem(icon)
 
         }
@@ -153,7 +155,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         }
 
-        if (first!=1){
+        if (first!=0){
             val previous = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ", mutableListOf(),"previous")
             inv.setItem(45,previous)
             inv.setItem(46,previous)
@@ -179,11 +181,12 @@ class OwnerMenu(val pl : Plugin) : Listener{
             e.isCancelled = true
             when(getId(item,pl)){
 
-                "back"->invmain.openMainMenu(p)
+                //TODO:ページ式に変更
+                "back"->pl.invmain.openMainMenu(p)
                 "next"->openOwnerSetting(p,getId(e.inventory.getItem(44)!!,pl).toInt()+1)
                 "previous"->openOwnerSetting(p,getId(e.inventory.getItem(44)!!,pl).toInt()-45)
                 else ->{
-                    regionCustomMenu(p,(item.lore!!)[0].replace("§e§lID:","").toInt())
+                    regionCustomMenu(p, getId(item,pl).toInt())
                 }
             }
         }
@@ -192,7 +195,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
         if (name == regionCustomMenu){
             e.isCancelled = true
             when(e.slot){
-                0->openOwnerSetting(p,1)
+                0->openOwnerSetting(p,0)
                 11->customRegionData(p, getId(item,pl).toInt())
                 13->customUserMenu(p, getId(item,pl).toInt())
                 15-> sendSuggest(p,"","mre adduser ${getId(item,pl)} ")
