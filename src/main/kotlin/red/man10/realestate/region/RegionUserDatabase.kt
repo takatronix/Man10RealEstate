@@ -179,6 +179,13 @@ class RegionUserDatabase (private val pl:Plugin){
     ///////////////////////////////
     fun setLike(p:Player,id:Int){
 
+        val data = regionData[id]?:return
+
+        if (data.owner_uuid == p.uniqueId){
+            pl.sendMessage(p,"§3§lあなたはオーナーなのでいいね出来ません！")
+            return
+        }
+
         val list = isLike[p]?: mutableListOf()
 
         if (list.isEmpty()){

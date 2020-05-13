@@ -317,7 +317,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     val mysql = MySQLManager(pl,"mre")
 
                     //TODO:リージョンが一つもなかったときの処理
-                    val rs = mysql.query("SELECT id FROM region ORDER BY id DESC LIMIT 1")
+                    val rs = mysql.query("SELECT t.*\n" +
+                            "                 FROM region t\n" +
+                            "                 ORDER BY id DESC\n" +
+                            "                 LIMIT 501")
 
                     val id : Int
 
@@ -325,7 +328,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         id = 1
                     }else{
                         rs.next()
-                        id = rs.getInt(0)+1
+                        id = rs.getInt("id")+1
                         rs.close()
                     }
                     mysql.close()
