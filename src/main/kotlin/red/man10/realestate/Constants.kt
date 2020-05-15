@@ -59,7 +59,7 @@ class Constants(val p:Plugin) {
                 clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)
             }
 
-            val message = ComponentBuilder(text).event(clickEvent).create()
+            val message = ComponentBuilder("$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()
             p.spigot().sendMessage(*message)
         }
 

@@ -7,15 +7,21 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Constants
 import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.prefix
+import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Constants.Companion.sendSuggest
+import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import red.man10.realestate.menu.InventoryMenu.Companion.IS
 import red.man10.realestate.menu.InventoryMenu.Companion.getId
+import java.util.*
+import kotlin.collections.HashMap
 
 class OwnerMenu(val pl : Plugin) : Listener{
 
@@ -27,7 +33,12 @@ class OwnerMenu(val pl : Plugin) : Listener{
     val changeStatus = "${prefix}§a§lステータスの変更"
     val changeRent = "${prefix}§a§l賃料設定"
     val changeRentSpan = "${prefix}§a§lスパン設定"
+    val loading = "$prefix§e§lデータの読込中・・・"
+    val perm = "$prefix§3§l権限設定"
 
+    var mysql : MySQLManager? = null
+
+    val map = HashMap<Pair<UUID,Int>,PermList>()
 
     //リージョンの管理メニュ
     fun regionCustomMenu(p: Player, id:Int){
@@ -74,6 +85,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
     }
 
+    //リージョンのステータスの変更
     fun changeStatus(p:Player,id:Int){
         val inv = Bukkit.createInventory(null,9,changeStatus)
 
@@ -84,6 +96,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
         p.openInventory(inv)
     }
 
+    //賃貸設定
     fun changeRentSetting(p:Player, id:Int){
 
         val inv = Bukkit.createInventory(null,9,changeRent)
@@ -94,6 +107,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
         p.openInventory(inv)
     }
 
+    //賃料の徴収スパンの設定
     fun changeSpan(p:Player,id: Int){
         val inv = Bukkit.createInventory(null,9,changeRentSpan)
 
@@ -104,21 +118,190 @@ class OwnerMenu(val pl : Plugin) : Listener{
         p.openInventory(inv)
     }
 
+    //リージョンに登録されたユーザーのデータを取得
+    fun customUserMenu(p:Player,id:Int,page:Int){
 
-    fun customUserMenu(p:Player,id:Int){
+        loadingMenu(p)
 
-        val inv = Bukkit.createInventory(null,54,customUserMenu)
+        val inv = Bukkit.createInventory(null,54, "$customUserMenu:$id")
+
+        Bukkit.getScheduler().runTask(pl, Runnable {
+
+            val list = loadUsersList(id,page)
+
+            if (list.isNullOrEmpty()){
+
+                sendMessage(p,"§3§lこの土地には住人はいないようです")
+
+                p.closeInventory()
+                return@Runnable
+            }
+
+            for (uuid in list){
+                val head = ItemStack(Material.PLAYER_HEAD)
+                val meta = head.itemMeta as SkullMeta
+
+                val user =  Bukkit.getOfflinePlayer(UUID.fromString(uuid))
+
+                meta.owningPlayer = user
+                meta.setDisplayName("§6§l${user}")
+                meta.lore = mutableListOf(if (user.isOnline){"§aOnline"}else{"§4§lOffline"})
+
+                meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,uuid)
+
+                head.itemMeta = meta
+
+                inv.addItem(head)
+            }
+
+
+            val back = IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l戻る", mutableListOf(),"back")
+
+            for (i in 45..53){
+                inv.setItem(i,back)
+            }
+
+            if (inv.getItem(44) != null){
+
+                val next = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ", mutableListOf(),"next")
+
+                val meta = next.itemMeta
+                //クリックしたら開くページを保存
+                meta.persistentDataContainer.set(NamespacedKey(pl,"page"), PersistentDataType.INTEGER,page-1)
+                next.itemMeta = meta
+
+                inv.setItem(51,next)
+                inv.setItem(52,next)
+                inv.setItem(53,next)
+
+            }
+
+            if (page!=0){
+                val previous = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ", mutableListOf(),"previous")
+
+                val meta = previous.itemMeta
+                //クリックしたら開くページを保存
+                meta.persistentDataContainer.set(NamespacedKey(pl,"page"), PersistentDataType.INTEGER,page-1)
+                previous.itemMeta = meta
+
+
+                inv.setItem(45,previous)
+                inv.setItem(46,previous)
+                inv.setItem(47,previous)
+
+            }
+
+            p.openInventory(inv)
+
+        })
 
     }
 
-    fun customUserData(p:Player,id:Int,user:String){
+    //ユーザーの設定
+    fun customUserData(p:Player,id:Int,uuid:UUID){
 
-        val inv = Bukkit.createInventory(null,54,customUserData)
+        val inv = Bukkit.createInventory(null,9,customUserData)
 
+        inv.setItem(1, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),"$uuid,$id"))
+        inv.setItem(4, IS(pl,Material.COMPASS,"§a§lステータス", mutableListOf(),"$uuid,$id"))
+        inv.setItem(7,IS(pl,Material.REDSTONE_BLOCK,"住人を退去", mutableListOf(),"$uuid,$id"))
 
+        p.openInventory(inv)
     }
 
+    //権限設定
+    fun customPerm(p:Player,id:Int,uuid: UUID) {
 
+        var permData:PermList
+
+        loadingMenu(p)
+        Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
+            permData = getPerms(id,uuid)
+
+            val inv = Bukkit.createInventory(null,54,perm)
+
+            inv.setItem(13,IS(pl,
+                    if (permData.allowAll){Material.LIME_STAINED_GLASS_PANE }
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§l全権限", mutableListOf(),"$uuid,$id"))
+            inv.setItem(22, IS(pl,
+                    if (permData.allowBlock){Material.LIME_STAINED_GLASS_PANE }
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§lブロックの設置、破壊権限", mutableListOf(),"$uuid,$id"))
+            inv.setItem(31, IS(pl,
+                    if (permData.allowDoor){Material.LIME_STAINED_GLASS_PANE }
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなど、右クリックで触るものに対する権限", mutableListOf(),"$uuid,$id"))
+            inv.setItem(40, IS(pl,
+                    if (permData.allowInv){Material.LIME_STAINED_GLASS_PANE }
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§lインベントリを開く権限", mutableListOf(),"$uuid,$id"))
+
+            p.openInventory(inv)
+
+        })
+    }
+
+    //読込中の画面
+    fun loadingMenu(p:Player){
+
+        val inv = Bukkit.createInventory(null,27,loading)
+
+        inv.setItem(13, IS(pl,Material.CLOCK,"§e§l現在データの読み込み中です....", mutableListOf(),"loading"))
+
+        p.openInventory(inv)
+    }
+
+    @Synchronized
+    fun loadUsersList(id:Int, page: Int): MutableList<String>? {
+
+        if (mysql == null){
+            mysql = MySQLManager(pl,"mreLoadUserData")
+        }
+
+        val rs = mysql!!.query("SELECT `uuid` FROM `region_user` WHERE `region_id`='$id' LIMIT ${page*45}, ${(page+1)*45};")?:return null
+
+        val list = mutableListOf<String>()
+
+        while (rs.next()){
+            list.add(rs.getString("uuid"))
+        }
+
+        rs.close()
+        mysql!!.close()
+
+        return list
+    }
+
+    @Synchronized
+    fun getPerms(id:Int,uuid:UUID): PermList {
+
+        val p = Bukkit.getOfflinePlayer(uuid)
+        val data = PermList()
+
+        if (map[Pair(uuid,id)]!=null){
+            return map[Pair(uuid,id)]!!
+        }
+
+        if (p.isOnline){
+            val pd = regionUserData[p]!![id]!!
+
+            data.allowAll = pd.allowAll
+            data.allowBlock = pd.allowBlock
+            data.allowDoor = pd.allowDoor
+            data.allowInv = pd.allowInv
+            return data
+        }
+
+        if (mysql == null){
+            mysql = MySQLManager(pl,"mreLoadUserData")
+        }
+
+        val rs = mysql!!.query("SELECT * FROM `region_user` WHERE `region_id`=$id AND `uuid`='$uuid';")!!
+
+        data.allowAll = rs.getInt("allow_all")==1
+        data.allowBlock = rs.getInt("allow_block")==1
+        data.allowInv = rs.getInt("allow_inv")==1
+        data.allowDoor = rs.getInt("allow_door")==1
+
+        return data
+    }
 
     ////////////////////////
     //リージョンを持っているユーザーがリージョンを管理するメニュー
@@ -129,7 +312,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         val list = ownerData[p]?:return
 
-        for (i in page*45 .. (page*45)+44){
+        for (i in page*45 .. (page+1)*45){
 
             if (list.size <=i)break
 
@@ -213,7 +396,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
             when(e.slot){
                 0->openOwnerSetting(p,0)
                 11->customRegionData(p, getId(item,pl).toInt())
-                13->customUserMenu(p, getId(item,pl).toInt())
+                13->customUserMenu(p, getId(item,pl).toInt(),0)
                 15-> {
                     p.closeInventory()
                     sendSuggest(p,"§e§lユーザー名を入力してください！","/mre adduser ${getId(item,pl)} ")
@@ -274,13 +457,77 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         }
 
-        if (name == customUserMenu){
+        if (name.contains(customUserMenu)){
 
+            e.isCancelled = true
+            val id = e.view.title.replace("$customUserMenu:","").toInt()
+
+            when(getId(item,pl)){
+
+                "back"->openOwnerSetting(p,0)
+                "next"->customUserMenu(p,id,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
+                "previous"->customUserMenu(p,id,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
+                else ->{
+                    customUserData(p,id, UUID.fromString(getId(item,pl)))
+                }
+            }
         }
 
         if (name == customUserData){
 
+            e.isCancelled = true
+            val id = getId(item,pl).split(",")[0].toInt()
+            val uuid = UUID.fromString(getId(item,pl).split(",")[1])
+
+            when(e.slot){
+                1->customPerm(p,id,uuid)
+                4->{}
+                7->{}
+            }
         }
+
+        if (name == perm){
+            e.isCancelled = true
+
+            val id = getId(item,pl).split(",")[0].toInt()
+            val uuid = UUID.fromString(getId(item,pl).split(",")[1])
+            val data = map[Pair(uuid,id)]?:PermList()
+
+            when(e.slot){
+
+                13->data.allowAll = item.type == Material.RED_STAINED_GLASS_PANE
+                22->data.allowBlock = item.type == Material.RED_STAINED_GLASS_PANE
+                31->data.allowDoor = item.type == Material.RED_STAINED_GLASS_PANE
+                40->data.allowInv = item.type == Material.RED_STAINED_GLASS_PANE
+
+            }
+
+            if (Bukkit.getOfflinePlayer(uuid).isOnline){
+                val pd = regionUserData[Bukkit.getPlayer(uuid)!!]!![id]!!
+
+                pd.allowAll = data.allowAll
+                pd.allowBlock = data.allowBlock
+                pd.allowDoor = data.allowDoor
+                pd.allowInv = data.allowInv
+
+                customPerm(p,id,uuid)
+                return
+            }
+
+            map[Pair(uuid,id)] = data
+            customPerm(p,id,uuid)
+        }
+
+        if (name == loading){
+            e.isCancelled = true
+        }
+    }
+
+    class PermList{
+        var allowAll = false
+        var allowBlock = false
+        var allowInv = false
+        var allowDoor = false
 
     }
 

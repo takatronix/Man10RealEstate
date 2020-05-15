@@ -65,7 +65,7 @@ class InventoryMenu(private val pl: Plugin) : Listener {
 
         val list = isLike[p]!!
 
-        for (i in page*45 .. (page*45)+45){
+        for (i in page*45 .. (page+1)*45){
 
             if (list.size <=i)break
 
