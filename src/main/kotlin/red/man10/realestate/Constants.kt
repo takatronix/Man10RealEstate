@@ -3,6 +3,7 @@ package red.man10.realestate
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -18,6 +19,9 @@ class Constants(val p:Plugin) {
 
     companion object {
         const val WAND_NAME = "範囲指定ワンド"
+
+        var prefix = "[§5Man10RealEstate§f]"
+
         //リージョンのデータ
         val regionData = ConcurrentHashMap<Int, RegionDatabase.RegionData>()
         //プレイヤーごとのリージョン情報
@@ -33,9 +37,6 @@ class Constants(val p:Plugin) {
 
 
         //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
-        // [例1] sendHoverText(player,"ここをクリック",null,"/say おはまん");
-        // [例2] sendHoverText(player,"カーソルをあわせて","ヘルプメッセージとか",null);
-        // [例3] sendHoverText(player,"カーソルをあわせてクリック","ヘルプメッセージとか","/say おはまん");
         fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
             //////////////////////////////////////////
             //      ホバーテキストとイベントを作成する
@@ -48,6 +49,7 @@ class Constants(val p:Plugin) {
             p.spigot().sendMessage(*message)
         }
 
+        //サジェストメッセージ
         fun sendSuggest(p: Player, text: String?, command: String?) {
 
             //////////////////////////////////////////
@@ -56,9 +58,21 @@ class Constants(val p:Plugin) {
             if (command != null) {
                 clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)
             }
+
             val message = ComponentBuilder(text).event(clickEvent).create()
             p.spigot().sendMessage(*message)
         }
+
+        //prefix付きのブロードキャストメッセージ
+        fun broadcast(message: String) {
+            Bukkit.broadcastMessage("$prefix $message")
+        }
+
+        //prefix付きのメッセージ
+        fun sendMessage(player: Player, message: String) {
+            player.sendMessage("$prefix $message")
+        }
+
 
     }
 }

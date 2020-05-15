@@ -14,9 +14,11 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
+import red.man10.realestate.Constants.Companion.broadcast
 import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
+import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.menu.OwnerMenu
 import red.man10.realestate.region.ProtectRegionEvent
@@ -27,7 +29,6 @@ import java.util.*
 
 
 class Plugin : JavaPlugin(), Listener {
-    var prefix = "[§5Man10RealEstate§f]"
 
     lateinit var regionEvent: RegionEvent
     lateinit var protectEvent: ProtectRegionEvent
@@ -38,6 +39,7 @@ class Plugin : JavaPlugin(), Listener {
     lateinit var invmain : InventoryMenu
     lateinit var ownerInv : OwnerMenu
 
+    lateinit var sqlThread : Thread
 
     var wandStartLocation: Location? = null
     var wandEndLocation: Location? = null
@@ -82,14 +84,19 @@ class Plugin : JavaPlugin(), Listener {
 
         mysql = MySQLManager(this,"mreRentThread")
 
-        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
+//        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
+//            while (true){
+//                rentTimer()
+//                Thread.sleep(3600000)
+//            }
+//        })
 
-
+        Thread(Runnable {
             while (true){
                 rentTimer()
                 Thread.sleep(3600000)
             }
-        })
+        }).start()
 
         RegionDatabase(this).loadRegion()
 
@@ -99,17 +106,13 @@ class Plugin : JavaPlugin(), Listener {
     }
 
     override fun onDisable() { // Plugin shutdown logic
+
+        sqlThread.interrupt()
     }
 
-    fun broadcast(message: String) {
-        Bukkit.broadcastMessage("$prefix $message")
-    }
-    fun sendMessage(player: Player, message: String) {
-        player.sendMessage("$prefix $message")
-    }
     @EventHandler
     fun onPlayerJoin(e: PlayerJoinEvent) {
-        this.broadcast("${e.player.displayName} is joined.")
+        broadcast("${e.player.displayName} is joined.")
     }
 
 
@@ -184,7 +187,7 @@ class Plugin : JavaPlugin(), Listener {
     //dbのクエリキュー
     ////////////////////////
     fun mysqlQueue(){
-        Thread(Runnable {
+        sqlThread = Thread(Runnable {
             try{
                 val sql = MySQLManager(this,"man10realestate queue")
                 while (true){
@@ -194,7 +197,8 @@ class Plugin : JavaPlugin(), Listener {
             }catch (e:InterruptedException){
 
             }
-        }).start()
+        })
+        sqlThread.start()
     }
 
     /////////////////////////////////////
@@ -236,7 +240,9 @@ class Plugin : JavaPlugin(), Listener {
                     vault.withdraw(uuid,data.rent)
 
                     pd.status = "Share"
-                    db.addProfit(data.owner_uuid,data.rent)
+                    if (data.owner_uuid != null){
+                        db.addProfit(data.owner_uuid!!,data.rent)
+                    }
                 }
 
                 db.saveMap(p,pd,id)
@@ -253,7 +259,9 @@ class Plugin : JavaPlugin(), Listener {
 
             vault.withdraw(uuid,data.rent)
             mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$uuid' AND region_id=$id;")
-            db.addProfit(data.owner_uuid,data.rent)
+            if (data.owner_uuid != null){
+                db.addProfit(data.owner_uuid!!,data.rent)
+            }
 
         }
         rs.close()

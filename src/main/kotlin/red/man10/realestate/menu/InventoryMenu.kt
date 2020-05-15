@@ -10,14 +10,16 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Constants.Companion.isLike
-import red.man10.realestate.Constants.Companion.ownerData
+import red.man10.realestate.Constants.Companion.prefix
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Plugin
+import red.man10.realestate.region.RegionDatabase
+import javax.naming.Name
 
 class InventoryMenu(private val pl: Plugin) : Listener {
 
-    val mainMenu = "${pl.prefix}§a§lメインメニュー"
-    val bookmark = "${pl.prefix}§a§lいいねしたリスト"
+    val mainMenu = "${prefix}§a§lメインメニュー"
+    val bookmark = "${prefix}§a§lいいねしたリスト"
 
 
     companion object{
@@ -57,13 +59,13 @@ class InventoryMenu(private val pl: Plugin) : Listener {
     //////////////////////////
     //いいねした土地の確認
     //////////////////////////
-    fun openBookMark(p:Player,first: Int){
+    fun openBookMark(p:Player, page: Int){
 
         val inv = Bukkit.createInventory(null,54,bookmark)
 
         val list = isLike[p]!!
 
-        for (i in first .. first+44){
+        for (i in page*45 .. (page*45)+45){
 
             if (list.size <=i)break
 
@@ -71,12 +73,13 @@ class InventoryMenu(private val pl: Plugin) : Listener {
 
             val icon = IS(pl,Material.PAPER,d.name,mutableListOf(
                     "§e§lID:${i}",
-                    "§b§lOwner:${Bukkit.getOfflinePlayer(d.owner_uuid).name}",
+                    "§b§lOwner:${RegionDatabase.getOwner(d)}",
                     "§a§lStatus:${d.status}"
             ),list[i].toString())
 
             inv.addItem(icon)
         }
+
 
         val back = IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l戻る", mutableListOf(),"back")
         for (i in 45..53){
@@ -86,14 +89,24 @@ class InventoryMenu(private val pl: Plugin) : Listener {
         if (inv.getItem(44) != null){
 
             val next = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ", mutableListOf(),"next")
+            val meta = next.itemMeta
+            //クリックしたら開くページを保存
+            meta.persistentDataContainer.set(NamespacedKey(pl,"page"), PersistentDataType.INTEGER,page+1)
+            next.itemMeta = meta
+
             inv.setItem(51,next)
             inv.setItem(52,next)
             inv.setItem(53,next)
 
         }
 
-        if (first!=0){
+        if (page!=0){
             val previous = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ", mutableListOf(),"previous")
+            val meta = previous.itemMeta
+            //クリックしたら開くページを保存
+            meta.persistentDataContainer.set(NamespacedKey(pl,"page"), PersistentDataType.INTEGER,page-1)
+            previous.itemMeta = meta
+
             inv.setItem(45,previous)
             inv.setItem(46,previous)
             inv.setItem(47,previous)
@@ -103,7 +116,6 @@ class InventoryMenu(private val pl: Plugin) : Listener {
         p.openInventory(inv)
 
     }
-
 
     @EventHandler
     fun invEvent(e:InventoryClickEvent){
@@ -127,14 +139,12 @@ class InventoryMenu(private val pl: Plugin) : Listener {
             e.isCancelled = true
             when(getId(item,pl)){
 
-                //TODO:ページ式に変更
                 "back"->openMainMenu(p)
-                "next"->openBookMark(p,getId(e.inventory.getItem(44)!!,pl).toInt()+1)
-                "previous"->openBookMark(p,getId(e.inventory.getItem(44)!!,pl).toInt()-45)
+                "next"->openBookMark(p,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
+                "previous"->openBookMark(p,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
                 else ->{
                     p.performCommand("mre tp ${getId(item,pl).toInt()}")
                 }
-
             }
             return
         }

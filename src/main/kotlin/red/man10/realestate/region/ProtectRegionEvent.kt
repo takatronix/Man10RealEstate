@@ -11,6 +11,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
+import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Plugin
 
 class ProtectRegionEvent(private val pl:Plugin):Listener{
@@ -21,7 +22,7 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         val p = e.player
 
         if (!canBreak(p,e.block.location,e)){
-            pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを破壊する権限がありません！")
+            sendMessage(p,"§4§lあなたにはこの場所でブロックを破壊する権限がありません！")
             e.isCancelled = true
         }
     }
@@ -31,7 +32,7 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         val p = e.player
 
         if (!canBreak(p,e.block.location,e)){
-            pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
+            sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
             e.isCancelled = true
         }
     }
@@ -44,7 +45,7 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         val p = e.player
 
         if (!canBreak(p,e.clickedBlock!!.location,e)){
-            pl.sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
         }
     }
@@ -54,7 +55,7 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         val p = e.player as Player
 
         if (!canBreak(p,p.location,e)){
-            pl.sendMessage(p,"§4§lあなたにはこの場所でインベントリを開く権限がありません！")
+            sendMessage(p,"§4§lあなたにはこの場所でインベントリを開く権限がありません！")
             e.isCancelled = true
         }
 

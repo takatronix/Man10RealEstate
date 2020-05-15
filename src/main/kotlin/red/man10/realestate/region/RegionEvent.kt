@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import red.man10.realestate.Constants
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.sendHoverText
+import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Plugin
 import java.lang.Exception
 
@@ -52,7 +53,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
             lore.add("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
         }
 
-        pl.sendMessage(p,"§e§lSet Start:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+        sendMessage(p,"§e§lSet Start:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
 
         pl.wandStartLocation = loc.clone()
 
@@ -90,7 +91,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
         }else{
             lore.add("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
         }
-        pl.sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+        sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
         //      TODO:二人同時に編集できないのをいつか直す
         pl.wandEndLocation = loc.clone()
 
@@ -118,7 +119,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
             try {
                 id = lines[0].replace("mre:","").toInt()
             }catch (e:Exception){
-                pl.sendMessage(p,"§3§l入力方法：”mre:<id>”")
+                sendMessage(p,"§3§l入力方法：”mre:<id>”")
                 return
             }
 
@@ -126,10 +127,10 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
             e.setLine(0,"§eID:$id")
             e.setLine(1,data.name)
-            e.setLine(2,"§d§l${Bukkit.getOfflinePlayer(data.owner_uuid).name}")
+            e.setLine(2,"§d§l${RegionDatabase.getOwner(data)}")
             e.setLine(3,"§b§l${data.status}")
 
-            pl.sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
+            sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
         }
     }
 
@@ -164,14 +165,14 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         val p = e.player
 
-        pl.sendMessage(p,"§a§l==========${data.name}§a§lの情報==========")
+        sendMessage(p,"§a§l==========${data.name}§a§lの情報==========")
 
-        pl.sendMessage(p,"§a土地名:${data.name}")
-        pl.sendMessage(p,"§a現在のステータス:${data.status}")
-        pl.sendMessage(p,"§a現在のオーナー:${Bukkit.getOfflinePlayer(data.owner_uuid).name}")
-        pl.sendMessage(p,"§a値段:${data.price}")
+        sendMessage(p,"§a土地名:${data.name}")
+        sendMessage(p,"§a現在のステータス:${data.status}")
+        sendMessage(p,"§a現在のオーナー:${RegionDatabase.getOwner(data)}")
+        sendMessage(p,"§a値段:${data.price}")
 
-        pl.sendMessage(p,"§a§l==========================================")
+        sendMessage(p,"§a§l==========================================")
 
         sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
         sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")

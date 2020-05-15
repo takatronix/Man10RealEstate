@@ -2,12 +2,16 @@ package red.man10.realestate.menu
 
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Constants
 import red.man10.realestate.Constants.Companion.ownerData
+import red.man10.realestate.Constants.Companion.prefix
+import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Constants.Companion.sendSuggest
 import red.man10.realestate.Plugin
 import red.man10.realestate.menu.InventoryMenu.Companion.IS
@@ -15,14 +19,14 @@ import red.man10.realestate.menu.InventoryMenu.Companion.getId
 
 class OwnerMenu(val pl : Plugin) : Listener{
 
-    val regionCustomMenu = "${pl.prefix}§a§l土地の設定"
-    val ownerMenu = "${pl.prefix}§a§lオーナーメニュー"
-    val customRegionData = "${pl.prefix}§a§l土地の詳細設定"
-    val customUserMenu = "${pl.prefix}§a§l住人の設定"
-    val customUserData = "${pl.prefix}§a§l住人の設定"
-    val changeStatus = "${pl.prefix}§a§lステータスの変更"
-    val changeRent = "${pl.prefix}§a§l賃料設定"
-    val changeRentSpan = "${pl.prefix}§a§lスパン設定"
+    val regionCustomMenu = "${prefix}§a§l土地の設定"
+    val ownerMenu = "${prefix}§a§lオーナーメニュー"
+    val customRegionData = "${prefix}§a§l土地の詳細設定"
+    val customUserMenu = "${prefix}§a§l住人の設定"
+    val customUserData = "${prefix}§a§l住人の設定"
+    val changeStatus = "${prefix}§a§lステータスの変更"
+    val changeRent = "${prefix}§a§l賃料設定"
+    val changeRentSpan = "${prefix}§a§lスパン設定"
 
 
     //リージョンの管理メニュ
@@ -31,13 +35,13 @@ class OwnerMenu(val pl : Plugin) : Listener{
         val data = Constants.regionData[id]
 
         if (data == null){
-            pl.sendMessage(p,"§e§l存在しない土地です")
+            sendMessage(p,"§e§l存在しない土地です")
             p.closeInventory()
             return
         }
 
         if (data.owner_uuid != p.uniqueId){
-            pl.sendMessage(p,"§e§lあなたはこの土地のオーナーではありません")
+            sendMessage(p,"§e§lあなたはこの土地のオーナーではありません")
             p.closeInventory()
             return
         }
@@ -119,13 +123,13 @@ class OwnerMenu(val pl : Plugin) : Listener{
     ////////////////////////
     //リージョンを持っているユーザーがリージョンを管理するメニュー
     ////////////////////////
-    fun openOwnerSetting(p:Player,first:Int){
+    fun openOwnerSetting(p:Player, page:Int){
 
         val inv = Bukkit.createInventory(null,54,ownerMenu)
 
         val list = ownerData[p]?:return
 
-        for (i in first .. first+44){
+        for (i in page*45 .. (page*45)+44){
 
             if (list.size <=i)break
 
@@ -149,14 +153,27 @@ class OwnerMenu(val pl : Plugin) : Listener{
         if (inv.getItem(44) != null){
 
             val next = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ", mutableListOf(),"next")
+
+            val meta = next.itemMeta
+            //クリックしたら開くページを保存
+            meta.persistentDataContainer.set(NamespacedKey(pl,"page"), PersistentDataType.INTEGER,page-1)
+            next.itemMeta = meta
+
             inv.setItem(51,next)
             inv.setItem(52,next)
             inv.setItem(53,next)
 
         }
 
-        if (first!=0){
+        if (page!=0){
             val previous = IS(pl,Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ", mutableListOf(),"previous")
+
+            val meta = previous.itemMeta
+            //クリックしたら開くページを保存
+            meta.persistentDataContainer.set(NamespacedKey(pl,"page"), PersistentDataType.INTEGER,page-1)
+            previous.itemMeta = meta
+
+
             inv.setItem(45,previous)
             inv.setItem(46,previous)
             inv.setItem(47,previous)
@@ -181,10 +198,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
             e.isCancelled = true
             when(getId(item,pl)){
 
-                //TODO:ページ式に変更
                 "back"->pl.invmain.openMainMenu(p)
-                "next"->openOwnerSetting(p,getId(e.inventory.getItem(44)!!,pl).toInt()+1)
-                "previous"->openOwnerSetting(p,getId(e.inventory.getItem(44)!!,pl).toInt()-45)
+                "next"->openOwnerSetting(p,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
+                "previous"->openOwnerSetting(p,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
                 else ->{
                     regionCustomMenu(p, getId(item,pl).toInt())
                 }
@@ -198,7 +214,10 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 0->openOwnerSetting(p,0)
                 11->customRegionData(p, getId(item,pl).toInt())
                 13->customUserMenu(p, getId(item,pl).toInt())
-                15-> sendSuggest(p,"","mre adduser ${getId(item,pl)} ")
+                15-> {
+                    p.closeInventory()
+                    sendSuggest(p,"§e§lユーザー名を入力してください！","/mre adduser ${getId(item,pl)} ")
+                }
             }
         }
 
@@ -208,10 +227,16 @@ class OwnerMenu(val pl : Plugin) : Listener{
             when(e.slot){
                 0->regionCustomMenu(p, getId(item,pl).toInt())                              //オーナーメニュに戻る
                 10->changeStatus(p, getId(item,pl).toInt())                                 //ステータスの変更
-                13->sendSuggest(p,"","/mre changeprice ${getId(item, pl)} ") // 料金変更
+                13->{
+                    p.closeInventory()
+                    sendSuggest(p,"§e§l販売する料金を入力してください！","/mre changeprice ${getId(item, pl)} ")
+                } // 料金変更
                 16->p.performCommand("mre settp ${getId(item, pl)}")              //テレポート地点変更
                 38->changeRentSetting(p, getId(item,pl).toInt())                              //賃料設定
-                42->sendSuggest(p,"","/mre changeowner ${getId(item, pl)} ") //オーナー変更
+                42->{
+                    p.closeInventory()
+                    sendSuggest(p,"§e§l変更するオーナーの名前を入力してください！","/mre changeowner ${getId(item, pl)} ")
+                } //オーナー変更
             }
         }
 
@@ -229,7 +254,10 @@ class OwnerMenu(val pl : Plugin) : Listener{
         if (name == changeRent){
             e.isCancelled = true
             when(e.slot){
-                2-> sendSuggest(p,"","mre rent ${getId(item, pl)} ")
+                2-> {
+                    p.closeInventory()
+                    sendSuggest(p,"§e§l賃料を入力してください！","/mre rent ${getId(item, pl)} ")
+                }
                 7->changeSpan(p,getId(item, pl).toInt())
             }
 

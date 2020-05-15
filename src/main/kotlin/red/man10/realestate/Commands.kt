@@ -8,9 +8,11 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import red.man10.realestate.Constants.Companion.WAND_NAME
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendHoverText
+import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionUserDatabase
@@ -42,16 +44,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 help(sender,false)
             }
 
-            //範囲指定ワンド取得
-            if (cmd == "wand"){
-                val wand = ItemStack(Material.STICK)
-                val meta = wand.itemMeta
-                meta.setDisplayName(Constants.WAND_NAME)
-                wand.itemMeta = meta
-                sender.inventory.addItem(wand)
-                return true
-            }
-
             //onSaleの土地を購入する
             if (cmd == "buy"){
 
@@ -65,9 +57,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val data = regionData[args[1].toInt()]?:return true
 
-                pl.sendMessage(sender,"§3§l料金：${data.price} 名前：${data.name}" +
-                        " §a§l現在のオーナー名：${Bukkit.getOfflinePlayer(data.owner_uuid).name}")
-                pl.sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
+                sendMessage(sender,"§3§l料金：${data.price} 名前：${data.name}" +
+                        " §a§l現在のオーナー名：${RegionDatabase.getOwner(data)}")
+                sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
                 sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy ${args[1]}")
 
                 return true
@@ -94,7 +86,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                     val profit = pdb.getProfit(sender)
 
-                    pl.sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
+                    sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
 
                     if (profit >0){
                         sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n$profit","mre withdraw")
@@ -103,9 +95,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //共同者を追加する ex)/mre adduser [id] [user] [status]
+            //共同者を追加する ex)/mre adduser [id] [user]
             //def: type:2 status:Share
-            if (cmd == "adduser" && args.size == 4){
+            if (cmd == "adduser" && args.size == 3){
 
                 val id = args[1].toInt()
 
@@ -115,15 +107,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val p = Bukkit.getPlayer(args[2])?:return false
 
-                pdb.createUserData(id,p,args[4])
-                pl.sendMessage(sender,"§e§l${args[2]}§a§lを居住者に追加しました！")
+                pdb.createUserData(id,p)
+                sendMessage(sender,"§e§l${args[2]}§a§lを居住者に追加しました！")
 
-                pl.sendMessage(p,"§e§lあなたは居住者に追加されました")
-                pl.sendMessage(p,"§a§l=================土地の情報==================")
-                pl.sendMessage(p,"§a§lオーナー：${Bukkit.getPlayer(data.owner_uuid)!!.name}")
-                pl.sendMessage(p,"§a§l土地の名前：${data.name}")
-                pl.sendMessage(p,"§a§l土地のステータス：${data.status}")
-                pl.sendMessage(p,"§a§l===========================================")
+                sendMessage(p,"§e§lあなたは居住者に追加されました")
+                sendMessage(p,"§a§l=================土地の情報==================")
+                sendMessage(p,"§a§lオーナー：${RegionDatabase.getOwner(data)}")
+                sendMessage(p,"§a§l土地の名前：${data.name}")
+                sendMessage(p,"§a§l土地のステータス：${data.status}")
+                sendMessage(p,"§a§l===========================================")
                 return true
 
             }
@@ -136,7 +128,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 if (!hasRegionAdmin(sender,id)){ return true }
 
                 pdb.removeUserData(id,Bukkit.getPlayer(args[2])?:return false)
-                pl.sendMessage(sender,"§e§l削除完了！")
+                sendMessage(sender,"§e§l削除完了！")
                 return true
             }
 
@@ -152,7 +144,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         data.teleport[3].toFloat(),
                         data.teleport[4].toFloat()
                 ))
-                pl.sendMessage(sender,"§a§lテレポートしました！")
+                sendMessage(sender,"§a§lテレポートしました！")
                 return true
             }
 
@@ -198,7 +190,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 pdb.saveMap(p,pd,id)
                 pdb.saveUserData(p,args[1].toInt())
 
-                pl.sendMessage(sender,"§e§l設定完了！")
+                sendMessage(sender,"§e§l設定完了！")
 
             }
 
@@ -217,7 +209,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         loc.pitch.toDouble()
                 ))
 
-                pl.sendMessage(sender,"§e§l登録完了！")
+                sendMessage(sender,"§e§l登録完了！")
                 return true
             }
 
@@ -226,9 +218,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
-                RegionDatabase(pl).setRegionOwner(args[1].toInt(),Bukkit.getPlayer(args[1])!!)
+                db.setRegionOwner(args[1].toInt(),Bukkit.getPlayer(args[1])!!)
 
-                pl.sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
+                sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
                 return true
             }
 
@@ -237,11 +229,11 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
                 if (sender.hasPermission("mre.op") && args[2]=="Lock"){
-                    pl.sendMessage(sender,"§3§lリージョンのロックは運営しか出来ません！")
+                    sendMessage(sender,"§3§lリージョンのロックは運営しか出来ません！")
                     return true
                 }
 
-                pl.sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
+                sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
                 return true
             }
 
@@ -251,7 +243,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 db.setPrice(args[1].toInt(),args[2].toDouble())
 
-                pl.sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
+                sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
                 return true
             }
 
@@ -273,15 +265,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val wand = sender.inventory.itemInMainHand
 
-                if (!wand.hasItemMeta() || wand.itemMeta.displayName != Constants.WAND_NAME){
-                    pl.sendMessage(sender,"${Constants.WAND_NAME}§e§lを持ってください！")
+                if (!wand.hasItemMeta() || wand.itemMeta.displayName != WAND_NAME){
+                    sendMessage(sender,"${WAND_NAME}§e§lを持ってください！")
                     return true
                 }
 
                 val lore = wand.lore
 
                 if (lore == null || wand.lore!!.size != 5){
-                    pl.sendMessage(sender,"§e§fの範囲指定ができていません！")
+                    sendMessage(sender,"§e§fの範囲指定ができていません！")
                     return true
                 }
 
@@ -290,7 +282,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 data.name = args[1]
                 data.status = args[2]
 
-                data.owner_uuid = Bukkit.getPlayer(lore[0].replace("§aOwner:§f",""))!!.uniqueId
+                data.owner_uuid = null
                 data.server = lore[1].replace("§aServer:§f","")
                 data.world = lore[2].replace("§aWorld:§f","")
 
@@ -317,7 +309,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
-                    pl.sendMessage(sender,"§a§l現在登録中です・・・")
+                    sendMessage(sender,"§a§l現在登録中です・・・")
 
                     val mysql = MySQLManager(pl,"mre")
 
@@ -339,8 +331,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                     db.registerRegion(data,id)
 
-                    pl.sendMessage(sender,"§a§l登録完了！")
-                    pl.sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
+                    sendMessage(sender,"§a§l登録完了！")
+                    sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
 
                 })
 
@@ -361,7 +353,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 if (args.size == 2){
                     for (i in args[1].toInt() .. args[1].toInt()+15){
                         if (i >= regionData.size)break
-                        pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
+                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
                     }
 
                     sendHoverText(sender,"§e§l[NEXT]","","mre list ${args[1].toInt()+16}")
@@ -371,13 +363,24 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     for (i in 1 .. 16){
                         if (i >= regionData.size)break
                         if (regionData[i] == null)continue
-                        pl.sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
+                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
                     }
                     sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
                 }
 
                 return true
             }
+
+            //範囲指定ワンド取得
+            if (cmd == "wand"){
+                val wand = ItemStack(Material.STICK)
+                val meta = wand.itemMeta
+                meta.setDisplayName(WAND_NAME)
+                wand.itemMeta = meta
+                sender.inventory.addItem(wand)
+                return true
+            }
+
 
             //リージョンデータのリロード
             if (cmd == "reload"){
@@ -388,14 +391,14 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         pdb.loadUserData(p)
                     }
 
-                    pl.sendMessage(sender,"§e§lリロード完了")
+                    sendMessage(sender,"§e§lリロード完了")
 
                 })
             }
 
             if (cmd == "debug"){
                 pl.debugMode = !pl.debugMode
-                pl.sendMessage(sender,pl.debugMode.toString())
+                sendMessage(sender,pl.debugMode.toString())
             }
 
             if (cmd == "rentTimer"){
@@ -411,27 +414,27 @@ class Commands (private val pl :Plugin):CommandExecutor{
     fun help(p:Player,op:Boolean){
 
         if (!op){
-            pl.sendMessage(p,"§e§l/mre wand : 範囲指定用のワンドを取得")
-            pl.sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
-            pl.sendMessage(p,"§e§l/mre buy <id> : 指定idが販売中なら購入します")
-            pl.sendMessage(p,"§e§l/mre adduser <id> <user> <status> : リージョンにユーザーを追加します")
-            pl.sendMessage(p,"§e§l/mre removeuser <id> <user> : リージョンのユーザーを削除します")
-            pl.sendMessage(p,"§e§l/mre tp <id> : 指定したidにテレポートします")
-            pl.sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")
-            pl.sendMessage(p,"§e§l/mre span <id> <span> : 賃料を支払うスパンを設定します 0:月 1:週 2:日")
-            pl.sendMessage(p,"§e§l/mre settp <id> : 現在地点をテレポート地点に設定します")
-            pl.sendMessage(p,"§e§l/mre changestatus <id> <status> : 指定idのステータスを変更します")
-            pl.sendMessage(p,"§e§l/mre changeprice <id> <price> : 指定idの金額を変更します")
-            pl.sendMessage(p,"§e§l/mre changeowner <id> <owner> : 指定idのオーナーを変更します")
+//            sendMessage(p,"§e§l/mre good <id> : 指定idに評価(いいね！)します")
+//            sendMessage(p,"§e§l/mre buy <id> : 指定idが販売中なら購入します")
+//            sendMessage(p,"§e§l/mre adduser <id> <user> : リージョンにユーザーを追加します")
+//            sendMessage(p,"§e§l/mre removeuser <id> <user> : リージョンのユーザーを削除します")
+//            sendMessage(p,"§e§l/mre tp <id> : 指定したidにテレポートします")
+//            sendMessage(p,"§e§l/mre rent <id> <rent> : リージョンの賃料を設定します")
+//            sendMessage(p,"§e§l/mre span <id> <span> : 賃料を支払うスパンを設定します 0:月 1:週 2:日")
+//            sendMessage(p,"§e§l/mre settp <id> : 現在地点をテレポート地点に設定します")
+//            sendMessage(p,"§e§l/mre changestatus <id> <status> : 指定idのステータスを変更します")
+//            sendMessage(p,"§e§l/mre changeprice <id> <price> : 指定idの金額を変更します")
+//            sendMessage(p,"§e§l/mre changeowner <id> <owner> : 指定idのオーナーを変更します")
         }else{
             if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
-            pl.sendMessage(p,"§e§l==============================================")
-            pl.sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
-            pl.sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
-            pl.sendMessage(p,"§e§l範囲指定済みの${Constants.WAND_NAME}§e§lを持ってコマンドを実行してください")
-            pl.sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
-            pl.sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
-            pl.sendMessage(p,"§e§l/mreop reload : 再読み込みをします")
+            sendMessage(p,"§e§l==============================================")
+            sendMessage(p,"§e§l/mreop wand : 範囲指定用のワンドを取得")
+            sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
+            sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
+            sendMessage(p,"§e§l範囲指定済みの${WAND_NAME}§e§lを持ってコマンドを実行してください")
+            sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
+            sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
+            sendMessage(p,"§e§l/mreop reload : 再読み込みをします")
         }
     }
 

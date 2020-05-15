@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.regionData
+import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Constants.Companion.worldRegion
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
@@ -25,8 +26,8 @@ class RegionDatabase(private val pl: Plugin) {
                 "VALUES (" +
                 "'${data.server}', " +
                 "'${data.world}', " +
-                "'${data.owner_uuid}', " +
-                "'${Bukkit.getPlayer(data.owner_uuid)!!.name}' ," +
+                "'${null}', " +
+                "'${null}' ," +
                 "'${data.name}', " +
                 "'${data.status}', " +
                 "'${data.teleport[0]}', "+
@@ -123,35 +124,37 @@ class RegionDatabase(private val pl: Plugin) {
 
         val data = regionData[id]?:when{
             else -> {
-                pl.sendMessage(user,"§3§l購入失敗！ 存在しないidです！")
+                sendMessage(user,"§3§l購入失敗！ 存在しないidです！")
                 return
             }
         }
 
         if (user.uniqueId == data.owner_uuid){
-            pl.sendMessage(user,"§3§lあなたはこのリージョンのオーナーです！")
+            sendMessage(user,"§3§lあなたはこのリージョンのオーナーです！")
             return
         }
 
         if (data.status != "OnSale"){
-            pl.sendMessage(user,"§3§lこのリージョンは販売中ではありません")
+            sendMessage(user,"§3§lこのリージョンは販売中ではありません")
             return
         }
 
         if (pl.vault.getBalance(user.uniqueId) < data.price){
-            pl.sendMessage(user,"§3§l所持金が足りません！")
+            sendMessage(user,"§3§l所持金が足りません！")
             return
         }
 
         //旧オーナーに所持金を追加
         pl.vault.withdraw(user.uniqueId,data.price)
-        RegionUserDatabase(pl).addProfit(data.owner_uuid,data.price)
+        if (data.owner_uuid != null){
+            RegionUserDatabase(pl).addProfit(data.owner_uuid!!,data.price)
+        }
 
 
         setRegionOwner(id,user)
         setRegionStatus(id,"Protected")
 
-        pl.sendMessage(user,"§a§l購入完了、土地の保護がされました！")
+        sendMessage(user,"§a§l購入完了、土地の保護がされました！")
     }
 
     //リージョンの削除
@@ -224,7 +227,8 @@ class RegionDatabase(private val pl: Plugin) {
 
         mysqlQueue.add("UPDATE region t SET " +
                 "t.owner_uuid = '${data.owner_uuid}', " +
-                "t.owner_name = '${Bukkit.getOfflinePlayer(data.owner_uuid).name}', " +
+                "t.owner_name = '${if (data.owner_uuid == null)null
+                else{Bukkit.getOfflinePlayer(data.owner_uuid!!).name}}', " +
                 "t.x = ${data.teleport[0]}," +
                 " t.y = ${data.teleport[1]}, " +
                 "t.z = ${data.teleport[2]}, " +
@@ -239,6 +243,19 @@ class RegionDatabase(private val pl: Plugin) {
         return true
     }
 
+    companion object{
+        fun getOwner(data:RegionData):String{
+
+            val uuid = data.owner_uuid
+
+            return if (uuid == null){
+                "Admin"
+            }else{
+                Bukkit.getOfflinePlayer(uuid).name!!
+            }
+        }
+
+    }
 
     ///////////////////////////////
     //リージョンのデータをまとめたclass
@@ -246,7 +263,7 @@ class RegionDatabase(private val pl: Plugin) {
     class RegionData{
 
         var name = "RegionName"
-        var owner_uuid : UUID = UUID.randomUUID()
+        var owner_uuid : UUID? = UUID.randomUUID()
         var status = "OnSale"
 
         var world = "world"

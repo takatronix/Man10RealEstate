@@ -7,6 +7,7 @@ import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
+import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import java.util.*
@@ -19,7 +20,7 @@ class RegionUserDatabase (private val pl:Plugin){
     //////////////////////////////////
     //ユーザーデータを新規作成
     //////////////////////////////////
-    fun createUserData(regionId:Int,user:Player,status: String){
+    fun createUserData(regionId:Int,user:Player){
 
         val data = RegionUserData()
 
@@ -34,11 +35,11 @@ class RegionUserDatabase (private val pl:Plugin){
                 " '${user.uniqueId}'," +
                 " '${user.name}'," +
                 " now()," +
-                " '$status');"
+                " 'Share');"
 
         mysqlQueue.add(sql)
 
-        data.status = status
+        data.status = "Share"
 
         saveMap(user,data,regionId)
     }
@@ -86,7 +87,7 @@ class RegionUserDatabase (private val pl:Plugin){
             }
 
             if (data.status=="Lock"){
-                pl.sendMessage(p,"§4§lLockされたリージョン:${d.name}")
+                sendMessage(p,"§4§lLockされたリージョン:${d.name}")
             }
         }
 
@@ -184,7 +185,7 @@ class RegionUserDatabase (private val pl:Plugin){
         val p = Bukkit.getOfflinePlayer(uuid)
 
         if (p.isOnline && p.player != null){
-            pl.sendMessage(p.player!!,"§e§l入金情報:$${amount}")
+            sendMessage(p.player!!,"§e§l入金情報:$${amount}")
         }
         mysqlQueue.add("INSERT INTO user_index (uuid, player, profit, type, received, date) " +
                 "VALUES ('$uuid', '${p.name}', '$amount', DEFAULT, DEFAULT, DEFAULT)")
@@ -198,7 +199,7 @@ class RegionUserDatabase (private val pl:Plugin){
         val data = regionData[id]?:return
 
         if (data.owner_uuid == p.uniqueId){
-            pl.sendMessage(p,"§3§lあなたはオーナーなのでいいね出来ません！")
+            sendMessage(p,"§3§lあなたはオーナーなのでいいね出来ません！")
             return
         }
 
@@ -209,16 +210,16 @@ class RegionUserDatabase (private val pl:Plugin){
 
             list.add(id)
             isLike[p] = list
-            pl.sendMessage(p,"§a§lいいねしました！")
+            sendMessage(p,"§a§lいいねしました！")
             return
         }
 
         if (list.contains(id)){
             list.remove(id)
-            pl.sendMessage(p,"§a§aいいね解除しました！")
+            sendMessage(p,"§a§aいいね解除しました！")
         }else{
             list.add(id)
-            pl.sendMessage(p,"§a§lいいねしました！")
+            sendMessage(p,"§a§lいいねしました！")
         }
 
         isLike[p] = list
