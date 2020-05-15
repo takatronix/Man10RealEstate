@@ -20,6 +20,7 @@ import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import red.man10.realestate.menu.InventoryMenu.Companion.IS
 import red.man10.realestate.menu.InventoryMenu.Companion.getId
+import red.man10.realestate.region.RegionUserDatabase
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -482,7 +483,15 @@ class OwnerMenu(val pl : Plugin) : Listener{
             when(e.slot){
                 1->customPerm(p,id,uuid)
                 4->{}
-                7->{}
+                7->{
+                    if (Bukkit.getOfflinePlayer(uuid).isOnline){
+                        RegionUserDatabase(pl).removeUserData(id,Bukkit.getOfflinePlayer(uuid).player!!)
+                    }else{
+                        RegionUserDatabase(pl).removeUserData(id,uuid)
+                    }
+                    p.closeInventory()
+                    sendMessage(p,"削除しました")
+                }
             }
         }
 

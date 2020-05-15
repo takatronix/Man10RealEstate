@@ -52,6 +52,13 @@ class RegionUserDatabase (private val pl:Plugin){
         mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$regionId' AND `uuid`='${user.uniqueId}';")
     }
 
+    ///////////////////////
+    //ユーザーデータを削除
+    ///////////////////////
+    fun removeUserData(regionId: Int,user: UUID){
+        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$regionId' AND `uuid`='${user}';")
+    }
+
 
     /////////////////////////////
     //ユーザーデータを読み込み
