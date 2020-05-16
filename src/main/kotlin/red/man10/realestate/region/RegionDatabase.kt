@@ -3,6 +3,7 @@ package red.man10.realestate.region
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import red.man10.realestate.Constants.Companion.mysqlQueue
+import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Constants.Companion.worldRegion
@@ -17,10 +18,10 @@ class RegionDatabase(private val pl: Plugin) {
     /////////////////////////////////
     //リージョンデータを新規で登録
     /////////////////////////////////
-    fun registerRegion(data:RegionData,id:Int){
+    fun registerRegion(data:RegionData):Int{
 
         val sql = "INSERT INTO `region` " +
-                "(`server`, `world`, `owner_uuid`, `owner_name`, `name`, `status`, " +
+                "(`server`, `world`, `owner_uuid`, `owner_name`, `name`, `status`, `price`, " +
                 "`x`, `y`, `z`, `pitch`, `yaw`, " +
                 "`sx`, `sy`, `sz`, `ex`, `ey`, `ez`) " +
                 "VALUES (" +
@@ -30,6 +31,7 @@ class RegionDatabase(private val pl: Plugin) {
                 "'${null}' ," +
                 "'${data.name}', " +
                 "'${data.status}', " +
+                "'${data.price}', " +
                 "'${data.teleport[0]}', "+
                 "'${data.teleport[1]}', "+
                 "'${data.teleport[2]}', "+
@@ -42,7 +44,17 @@ class RegionDatabase(private val pl: Plugin) {
                 "'${data.endCoordinate.second}', " +
                 "'${data.endCoordinate.third}');"
 
-        mysqlQueue.add(sql)
+        val mysql = MySQLManager(pl,"registerRegion")
+
+        mysql.execute(sql)
+
+        val rs = mysql.query("SELECT t.* FROM region t ORDER BY id DESC LIMIT 501")?:return -1
+        rs.next()
+
+        val id = rs.getInt(1)
+
+        rs.close()
+        mysql.close()
 
         regionData[id] = data
 
@@ -50,6 +62,7 @@ class RegionDatabase(private val pl: Plugin) {
         list.add(id)
         worldRegion[data.world] = list
 
+        return id
     }
 
 
@@ -92,6 +105,10 @@ class RegionDatabase(private val pl: Plugin) {
 
     //オーナーの変更
     fun setRegionOwner(id:Int,owner: Player){
+
+        val list = ownerData[owner]?: mutableListOf()
+        list.add(id)
+        ownerData[owner] = list
 
         val data = regionData[id]?:return
         data.owner_uuid = owner.uniqueId
@@ -146,6 +163,7 @@ class RegionDatabase(private val pl: Plugin) {
 
         //旧オーナーに所持金を追加
         pl.vault.withdraw(user.uniqueId,data.price)
+
         if (data.owner_uuid != null){
             RegionUserDatabase(pl).addProfit(data.owner_uuid!!,data.price)
         }
@@ -187,7 +205,11 @@ class RegionDatabase(private val pl: Plugin) {
             data.name = rs.getString("name")
             data.world = rs.getString("world")
             data.server = rs.getString("server")
-            data.owner_uuid = UUID.fromString(rs.getString("owner_uuid"))
+            if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
+                data.owner_uuid = null
+            }else{
+                data.owner_uuid = UUID.fromString(rs.getString("owner_uuid"))
+            }
             data.status = rs.getString("status")
             data.price = rs.getDouble("price")
 

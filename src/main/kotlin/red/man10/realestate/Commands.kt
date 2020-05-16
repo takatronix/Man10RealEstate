@@ -1,5 +1,6 @@
 package red.man10.realestate
 
+import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -99,9 +100,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //def: type:2 status:Share
             if (cmd == "adduser" && args.size == 3){
 
+                if (!NumberUtils.isNumber(args[1]))return false
                 val id = args[1].toInt()
 
-                val data = regionData[id]?:return true
+                val data = regionData[id]?:return false
 
                 if (!hasRegionAdmin(sender,id)){ return true }
 
@@ -233,6 +235,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     return true
                 }
 
+                db.setRegionStatus(args[1].toInt(),args[2])
+
                 sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
                 return true
             }
@@ -277,10 +281,19 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     return true
                 }
 
+                if (!NumberUtils.isNumber(args[2])){
+                    sendMessage(sender,"§3§lパラメータの入力方法が違います！")
+                    sendMessage(sender,"§3§l/mreop create [リージョンの名前] [初期の値段]")
+                    return true
+                }
+
+                sendMessage(sender,"§a§l現在登録中です・・・")
+
                 val data = RegionDatabase.RegionData()
 
                 data.name = args[1]
-                data.status = args[2]
+                data.status = "OnSale"
+                data.price = args[2].toDouble()
 
                 data.owner_uuid = null
                 data.server = lore[1].replace("§aServer:§f","")
@@ -309,27 +322,12 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
-                    sendMessage(sender,"§a§l現在登録中です・・・")
+                    val id = db.registerRegion(data)
 
-                    val mysql = MySQLManager(pl,"mre")
-
-                    val rs = mysql.query("SELECT t.*\n" +
-                            "                 FROM region t\n" +
-                            "                 ORDER BY id DESC\n" +
-                            "                 LIMIT 501")
-
-                    val id : Int
-
-                    if (rs == null){
-                        id = 1
-                    }else{
-                        rs.next()
-                        id = rs.getInt("id")+1
-                        rs.close()
+                    if (id == -1){
+                        sendMessage(sender,"§3§l登録失敗！")
+                        return@Runnable
                     }
-                    mysql.close()
-
-                    db.registerRegion(data,id)
 
                     sendMessage(sender,"§a§l登録完了！")
                     sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
@@ -341,32 +339,30 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //リージョンの削除
             if (cmd == "delete" && args.size==2){
-                Thread(Runnable {
-                    db.deleteRegion(args[1].toInt())
-                }).start()
+                db.deleteRegion(args[1].toInt())
 
                 return true
             }
 
             if (cmd == "list"){
 
-                if (args.size == 2){
-                    for (i in args[1].toInt() .. args[1].toInt()+15){
-                        if (i >= regionData.size)break
-                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
-                    }
-
-                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${args[1].toInt()+16}")
-                    sendHoverText(sender,"§e§l[Previous]","","mre list ${args[1].toInt()-16}")
-
-                }else{
-                    for (i in 1 .. 16){
-                        if (i >= regionData.size)break
-                        if (regionData[i] == null)continue
-                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
-                    }
-                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
-                }
+//                if (args.size == 2){
+//                    for (i in args[1].toInt() .. args[1].toInt()+15){
+//                        if (i >= regionData.size)break
+//                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
+//                    }
+//
+//                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${args[1].toInt()+16}")
+//                    sendHoverText(sender,"§e§l[Previous]","","mre list ${args[1].toInt()-16}")
+//
+//                }else{
+//                    for (i in 1 .. 16){
+//                        if (i >= regionData.size)break
+//                        if (regionData[i] == null)continue
+//                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
+//                    }
+//                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
+//                }
 
                 return true
             }
@@ -430,7 +426,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             sendMessage(p,"§e§l==============================================")
             sendMessage(p,"§e§l/mreop wand : 範囲指定用のワンドを取得")
             sendMessage(p,"§e§l/mreop good <id> : 指定idに評価(いいね！)します")
-            sendMessage(p,"§e§l/mreop create <リージョン名> <初期ステータス> : 新規リージョンを作成します")
+            sendMessage(p,"§e§l/mreop create <リージョン名> <値段> : 新規リージョンを作成します")
             sendMessage(p,"§e§l範囲指定済みの${WAND_NAME}§e§lを持ってコマンドを実行してください")
             sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
             sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
@@ -444,7 +440,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
         val data = regionData[id]?:return false
 
-        if (data.status == "Lock")
+        if (data.status == "Lock")return false
 
         if (data.owner_uuid == p.uniqueId)return true
 
