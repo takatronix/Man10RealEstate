@@ -35,15 +35,17 @@ class OwnerMenu(val pl : Plugin) : Listener{
     val changeStatus = "${prefix}§a§lステータスの変更"
     val changeRent = "${prefix}§a§l賃料設定"
     val changeRentSpan = "${prefix}§a§lスパン設定"
-    val loading = "$prefix§e§lデータの読込中・・・"
     val perm = "$prefix§3§l権限設定"
 
     var mysql : MySQLManager? = null
 
     val map = HashMap<Pair<UUID,Int>,PermList>()
 
+    var loadItem : ItemStack
+
     init {
         mysql = MySQLManager(pl,"mreOwnerMenu")
+        loadItem = IS(pl,Material.CLOCK,"§e§l現在データの読み込み中です....", mutableListOf(),"loading")
     }
 
     //リージョンの管理メニュ
@@ -127,11 +129,11 @@ class OwnerMenu(val pl : Plugin) : Listener{
     //リージョンに登録されたユーザーのデータを取得
     fun customUserMenu(p:Player,id:Int,page:Int){
 
-        loadingMenu(p)
-
         val inv = Bukkit.createInventory(null,54, customUserMenu)
 
-        Bukkit.getScheduler().runTask(pl, Runnable {
+        inv.setItem(22, loadItem)
+
+        Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
             val list = loadUsersList(id,page)
 
@@ -142,6 +144,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 p.closeInventory()
                 return@Runnable
             }
+
+            inv.remove(loadItem)
 
             for (uuid in list){
                 val head = ItemStack(Material.PLAYER_HEAD)
@@ -197,9 +201,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             }
 
-            p.openInventory(inv)
-
         })
+
+        p.openInventory(inv)
 
     }
 
@@ -220,11 +224,12 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         var permData:PermList
 
-        loadingMenu(p)
-        Bukkit.getScheduler().runTask(pl, Runnable {
-            permData = getPerms(id,uuid)
+        val inv = Bukkit.createInventory(null,54,perm)
 
-            val inv = Bukkit.createInventory(null,54,perm)
+        inv.setItem(22, loadItem)
+
+        Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
+            permData = getPerms(id,uuid)
 
             inv.setItem(13,IS(pl,
                     if (permData.allowAll){Material.LIME_STAINED_GLASS_PANE }
@@ -241,20 +246,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             inv.setItem(0,IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l戻る", mutableListOf(),"$uuid,$id"))
 
-            inv.setItem(8,IS(pl,Material.YELLOW_STAINED_GLASS_PANE,"§3§lsセーブ", mutableListOf(),"$uuid,$id"))
-
-
-            p.openInventory(inv)
+            inv.setItem(8,IS(pl,Material.YELLOW_STAINED_GLASS_PANE,"§3§lセーブ", mutableListOf(),"$uuid,$id"))
 
         })
-    }
-
-    //読込中の画面
-    fun loadingMenu(p:Player){
-
-        val inv = Bukkit.createInventory(null,27,loading)
-
-        inv.setItem(13, IS(pl,Material.CLOCK,"§e§l現在データの読み込み中です....", mutableListOf(),"loading"))
 
         p.openInventory(inv)
     }
@@ -307,6 +301,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         rs.close()
         mysql!!.close()
+
+        map[Pair(uuid,id)] = data
 
         return data
     }
@@ -396,6 +392,11 @@ class OwnerMenu(val pl : Plugin) : Listener{
         val name = e.view.title
         val item = e.currentItem?:return
         val p = e.whoClicked as Player
+
+        if (getId(item,pl) == "loading"){
+            e.isCancelled = true
+            return
+        }
 
         //オーナーメニュ
         if (name == ownerMenu){
@@ -487,7 +488,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             when(getId(item,pl)){
 
-                "back"->openOwnerSetting(p,0)
+                "back"->regionCustomMenu(p,id)
                 "next"->customUserMenu(p,id,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
                 "previous"->customUserMenu(p,id,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
                 else ->{
@@ -550,6 +551,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
                     }
                     savePerm(data, uuid, id)
+                    sendMessage(p,"§e§l保存しました！")
                     p.closeInventory()
                     return
                 }
@@ -559,10 +561,6 @@ class OwnerMenu(val pl : Plugin) : Listener{
             customPerm(p,id,uuid)
         }
 
-        //読込中の画面
-        if (name == loading){
-            e.isCancelled = true
-        }
     }
 
     class PermList{

@@ -107,6 +107,11 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,id)){ return true }
 
+                if (sender.name == args[2]){
+                    sendMessage(sender,"§3§lあなたは既に住人です")
+                    return true
+                }
+
                 val p = Bukkit.getPlayer(args[2])?:return false
 
                 pdb.createUserData(id,p)
