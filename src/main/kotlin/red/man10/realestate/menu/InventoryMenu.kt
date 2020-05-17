@@ -124,6 +124,8 @@ class InventoryMenu(private val pl: Plugin) : Listener {
         val item = e.currentItem?:return
         val p = e.whoClicked as Player
 
+        if (!item.hasItemMeta())return
+
         //メインメニュ
         if (name == mainMenu){
             e.isCancelled = true

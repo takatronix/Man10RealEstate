@@ -13,6 +13,7 @@ import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Plugin
+import java.lang.Exception
 
 class ProtectRegionEvent(private val pl:Plugin):Listener{
 
@@ -43,6 +44,11 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         if (!e.hasBlock())return
 
         val p = e.player
+
+        if (e.hasBlock()&&e.clickedBlock!!.state is org.bukkit.block.Sign){
+            e.isCancelled = true
+            return
+        }
 
         if (!canBreak(p,e.clickedBlock!!.location,e)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")

@@ -393,6 +393,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
         val item = e.currentItem?:return
         val p = e.whoClicked as Player
 
+        if (!item.hasItemMeta())return
+
         if (getId(item,pl) == "loading"){
             e.isCancelled = true
             return
