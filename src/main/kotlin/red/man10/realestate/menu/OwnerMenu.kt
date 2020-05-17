@@ -305,6 +305,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
         data.allowInv = rs.getInt("allow_inv")==1
         data.allowDoor = rs.getInt("allow_door")==1
 
+        rs.close()
+        mysql!!.close()
+
         return data
     }
 
@@ -536,6 +539,16 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 31->data.allowDoor = item.type == Material.RED_STAINED_GLASS_PANE
                 40->data.allowInv = item.type == Material.RED_STAINED_GLASS_PANE
                 8->{
+                    val user = Bukkit.getOfflinePlayer(uuid)
+                    if (user.isOnline){
+                        val d = regionUserData[user]!![id]!!
+
+                        d.allowAll      = data.allowAll
+                        d.allowInv      = data.allowInv
+                        d.allowDoor     = data.allowDoor
+                        d.allowBlock    = data.allowBlock
+
+                    }
                     savePerm(data, uuid, id)
                     p.closeInventory()
                     return

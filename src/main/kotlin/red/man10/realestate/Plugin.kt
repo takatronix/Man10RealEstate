@@ -110,12 +110,6 @@ class Plugin : JavaPlugin(), Listener {
         sqlThread.interrupt()
     }
 
-    @EventHandler
-    fun onPlayerJoin(e: PlayerJoinEvent) {
-        broadcast("${e.player.displayName} is joined.")
-    }
-
-
     fun drawLine(point1: Location, point2: Location, space: Double) {
         //broadcast("draw {${point1.toString()}- {${point2.toString()}}}")
         val world = point1.world
@@ -210,7 +204,7 @@ class Plugin : JavaPlugin(), Listener {
 
         while (rs.next()){
 
-            if (rs.getInt("isRent") == 0)continue
+            if (rs.getInt("is_rent") == 0)continue
 
             val uuid = UUID.fromString( rs.getString("uuid"))
             val id = rs.getInt("region_id")
