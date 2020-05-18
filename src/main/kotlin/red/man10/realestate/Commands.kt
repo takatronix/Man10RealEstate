@@ -225,7 +225,14 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
-                db.setRegionOwner(args[1].toInt(),Bukkit.getPlayer(args[1])!!)
+                val p = Bukkit.getPlayer(args[1])
+
+                if (p == null){
+                    sendMessage(sender,"§3§lオンラインのユーザーを入力してください")
+                    return true
+                }
+
+                db.setRegionOwner(args[1].toInt(),p)
 
                 sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
                 return true
