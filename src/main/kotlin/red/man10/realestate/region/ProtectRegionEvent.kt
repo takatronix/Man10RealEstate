@@ -7,6 +7,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.block.SignChangeEvent
+import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Constants.Companion.regionData
@@ -61,7 +63,31 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
         val p = e.player as Player
 
         if (!canBreak(p,p.location,e)){
-            sendMessage(p,"§4§lあなたにはこの場所でインベントリを開く権限がありません！")
+            sendMessage(p,"§4§lあなたにはこの場所でチェストなどを開く権限がありません！")
+            e.isCancelled = true
+        }
+
+    }
+
+    @EventHandler
+    fun signEvent(e:SignChangeEvent){
+        val p = e.player
+
+        if (!canBreak(p,p.location,e)){
+            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
+            e.isCancelled = true
+        }
+
+    }
+
+    @EventHandler
+    fun breakEntity(e:HangingBreakByEntityEvent){
+        val p = e.remover?:return
+
+        if (p !is Player)return
+
+        if (!canBreak(p,p.location,e)){
+            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
 
@@ -86,6 +112,7 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
                 if (pd.allowAll)return true
 
                 if ((eventType is BlockBreakEvent || eventType is BlockPlaceEvent) && pd.allowBlock)return true
+                if ((eventType is SignChangeEvent || eventType is HangingBreakByEntityEvent) && pd.allowBlock)return true
                 if (eventType is PlayerInteractEvent && pd.allowDoor)return true
                 if (eventType is InventoryOpenEvent && pd.allowInv)return true
                 return false

@@ -14,6 +14,7 @@ import red.man10.realestate.Constants
 import red.man10.realestate.Constants.Companion.mysqlQueue
 import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.prefix
+import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Constants.Companion.sendSuggest
@@ -51,7 +52,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
     //リージョンの管理メニュ
     fun regionCustomMenu(p: Player, id:Int){
 
-        val data = Constants.regionData[id]
+        val data = regionData[id]
 
         if (data == null){
             sendMessage(p,"§e§l存在しない土地です")
@@ -82,12 +83,26 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         val inv = Bukkit.createInventory(null,54,customRegionData)
 
+        val data = regionData[id]?:return
+
         inv.setItem(0,IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l戻る", mutableListOf(),"$id"))
-        inv.setItem(10,IS(pl,Material.COMPASS,"§e§lステータス", mutableListOf(),"$id"))
-        inv.setItem(13,IS(pl,Material.EMERALD,"§e§l料金設定", mutableListOf(),"$id"))
+        inv.setItem(10,IS(pl,Material.COMPASS,"§e§lステータス", mutableListOf("§a現在のステータス：${data.status}"),"$id"))
+        inv.setItem(13,IS(pl,Material.EMERALD,"§e§l料金設定",
+                mutableListOf("§e現在の料金：${String.format("%,.1f",data.price)}"),"$id"))
+
         inv.setItem(16,IS(pl,Material.ENDER_PEARL,"§a§lテレポート設定", mutableListOf(),"$id"))
-        inv.setItem(38,IS(pl,Material.CLOCK,"§b§l賃貸設定", mutableListOf(),"$id"))
+
+        inv.setItem(38,IS(pl,Material.CLOCK,"§b§l賃貸設定",
+                mutableListOf("§e現在の賃料：${String.format("%,.1f",data.rent)}"
+                        ,"§aスパン：${when (data.span) {
+                            0 -> "一ヶ月ごと"
+                            1 -> "一週間ごと"
+                            else -> "一日ごと"
+                        }}"),"$id"))
+
         inv.setItem(42,IS(pl,Material.PLAYER_HEAD,"§3§lオーナーの変更", mutableListOf(),"$id"))
+
+        inv.setItem(8, IS(pl,Material.GREEN_STAINED_GLASS_PANE,"§a§l自分の土地にテレポートする", mutableListOf(),"$id"))
 
         p.openInventory(inv)
 
@@ -333,7 +348,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             if (list.size <=i)break
 
-            val d = Constants.regionData[list[i]]?:continue
+            val d = regionData[list[i]]?:continue
 
             val icon = IS(pl,Material.PAPER,d.name,mutableListOf(
                     "§e§lID:${list[i]}",
@@ -444,6 +459,11 @@ class OwnerMenu(val pl : Plugin) : Listener{
                     p.closeInventory()
                     sendSuggest(p,"§e§l変更するオーナーの名前を入力してください！","/mre changeowner ${getId(item, pl)} ")
                 } //オーナー変更
+
+                8->{
+                    p.closeInventory()
+                    p.performCommand("mre tp ${getId(item,pl)}")
+                }
             }
         }
 

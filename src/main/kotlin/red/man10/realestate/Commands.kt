@@ -87,10 +87,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                     val profit = pdb.getProfit(sender)
 
-                    sendMessage(sender,"§l§kXX§r§e§l利益の合計：$profit§e§l§kXX")
+                    sendMessage(sender,"§l§kXX§r§e§l利益の合計：${String.format("%,.1f",profit)}§e§l§kXX")
 
                     if (profit >0){
-                        sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n$profit","mre withdraw")
+                        sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n${String.format("%,.1f",profit)}","mre withdraw")
                     }
                 })
                 return true
@@ -225,7 +225,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
-                val p = Bukkit.getPlayer(args[1])
+                val p = Bukkit.getPlayer(args[2])
 
                 if (p == null){
                     sendMessage(sender,"§3§lオンラインのユーザーを入力してください")
@@ -351,7 +351,22 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //リージョンの削除
             if (cmd == "delete" && args.size==2){
+
+                if (!NumberUtils.isNumber(args[1])){
+                    sendMessage(sender,"§3§l数字を入力してください")
+                    return true
+                }
+
+                val id = args[1].toInt()
+
+                if (regionData[id] == null){
+                    sendMessage(sender,"§3§l存在しないリージョンです！")
+                    return true
+                }
+
                 db.deleteRegion(args[1].toInt())
+
+                sendMessage(sender,"§a§l削除完了")
 
                 return true
             }
@@ -404,16 +419,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 })
             }
 
-            if (cmd == "debug"){
-                pl.debugMode = !pl.debugMode
-                sendMessage(sender,pl.debugMode.toString())
-            }
-
-            if (cmd == "rentTimer"){
-                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-                    pl.rentTimer()
-                })
-            }
         }
 
         return false

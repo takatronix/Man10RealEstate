@@ -84,12 +84,6 @@ class Plugin : JavaPlugin(), Listener {
 
         mysql = MySQLManager(this,"mreRentThread")
 
-//        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
-//            while (true){
-//                rentTimer()
-//                Thread.sleep(3600000)
-//            }
-//        })
 
         Thread(Runnable {
             while (true){
@@ -238,6 +232,7 @@ class Plugin : JavaPlugin(), Listener {
                         db.addProfit(data.owner_uuid!!,data.rent)
                     }
                 }
+                pd.paid = Date()
 
                 db.saveMap(p,pd,id)
                 db.saveUserData(p,id)

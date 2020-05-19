@@ -1,6 +1,7 @@
 package red.man10.realestate.region
 
 import org.bukkit.*
+import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -170,18 +171,32 @@ class RegionEvent (private val pl :Plugin) : Listener{
         sendMessage(p,"§a土地名:${data.name}")
         sendMessage(p,"§a現在のステータス:${data.status}")
         sendMessage(p,"§a現在のオーナー:${RegionDatabase.getOwner(data)}")
-        sendMessage(p,"§a値段:${data.price}")
+        sendMessage(p,"§a値段:${String.format("%,.1f",data.price)}")
 
         sendMessage(p,"§a§l==========================================")
 
         sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
         sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")
 
+        refreshSign(sign,id)
+    }
+
+    fun refreshSign(sign: Sign, id:Int){
+
+        val data = regionData[id]?:return
+
+        sign.setLine(0,"§eID:$id")
+        sign.setLine(1,data.name)
+        sign.setLine(2,"§d§l${RegionDatabase.getOwner(data)}")
+        sign.setLine(3,"§b§l${data.status}")
+
+        sign.update()
+
     }
 
     @EventHandler
     fun loginEvent(e:PlayerJoinEvent){
-        Bukkit.getScheduler().runTask(pl, Runnable {
+        Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
             RegionUserDatabase(pl).loadUserData(e.player)
         })
     }
