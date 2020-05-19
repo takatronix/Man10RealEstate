@@ -8,6 +8,10 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityShootBowEvent
+import org.bukkit.event.entity.ProjectileHitEvent
+import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -50,6 +54,20 @@ class ProtectRegionEvent:Listener{
             sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
             e.isCancelled = true
         }
+    }
+
+    @EventHandler
+    fun shootBowEvent(e:EntityShootBowEvent){
+
+        val p = e.entity
+
+        if (p !is Player)return
+
+        if (!disableWorld.contains(p.world.name)){
+            e.isCancelled = true
+            return
+        }
+
     }
 
     @EventHandler
