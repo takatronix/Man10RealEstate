@@ -501,6 +501,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 7->p.performCommand("mre span ${getId(item,pl)} 0")
             }
 
+            sendMessage(p,"§a§l変更完了！")
+            p.closeInventory()
+
         }
 
         //ユーザーリストの表示

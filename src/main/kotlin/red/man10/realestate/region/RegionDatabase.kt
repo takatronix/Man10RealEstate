@@ -284,7 +284,7 @@ class RegionDatabase(private val pl: Plugin) {
         var owner_uuid : UUID? = UUID.randomUUID()
         var status = "OnSale"
 
-        var world = "world"
+        var world = "builder"
         var server = "server"
 
         var startCoordinate: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)

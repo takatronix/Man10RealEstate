@@ -121,7 +121,7 @@ class ProtectRegionEvent:Listener{
 
             val data = id.value
 
-            if (isWithinRange(loc,data.startCoordinate,data.endCoordinate)){
+            if (isWithinRange(loc,data.startCoordinate,data.endCoordinate,data.world)){
                 if (data.status == "Lock")return false
                 if (data.owner_uuid == p.uniqueId)return true
 
@@ -153,7 +153,9 @@ class ProtectRegionEvent:Listener{
     ////////////////////////////////////////////////////////////
     //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
     ////////////////////////////////////////////////////////////
-    fun isWithinRange(loc: org.bukkit.Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>):Boolean{
+    fun isWithinRange(loc: org.bukkit.Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>,world:String):Boolean{
+
+        if (loc.world.name != world)return false
 
         val x = loc.blockX
         val y = loc.blockY
