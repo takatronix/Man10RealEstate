@@ -42,6 +42,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
     val map = HashMap<Pair<UUID,Int>,PermList>()
 
+    val pdb = RegionUserDatabase(pl)
+
     var loadItem : ItemStack
 
     init {
@@ -485,7 +487,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
                     p.closeInventory()
                     sendSuggest(p,"§e§l賃料を入力してください！","/mre rent ${getId(item, pl)} ")
                 }
-                7->changeSpan(p,getId(item, pl).toInt())
+                6->changeSpan(p,getId(item, pl).toInt())
             }
 
         }
@@ -530,12 +532,22 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             when(e.slot){
                 1->customPerm(p,id,uuid)
-                4->{}
+                4->{
+                    val user = Bukkit.getOfflinePlayer(uuid)
+                    if (user.isOnline && user.player !=null){
+                        p.closeInventory()
+                        pdb.setRent(user.player!!,id)
+                        sendMessage(p,"§a§l登録成功！、試験実装のため不具合があるかもしれません！")
+                        return
+                    }
+                    sendMessage(p,"§3§lユーザーがオフラインです")
+                    return
+                }
                 7->{
                     if (Bukkit.getOfflinePlayer(uuid).isOnline){
-                        RegionUserDatabase(pl).removeUserData(id,Bukkit.getOfflinePlayer(uuid).player!!)
+                        pdb.removeUserData(id,Bukkit.getOfflinePlayer(uuid).player!!)
                     }else{
-                        RegionUserDatabase(pl).removeUserData(id,uuid)
+                        pdb.removeUserData(id,uuid)
                     }
                     p.closeInventory()
                     sendMessage(p,"削除しました")

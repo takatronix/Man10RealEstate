@@ -4,3 +4,5 @@ mysql:
   pass: pass
   port: 3306
   db: man10realestate
+disableWorld:
+  -

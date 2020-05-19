@@ -59,6 +59,8 @@ class Plugin : JavaPlugin(), Listener {
         invmain = InventoryMenu(this)
         ownerInv = OwnerMenu(this)
 
+        Constants.disableWorld = config.getStringList("disableWorld")
+
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(regionEvent,this)
         server.pluginManager.registerEvents(protectEvent,this)

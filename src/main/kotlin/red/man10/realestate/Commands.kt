@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import red.man10.realestate.Constants.Companion.WAND_NAME
+import red.man10.realestate.Constants.Companion.disableWorld
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendHoverText
@@ -414,11 +415,39 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         pdb.loadUserData(p)
                     }
 
+                    pl.reloadConfig()
+
+                    disableWorld = pl.config.getStringList("disableWorld")
+
                     sendMessage(sender,"§e§lリロード完了")
 
                 })
             }
 
+            if (cmd == "disableWorld"){
+
+                if (args[2].isBlank()){
+                    sendMessage(sender,"§3§l保護を外すワールドを指定してください")
+                    return true
+                }
+
+                if (args[1] == "add"){
+                    disableWorld.add(args[2])
+
+                    Thread(Runnable {
+                        pl.config.set("disableWorld", disableWorld)
+                        sendMessage(sender,"追加完了！")
+                    }).start()
+                }
+                if (args[1] == "remove"){
+                    disableWorld.remove(args[2])
+                    Thread(Runnable {
+                        pl.config.set("disableWorld", disableWorld)
+                        sendMessage(sender,"削除完了！")
+                    }).start()
+                }
+
+            }
         }
 
         return false

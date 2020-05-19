@@ -11,6 +11,7 @@ import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import red.man10.realestate.Constants.Companion.disableWorld
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendMessage
@@ -118,7 +119,11 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
                 return false
             }
         }
-        return true
+
+        if (disableWorld.contains(loc.world.name)){
+            return true
+        }
+        return false
     }
 
     ////////////////////////////////////////////////////////////

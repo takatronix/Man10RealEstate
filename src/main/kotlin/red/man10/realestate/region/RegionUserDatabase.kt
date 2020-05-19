@@ -244,6 +244,18 @@ class RegionUserDatabase (private val pl:Plugin){
 
     }
 
+    fun setRent(p:Player,id:Int){
+
+        val pd = regionUserData[p]!![id]?:return
+
+        pd.isRent = !pd.isRent
+
+        regionUserData[p]!![id] = pd
+        saveUserData(p,id)
+
+        return
+    }
+
     class RegionUserData{
 
 //        var deposit : Double = 0.0  //この金がなくなったら支払えなくなる

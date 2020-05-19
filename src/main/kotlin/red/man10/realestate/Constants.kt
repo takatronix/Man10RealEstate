@@ -35,6 +35,7 @@ class Constants(val p:Plugin) {
 
         val ownerData = HashMap<Player,MutableList<Int>>()//オーナーメニューを開くための辞書
 
+        var disableWorld = mutableListOf<String>()
 
         //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
         fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
