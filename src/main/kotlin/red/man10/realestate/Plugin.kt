@@ -46,6 +46,10 @@ class Plugin : JavaPlugin(), Listener {
     var particleTime:Int = 0
     var debugMode = false
 
+    companion object{
+        lateinit var regionDatabase :RegionDatabase
+        lateinit var regionUserDatabase : RegionUserDatabase
+    }
 
     override fun onEnable() { // Plugin startup logic
         logger.info("Man10 Real Estate plugin enabled.")
@@ -58,6 +62,9 @@ class Plugin : JavaPlugin(), Listener {
         vault = VaultManager(this)
         invmain = InventoryMenu(this)
         ownerInv = OwnerMenu(this)
+
+        regionDatabase = RegionDatabase(this)
+        regionUserDatabase = RegionUserDatabase(this)
 
         Constants.disableWorld = config.getStringList("disableWorld")
 
@@ -94,7 +101,7 @@ class Plugin : JavaPlugin(), Listener {
             }
         }).start()
 
-        RegionDatabase(this).loadRegion()
+        regionDatabase.loadRegion()
 
         mysqlQueue()
         rentTimer()
@@ -178,10 +185,10 @@ class Plugin : JavaPlugin(), Listener {
     ////////////////////////
     fun mysqlQueue(){
         sqlThread = Thread(Runnable {
+            val sql = MySQLManager(this,"man10realestate queue")
             try{
-                val sql = MySQLManager(this,"man10realestate queue")
                 while (true){
-                    val take = Constants.mysqlQueue.take()
+                    val take = mysqlQueue.take()
                     sql.execute(take)
                 }
             }catch (e:InterruptedException){
@@ -196,7 +203,6 @@ class Plugin : JavaPlugin(), Listener {
     //////////////////////////////////////
     fun rentTimer(){
         val rs = mysql.query("SELECT * FROM region_user;")!!
-        val db = RegionUserDatabase(this)
 
         while (rs.next()){
 
@@ -231,13 +237,13 @@ class Plugin : JavaPlugin(), Listener {
 
                     pd.status = "Share"
                     if (data.owner_uuid != null){
-                        db.addProfit(data.owner_uuid!!,data.rent)
+                        regionUserDatabase.addProfit(data.owner_uuid!!,data.rent)
                     }
                 }
                 pd.paid = Date()
 
-                db.saveMap(p,pd,id)
-                db.saveUserData(p,id)
+                regionUserDatabase.saveMap(p,pd,id)
+                regionUserDatabase.saveUserData(p,id)
                 continue
             }
 
@@ -251,7 +257,7 @@ class Plugin : JavaPlugin(), Listener {
             vault.withdraw(uuid,data.rent)
             mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$uuid' AND region_id=$id;")
             if (data.owner_uuid != null){
-                db.addProfit(data.owner_uuid!!,data.rent)
+                regionUserDatabase.addProfit(data.owner_uuid!!,data.rent)
             }
 
         }

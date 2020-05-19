@@ -20,6 +20,7 @@ import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Constants.Companion.sendSuggest
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import red.man10.realestate.menu.InventoryMenu.Companion.IS
 import red.man10.realestate.menu.InventoryMenu.Companion.getId
 import red.man10.realestate.region.RegionUserDatabase
@@ -42,7 +43,6 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
     val map = HashMap<Pair<UUID,Int>,PermList>()
 
-    val pdb = RegionUserDatabase(pl)
 
     var loadItem : ItemStack
 
@@ -536,7 +536,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
                     val user = Bukkit.getOfflinePlayer(uuid)
                     if (user.isOnline && user.player !=null){
                         p.closeInventory()
-                        pdb.setRent(user.player!!,id)
+                        regionUserDatabase.setRent(user.player!!,id)
                         sendMessage(p,"§a§l登録成功！、試験実装のため不具合があるかもしれません！")
                         return
                     }
@@ -545,9 +545,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 }
                 7->{
                     if (Bukkit.getOfflinePlayer(uuid).isOnline){
-                        pdb.removeUserData(id,Bukkit.getOfflinePlayer(uuid).player!!)
+                        regionUserDatabase.removeUserData(id,Bukkit.getOfflinePlayer(uuid).player!!)
                     }else{
-                        pdb.removeUserData(id,uuid)
+                        regionUserDatabase.removeUserData(id,uuid)
                     }
                     p.closeInventory()
                     sendMessage(p,"削除しました")

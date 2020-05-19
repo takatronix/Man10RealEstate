@@ -264,19 +264,15 @@ class RegionDatabase(private val pl: Plugin) {
 
         return true
     }
+    fun getOwner(data:RegionData):String{
 
-    companion object{
-        fun getOwner(data:RegionData):String{
+        val uuid = data.owner_uuid
 
-            val uuid = data.owner_uuid
-
-            return if (uuid == null){
-                "Admin"
-            }else{
-                Bukkit.getOfflinePlayer(uuid).name!!
-            }
+        return if (uuid == null){
+            "Admin"
+        }else{
+            Bukkit.getOfflinePlayer(uuid).name!!
         }
-
     }
 
     ///////////////////////////////

@@ -13,6 +13,8 @@ import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.sendHoverText
 import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.regionDatabase
+import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import java.lang.Exception
 
 
@@ -128,7 +130,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
             e.setLine(0,"§eID:$id")
             e.setLine(1,data.name)
-            e.setLine(2,"§d§l${RegionDatabase.getOwner(data)}")
+            e.setLine(2,"§d§l${regionDatabase.getOwner(data)}")
             e.setLine(3,"§b§l${data.status}")
 
             sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
@@ -170,7 +172,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         sendMessage(p,"§a土地名:${data.name}")
         sendMessage(p,"§a現在のステータス:${data.status}")
-        sendMessage(p,"§a現在のオーナー:${RegionDatabase.getOwner(data)}")
+        sendMessage(p,"§a現在のオーナー:${regionDatabase.getOwner(data)}")
         sendMessage(p,"§a値段:${String.format("%,.1f",data.price)}")
 
         sendMessage(p,"§a§l==========================================")
@@ -187,7 +189,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
 
         sign.setLine(0,"§eID:$id")
         sign.setLine(1,data.name)
-        sign.setLine(2,"§d§l${RegionDatabase.getOwner(data)}")
+        sign.setLine(2,"§d§l${regionDatabase.getOwner(data)}")
         sign.setLine(3,"§b§l${data.status}")
 
         sign.update()
@@ -197,7 +199,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
     @EventHandler
     fun loginEvent(e:PlayerJoinEvent){
         Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-            RegionUserDatabase(pl).loadUserData(e.player)
+            regionUserDatabase.loadUserData(e.player)
         })
     }
 

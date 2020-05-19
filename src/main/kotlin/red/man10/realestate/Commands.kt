@@ -15,14 +15,14 @@ import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendHoverText
 import red.man10.realestate.Constants.Companion.sendMessage
+import red.man10.realestate.Plugin.Companion.regionDatabase
+import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionUserDatabase
 
 class Commands (private val pl :Plugin):CommandExecutor{
 
-    val db = RegionDatabase(pl)
-    val pdb = RegionUserDatabase(pl)
     val inventory = InventoryMenu(pl)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
@@ -50,7 +50,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             if (cmd == "buy"){
 
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-                    db.buy(args[1].toInt(),sender)
+                    regionDatabase.buy(args[1].toInt(),sender)
                 })
                 return true
             }
@@ -60,7 +60,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 val data = regionData[args[1].toInt()]?:return true
 
                 sendMessage(sender,"§3§l料金：${data.price} 名前：${data.name}" +
-                        " §a§l現在のオーナー名：${RegionDatabase.getOwner(data)}")
+                        " §a§l現在のオーナー名：${regionDatabase.getOwner(data)}")
                 sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
                 sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy ${args[1]}")
 
@@ -70,14 +70,14 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //いいね
             if (cmd == "good" && args.size == 2){
 
-                pdb.setLike(sender,args[1].toInt())
+                regionUserDatabase.setLike(sender,args[1].toInt())
                 return true
             }
 
             //取り出し
             if (cmd == "withdraw"){
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-                    pdb.takeProfit(sender)
+                    regionUserDatabase.takeProfit(sender)
                 })
                 return true
             }
@@ -86,7 +86,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             if (cmd == "bal"){
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
-                    val profit = pdb.getProfit(sender)
+                    val profit = regionUserDatabase.getProfit(sender)
 
                     sendMessage(sender,"§l§kXX§r§e§l利益の合計：${String.format("%,.1f",profit)}§e§l§kXX")
 
@@ -115,12 +115,12 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val p = Bukkit.getPlayer(args[2])?:return false
 
-                pdb.createUserData(id,p)
+                regionUserDatabase.createUserData(id,p)
                 sendMessage(sender,"§e§l${args[2]}§a§lを居住者に追加しました！")
 
                 sendMessage(p,"§e§lあなたは居住者に追加されました")
                 sendMessage(p,"§a§l=================土地の情報==================")
-                sendMessage(p,"§a§lオーナー：${RegionDatabase.getOwner(data)}")
+                sendMessage(p,"§a§lオーナー：${regionDatabase.getOwner(data)}")
                 sendMessage(p,"§a§l土地の名前：${data.name}")
                 sendMessage(p,"§a§l土地のステータス：${data.status}")
                 sendMessage(p,"§a§l===========================================")
@@ -135,7 +135,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,id)){ return true }
 
-                pdb.removeUserData(id,Bukkit.getPlayer(args[2])?:return false)
+                regionUserDatabase.removeUserData(id,Bukkit.getPlayer(args[2])?:return false)
                 sendMessage(sender,"§e§l削除完了！")
                 return true
             }
@@ -163,7 +163,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,id))return false
 
-                db.setRent(id,rent)
+                regionDatabase.setRent(id,rent)
                 return true
             }
 
@@ -174,7 +174,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,id))return false
 
-                db.setSpan(id,span)
+                regionDatabase.setSpan(id,span)
                 return true
             }
 
@@ -195,8 +195,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     else ->return true
                 }
 
-                pdb.saveMap(p,pd,id)
-                pdb.saveUserData(p,args[1].toInt())
+                regionUserDatabase.saveMap(p,pd,id)
+                regionUserDatabase.saveUserData(p,args[1].toInt())
 
                 sendMessage(sender,"§e§l設定完了！")
 
@@ -209,7 +209,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val loc = sender.location
 
-                db.setRegionTeleport(args[1].toInt(), mutableListOf(
+                regionDatabase.setRegionTeleport(args[1].toInt(), mutableListOf(
                         loc.x,
                         loc.y,
                         loc.z,
@@ -233,7 +233,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     return true
                 }
 
-                db.setRegionOwner(args[1].toInt(),p)
+                regionDatabase.setRegionOwner(args[1].toInt(),p)
 
                 sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
                 return true
@@ -248,7 +248,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     return true
                 }
 
-                db.setRegionStatus(args[1].toInt(),args[2])
+                regionDatabase.setRegionStatus(args[1].toInt(),args[2])
 
                 sendMessage(sender,"§e§l${args[1]}のステータスを${args[2]}に変更しました")
                 return true
@@ -258,7 +258,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
-                db.setPrice(args[1].toInt(),args[2].toDouble())
+                regionDatabase.setPrice(args[1].toInt(),args[2].toDouble())
 
                 sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
                 return true
@@ -335,7 +335,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
-                    val id = db.registerRegion(data)
+                    val id = regionDatabase.registerRegion(data)
 
                     if (id == -1){
                         sendMessage(sender,"§3§l登録失敗！")
@@ -365,7 +365,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     return true
                 }
 
-                db.deleteRegion(args[1].toInt())
+                regionDatabase.deleteRegion(args[1].toInt())
 
                 sendMessage(sender,"§a§l削除完了")
 
@@ -409,10 +409,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //リージョンデータのリロード
             if (cmd == "reload"){
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-                    db.loadRegion()
+                    regionDatabase.loadRegion()
 
                     for (p in Bukkit.getOnlinePlayers()){
-                        pdb.loadUserData(p)
+                        regionUserDatabase.loadUserData(p)
                     }
 
                     pl.reloadConfig()
@@ -436,6 +436,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                     Thread(Runnable {
                         pl.config.set("disableWorld", disableWorld)
+                        pl.saveConfig()
                         sendMessage(sender,"追加完了！")
                     }).start()
                 }
@@ -443,6 +444,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     disableWorld.remove(args[2])
                     Thread(Runnable {
                         pl.config.set("disableWorld", disableWorld)
+                        pl.saveConfig()
                         sendMessage(sender,"削除完了！")
                     }).start()
                 }
