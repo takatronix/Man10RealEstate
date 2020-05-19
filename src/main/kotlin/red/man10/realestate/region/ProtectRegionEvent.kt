@@ -18,7 +18,18 @@ import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Plugin
 import java.lang.Exception
 
-class ProtectRegionEvent(private val pl:Plugin):Listener{
+class ProtectRegionEvent:Listener{
+
+    val allowList = mutableListOf(
+            Material.CHEST,
+            Material.ENDER_CHEST,
+            Material.HOPPER,
+            Material.TRAPPED_CHEST,
+            Material.DISPENSER,
+            Material.DROPPER,
+            Material.FURNACE,
+            Material.BARREL,
+            Material.SHULKER_BOX)
 
     @EventHandler
     fun blockBreakEvent(e:BlockBreakEvent){
@@ -57,17 +68,6 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
         }
-    }
-
-    @EventHandler
-    fun invOpenEvent(e:InventoryOpenEvent){
-        val p = e.player as Player
-
-        if (!canBreak(p,p.location,e)){
-            sendMessage(p,"§4§lあなたにはこの場所でチェストなどを開く権限がありません！")
-            e.isCancelled = true
-        }
-
     }
 
     @EventHandler
@@ -114,8 +114,14 @@ class ProtectRegionEvent(private val pl:Plugin):Listener{
 
                 if ((eventType is BlockBreakEvent || eventType is BlockPlaceEvent) && pd.allowBlock)return true
                 if ((eventType is SignChangeEvent || eventType is HangingBreakByEntityEvent) && pd.allowBlock)return true
-                if (eventType is PlayerInteractEvent && pd.allowDoor)return true
-                if (eventType is InventoryOpenEvent && pd.allowInv)return true
+
+                if (eventType is PlayerInteractEvent && pd.allowInv){
+                    if (eventType.hasBlock() && allowList.contains(eventType.clickedBlock!!.type))return true
+
+                }
+
+                if (eventType is PlayerInteractEvent && pd.allowDoor && !allowList.contains(eventType.clickedBlock!!.type))return true
+
                 return false
             }
         }

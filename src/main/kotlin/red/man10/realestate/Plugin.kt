@@ -52,7 +52,7 @@ class Plugin : JavaPlugin(), Listener {
         saveDefaultConfig()
 
         regionEvent = RegionEvent(this)
-        protectEvent = ProtectRegionEvent(this)
+        protectEvent = ProtectRegionEvent()
         cmd = Commands(this)
         protocolManager = ProtocolLibrary.getProtocolManager()
         vault = VaultManager(this)
