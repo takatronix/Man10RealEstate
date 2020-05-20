@@ -10,6 +10,7 @@ import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import java.sql.Timestamp
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -87,6 +88,8 @@ class RegionUserDatabase (private val pl:Plugin){
             data.allowInv = rs1.getInt("allow_inv")==1
             data.allowDoor = rs1.getInt("allow_door")==1
 
+            data.isRent = rs1.getInt("is_rent")==1
+
             saveMap(p,data,id)
 
             if (data.allowAll){
@@ -146,8 +149,8 @@ class RegionUserDatabase (private val pl:Plugin){
         val sql = "UPDATE `region_user` " +
                 "SET " +
                 "`status`='${data.status}'," +
-                "`paid_date`='${data.paid}'," +
-                "`is_rent`='${data.isRent}`,"
+                "`paid_date`='${Timestamp(data.paid.time)}'," +
+                "`is_rent`='${if (data.isRent){1}else{0}}',"+
                 "`allow_all`='${if (data.allowAll){1}else{0}}'," +
                 "`allow_block`='${if (data.allowBlock){1}else{0}}'," +
                 "`allow_inv`='${if (data.allowInv){1}else{0}}'," +
@@ -244,16 +247,16 @@ class RegionUserDatabase (private val pl:Plugin){
 
     }
 
-    fun setRent(p:Player,id:Int){
+    fun setRent(p:Player,id:Int):Boolean{
 
-        val pd = regionUserData[p]!![id]?:return
+        val pd = regionUserData[p]!![id]?:return false
 
         pd.isRent = !pd.isRent
 
         regionUserData[p]!![id] = pd
         saveUserData(p,id)
 
-        return
+        return pd.isRent
     }
 
     class RegionUserData{

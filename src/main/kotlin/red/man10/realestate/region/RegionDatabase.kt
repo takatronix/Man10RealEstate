@@ -259,6 +259,7 @@ class RegionDatabase(private val pl: Plugin) {
                 "t.status = '${data.status}', " +
                 "t.price = ${data.price}, " +
                 "t.profit = 0, " +
+                "t.rent = ${data.rent}, " +
                 "t.span = ${data.span} " +
                 "WHERE t.id = $id")
 

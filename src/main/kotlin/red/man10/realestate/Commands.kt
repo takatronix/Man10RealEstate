@@ -18,6 +18,7 @@ import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Plugin.Companion.regionDatabase
 import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import red.man10.realestate.menu.InventoryMenu
+import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
 import red.man10.realestate.region.RegionUserDatabase
 
@@ -69,6 +70,11 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //いいね
             if (cmd == "good" && args.size == 2){
+
+                if (!NumberUtils.isNumber(args[1])){
+                    sendMessage(sender,"§3§l数字のIDを入力してください")
+                    return true
+                }
 
                 regionUserDatabase.setLike(sender,args[1].toInt())
                 return true
@@ -158,23 +164,50 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //賃料 /mre rent id rent
             if (cmd == "rent" && args.size == 3){
+
+                if (!NumberUtils.isNumber(args[1])||!NumberUtils.isNumber(args[2])){
+                    sendMessage(sender,"§3§lパラメータの入力方法が違います")
+                    return true
+                }
+
                 val id = args[1].toInt()
                 val rent = args[2].toDouble()
 
                 if (!hasRegionAdmin(sender,id))return false
 
                 regionDatabase.setRent(id,rent)
+                sendMessage(sender,"§a§l設定完了！")
+
+                return true
+            }
+
+            //mre accept id owner
+            if (cmd == "accept"){
+
+                if (regionUserData[sender]!![args[1].toInt()] == null){
+                    return true
+                }
+
+                regionUserDatabase.setRent(sender,args[1].toInt())
+
+
+                sendMessage(sender,"§a§l設定追加完了！、あなたはこれから${args[1]}のオーナーに賃料を支払うことになります！")
+
+                sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が賃料の支払いに承諾しました")
+
                 return true
             }
 
             //スパン /mre span id span
-            if (cmd == "span" && args.size == 4){
+            if (cmd == "span" && args.size == 3){
                 val id = args[1].toInt()
                 val span = args[2].toInt()
 
                 if (!hasRegionAdmin(sender,id))return false
 
                 regionDatabase.setSpan(id,span)
+
+
                 return true
             }
 
@@ -449,6 +482,25 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     }).start()
                 }
 
+            }
+
+            if (cmd == "where"){
+                val loc = sender.location
+
+                Thread(Runnable {
+                    sendMessage(sender,"§e§l=====================================")
+
+                    for (region in regionData){
+
+                        val data = region.value
+
+                        if (ProtectRegionEvent.isWithinRange(loc,data.startCoordinate,data.endCoordinate,data.world)){
+                            sendMessage(sender,"§e§lRegionID:${region.key}")
+                        }
+                    }
+
+                    sendMessage(sender,"§e§l=====================================")
+                }).start()
             }
         }
 

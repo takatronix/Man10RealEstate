@@ -16,6 +16,7 @@ import red.man10.realestate.Constants.Companion.ownerData
 import red.man10.realestate.Constants.Companion.prefix
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
+import red.man10.realestate.Constants.Companion.sendHoverText
 import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Constants.Companion.sendSuggest
 import red.man10.realestate.MySQLManager
@@ -499,6 +500,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 1->p.performCommand("mre span ${getId(item,pl)} 2")
                 4->p.performCommand("mre span ${getId(item,pl)} 1")
                 7->p.performCommand("mre span ${getId(item,pl)} 0")
+                else ->return
             }
 
             sendMessage(p,"§a§l変更完了！")
@@ -536,15 +538,43 @@ class OwnerMenu(val pl : Plugin) : Listener{
             when(e.slot){
                 1->customPerm(p,id,uuid)
                 4->{
-                    val user = Bukkit.getOfflinePlayer(uuid)
-                    if (user.isOnline && user.player !=null){
-                        p.closeInventory()
-                        regionUserDatabase.setRent(user.player!!,id)
-                        sendMessage(p,"§a§l登録成功！、試験実装のため不具合があるかもしれません！")
+
+                    val user = Bukkit.getOfflinePlayer(uuid).player
+
+                    if (user==null || !user.isOnline){
+                        sendMessage(p,"§3§lプレイヤーはオフラインです")
                         return
                     }
-                    sendMessage(p,"§3§lユーザーがオフラインです")
-                    return
+
+                    val pd = regionUserData[user]!![id]
+
+                    if (pd == null){
+                        sendMessage(p,"§3§lプレイヤーはこの土地の住人ではありません")
+                        return
+                    }
+
+                    if (pd.isRent){
+                        regionUserDatabase.setRent(user,id)
+                        sendMessage(p,"賃料の徴収を停止しました")
+                        return
+                    }
+
+                    sendMessage(p,"§e§l現在承諾待ちです...")
+
+                    sendMessage(user,"§e§lあなたに賃料の支払いを求められています！")
+                    sendMessage(user,"§e§l承諾する場合は下のチャット分をクリック、しない場合はこの文を無視してください")
+                    sendMessage(user,"§a§lID:$id Owner:${p.name} rent:${String.format("%,.1f", regionData[id]!!.rent)}")
+                    sendHoverText(user,"§e§l[賃料の支払いに承諾する]","","mre accept $id ${p.name}")
+
+//                    val user = Bukkit.getOfflinePlayer(uuid)
+//                    if (user.isOnline && user.player !=null){
+//                        p.closeInventory()
+//                        regionUserDatabase.setRent(user.player!!,id)
+//                        sendMessage(p,"§a§l登録成功！、試験実装のため不具合があるかもしれません！")
+//                        return
+//                    }
+//                    sendMessage(p,"§3§lユーザーがオフラインです")
+//                    return
                 }
                 7->{
                     if (Bukkit.getOfflinePlayer(uuid).isOnline){

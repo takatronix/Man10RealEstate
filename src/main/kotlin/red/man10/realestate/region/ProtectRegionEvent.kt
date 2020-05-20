@@ -150,23 +150,28 @@ class ProtectRegionEvent:Listener{
         return false
     }
 
-    ////////////////////////////////////////////////////////////
-    //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
-    ////////////////////////////////////////////////////////////
-    fun isWithinRange(loc: org.bukkit.Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>,world:String):Boolean{
 
-        if (loc.world.name != world)return false
+    companion object{
+        ////////////////////////////////////////////////////////////
+        //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
+        ////////////////////////////////////////////////////////////
+        fun isWithinRange(loc: org.bukkit.Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>,world:String):Boolean{
 
-        val x = loc.blockX
-        val y = loc.blockY
-        val z = loc.blockZ
+            if (loc.world.name != world)return false
 
-        if (x < start.first.coerceAtMost(end.first) || x > start.first.coerceAtLeast(end.first))return false
-        if (y < start.second.coerceAtMost(end.second) || y > start.second.coerceAtLeast(end.second))return false
-        if (z < start.third.coerceAtMost(end.third) || z > start.third.coerceAtLeast(end.third))return false
+            val x = loc.blockX
+            val y = loc.blockY
+            val z = loc.blockZ
 
-        return true
+            if (x < start.first.coerceAtMost(end.first) || x > start.first.coerceAtLeast(end.first))return false
+            if (y < start.second.coerceAtMost(end.second) || y > start.second.coerceAtLeast(end.second))return false
+            if (z < start.third.coerceAtMost(end.third) || z > start.third.coerceAtLeast(end.third))return false
+
+            return true
+
+        }
 
     }
+
 
 }
