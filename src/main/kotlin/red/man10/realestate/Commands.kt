@@ -11,6 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import red.man10.realestate.Constants.Companion.WAND_NAME
 import red.man10.realestate.Constants.Companion.disableWorld
+import red.man10.realestate.Constants.Companion.maxBalance
 import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Constants.Companion.regionUserData
 import red.man10.realestate.Constants.Companion.sendHoverText
@@ -173,6 +174,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 val id = args[1].toInt()
                 val rent = args[2].toDouble()
 
+                if (rent< 0.0 || rent> maxBalance){
+                    return true
+                }
+
                 if (!hasRegionAdmin(sender,id))return false
 
                 regionDatabase.setRent(id,rent)
@@ -289,9 +294,20 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             if (cmd == "changeprice" && args.size == 3){
 
+
+                if (!NumberUtils.isNumber(args[1]))return true
+
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
-                regionDatabase.setPrice(args[1].toInt(),args[2].toDouble())
+                if (!NumberUtils.isNumber(args[2])){
+                    return true
+                }
+
+                val price = args[2].toDouble()
+
+                if (price<0.0 || price> maxBalance)return true
+
+                regionDatabase.setPrice(args[1].toInt(),price)
 
                 sendMessage(sender,"§e§l${args[1]}の金額を${args[2]}に変更しました")
                 return true
@@ -451,6 +467,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     pl.reloadConfig()
 
                     disableWorld = pl.config.getStringList("disableWorld")
+                    maxBalance = pl.config.getDouble("maxBalance",100000000.0)
 
                     sendMessage(sender,"§e§lリロード完了")
 

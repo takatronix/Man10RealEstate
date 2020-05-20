@@ -37,6 +37,8 @@ class Constants(val p:Plugin) {
 
         var disableWorld = mutableListOf<String>()
 
+        var maxBalance = 100000000.0
+
         //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
         fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
             //////////////////////////////////////////

@@ -67,6 +67,7 @@ class Plugin : JavaPlugin(), Listener {
         regionUserDatabase = RegionUserDatabase(this)
 
         Constants.disableWorld = config.getStringList("disableWorld")
+        Constants.maxBalance = config.getDouble("maxBalance",100000000.0)
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(regionEvent,this)
