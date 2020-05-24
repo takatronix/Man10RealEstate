@@ -9,19 +9,18 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import red.man10.realestate.Constants.Companion.WAND_NAME
-import red.man10.realestate.Constants.Companion.disableWorld
-import red.man10.realestate.Constants.Companion.maxBalance
-import red.man10.realestate.Constants.Companion.regionData
-import red.man10.realestate.Constants.Companion.regionUserData
-import red.man10.realestate.Constants.Companion.sendHoverText
-import red.man10.realestate.Constants.Companion.sendMessage
+import red.man10.realestate.Plugin.Companion.WAND_NAME
+import red.man10.realestate.Plugin.Companion.disableWorld
+import red.man10.realestate.Plugin.Companion.maxBalance
+import red.man10.realestate.Plugin.Companion.regionData
+import red.man10.realestate.Plugin.Companion.regionUserData
+import red.man10.realestate.Plugin.Companion.sendHoverText
+import red.man10.realestate.Plugin.Companion.sendMessage
 import red.man10.realestate.Plugin.Companion.regionDatabase
 import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
-import red.man10.realestate.region.RegionUserDatabase
 
 class Commands (private val pl :Plugin):CommandExecutor{
 
@@ -365,13 +364,13 @@ class Commands (private val pl :Plugin):CommandExecutor{
                         .replace("Y","").replace("Z","")
                         .replace(":","").split(",")
 
-                data.startCoordinate = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+                data.startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
 
                 val c2 = lore[4].replace("§aEnd:§fX:","")
                         .replace("Y","").replace("Z","")
                         .replace(":","").split(",")
 
-                data.endCoordinate = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+                data.endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
 
 
                 data.teleport = mutableListOf(
@@ -511,7 +510,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                         val data = region.value
 
-                        if (ProtectRegionEvent.isWithinRange(loc,data.startCoordinate,data.endCoordinate,data.world)){
+                        if (ProtectRegionEvent.isWithinRange(loc,data.startPosition,data.endPosition,data.world)){
                             sendMessage(sender,"§e§lRegionID:${region.key}")
                         }
                     }

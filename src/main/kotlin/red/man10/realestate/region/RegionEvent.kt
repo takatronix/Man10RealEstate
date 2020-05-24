@@ -8,17 +8,17 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import red.man10.realestate.Constants
-import red.man10.realestate.Constants.Companion.regionData
-import red.man10.realestate.Constants.Companion.sendHoverText
-import red.man10.realestate.Constants.Companion.sendMessage
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.regionData
+import red.man10.realestate.Plugin.Companion.sendHoverText
+import red.man10.realestate.Plugin.Companion.sendMessage
+import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.regionDatabase
 import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import java.lang.Exception
 
 
-class RegionEvent (private val pl :Plugin) : Listener{
+class RegionEvent (private val pl : Plugin) : Listener{
 
 
     /////////////////////////
@@ -34,7 +34,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
         val wand = e.item?:return
         if (wand.type != Material.STICK)return
         if (!wand.hasItemMeta())return
-        if(wand.itemMeta.displayName != Constants.WAND_NAME) return
+        if(wand.itemMeta.displayName != WAND_NAME) return
 
         val lore = wand.lore?: mutableListOf()
 
@@ -79,7 +79,7 @@ class RegionEvent (private val pl :Plugin) : Listener{
         val wand = e.item?:return
         if (wand.type != Material.STICK)return
         if (!wand.hasItemMeta())return
-        if(wand.itemMeta.displayName != Constants.WAND_NAME) return
+        if(wand.itemMeta.displayName != WAND_NAME) return
 
         val lore = wand.lore?: mutableListOf("","","","","")
 

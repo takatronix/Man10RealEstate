@@ -2,14 +2,13 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.realestate.Constants.Companion.mysqlQueue
-import red.man10.realestate.Constants.Companion.ownerData
-import red.man10.realestate.Constants.Companion.regionData
-import red.man10.realestate.Constants.Companion.sendMessage
-import red.man10.realestate.Constants.Companion.worldRegion
+import red.man10.realestate.Plugin.Companion.mysqlQueue
+import red.man10.realestate.Plugin.Companion.ownerData
+import red.man10.realestate.Plugin.Companion.regionData
+import red.man10.realestate.Plugin.Companion.sendMessage
+import red.man10.realestate.Plugin.Companion.worldRegion
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
-import java.awt.print.Book
 import java.util.*
 
 class RegionDatabase(private val pl: Plugin) {
@@ -37,12 +36,12 @@ class RegionDatabase(private val pl: Plugin) {
                 "'${data.teleport[2]}', "+
                 "'${data.teleport[3]}', "+
                 "'${data.teleport[4]}', "+
-                "'${data.startCoordinate.first}', " +
-                "'${data.startCoordinate.second}', " +
-                "'${data.startCoordinate.third}', " +
-                "'${data.endCoordinate.first}', " +
-                "'${data.endCoordinate.second}', " +
-                "'${data.endCoordinate.third}');"
+                "'${data.startPosition.first}', " +
+                "'${data.startPosition.second}', " +
+                "'${data.startPosition.third}', " +
+                "'${data.endPosition.first}', " +
+                "'${data.endPosition.second}', " +
+                "'${data.endPosition.third}');"
 
         val mysql = MySQLManager(pl,"registerRegion")
 
@@ -169,6 +168,7 @@ class RegionDatabase(private val pl: Plugin) {
         }
 
 
+
         setRegionOwner(id,user)
         setRegionStatus(id,"Protected")
 
@@ -223,12 +223,12 @@ class RegionDatabase(private val pl: Plugin) {
                     rs.getDouble("pitch"),
                     rs.getDouble("yaw")
             )
-            data.startCoordinate = Triple(
+            data.startPosition = Triple(
                     rs.getDouble("sx"),
                     rs.getDouble("sy"),
                     rs.getDouble("sz")
             )
-            data.endCoordinate = Triple(
+            data.endPosition = Triple(
                     rs.getDouble("ex"),
                     rs.getDouble("ey"),
                     rs.getDouble("ez")
@@ -243,6 +243,9 @@ class RegionDatabase(private val pl: Plugin) {
         mysql.close()
     }
 
+    ////////////////////////////////////////
+    //メソッドを呼び出した時点でのリージョンのデータを保存
+    ////////////////////////////////////////
     fun saveRegion(id:Int):Boolean{
 
         val data = regionData[id]?:return false
@@ -256,6 +259,12 @@ class RegionDatabase(private val pl: Plugin) {
                 "t.z = ${data.teleport[2]}, " +
                 "t.pitch = ${data.teleport[3]}, " +
                 "t.yaw = ${data.teleport[4]}, " +
+                "t.sx = ${data.startPosition.first}, " +
+                "t.sy = ${data.startPosition.second}, " +
+                "t.sz = ${data.startPosition.third}, " +
+                "t.ex = ${data.endPosition.first}, " +
+                "t.ey = ${data.endPosition.second}, " +
+                "t.ez = ${data.endPosition.third}, " +
                 "t.status = '${data.status}', " +
                 "t.price = ${data.price}, " +
                 "t.profit = 0, " +
@@ -265,6 +274,8 @@ class RegionDatabase(private val pl: Plugin) {
 
         return true
     }
+
+    //オーナーを取得
     fun getOwner(data:RegionData):String{
 
         val uuid = data.owner_uuid
@@ -288,8 +299,8 @@ class RegionDatabase(private val pl: Plugin) {
         var world = "builder"
         var server = "server"
 
-        var startCoordinate: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
-        var endCoordinate: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
+        var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
+        var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
         var teleport = mutableListOf<Double>()
 
         var price : Double = 0.0

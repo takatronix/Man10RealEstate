@@ -8,19 +8,13 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
-import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityShootBowEvent
-import org.bukkit.event.entity.ProjectileHitEvent
-import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
-import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import red.man10.realestate.Constants.Companion.disableWorld
-import red.man10.realestate.Constants.Companion.regionData
-import red.man10.realestate.Constants.Companion.regionUserData
-import red.man10.realestate.Constants.Companion.sendMessage
-import red.man10.realestate.Plugin
-import java.lang.Exception
+import red.man10.realestate.Plugin.Companion.disableWorld
+import red.man10.realestate.Plugin.Companion.regionData
+import red.man10.realestate.Plugin.Companion.regionUserData
+import red.man10.realestate.Plugin.Companion.sendMessage
 
 class ProtectRegionEvent:Listener{
 
@@ -121,7 +115,7 @@ class ProtectRegionEvent:Listener{
 
             val data = id.value
 
-            if (isWithinRange(loc,data.startCoordinate,data.endCoordinate,data.world)){
+            if (isWithinRange(loc,data.startPosition,data.endPosition,data.world)){
                 if (data.status == "Lock")return false
                 if (data.owner_uuid == p.uniqueId)return true
 

@@ -9,13 +9,11 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import red.man10.realestate.Constants.Companion.isLike
-import red.man10.realestate.Constants.Companion.prefix
-import red.man10.realestate.Constants.Companion.regionData
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.isLike
+import red.man10.realestate.Plugin.Companion.prefix
+import red.man10.realestate.Plugin.Companion.regionData
 import red.man10.realestate.Plugin.Companion.regionDatabase
-import red.man10.realestate.region.RegionDatabase
-import javax.naming.Name
 
 class InventoryMenu(private val pl: Plugin) : Listener {
 
@@ -77,7 +75,6 @@ class InventoryMenu(private val pl: Plugin) : Listener {
                     "§b§lOwner:${regionDatabase.getOwner(d)}",
                     "§a§lStatus:${d.status}"
             ),list[i].toString())
-
             inv.addItem(icon)
         }
 

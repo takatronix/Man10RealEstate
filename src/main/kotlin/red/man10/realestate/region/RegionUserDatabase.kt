@@ -2,19 +2,19 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.realestate.Constants.Companion.isLike
-import red.man10.realestate.Constants.Companion.mysqlQueue
-import red.man10.realestate.Constants.Companion.ownerData
-import red.man10.realestate.Constants.Companion.regionData
-import red.man10.realestate.Constants.Companion.regionUserData
-import red.man10.realestate.Constants.Companion.sendMessage
+import red.man10.realestate.Plugin.Companion.isLike
+import red.man10.realestate.Plugin.Companion.mysqlQueue
+import red.man10.realestate.Plugin.Companion.ownerData
+import red.man10.realestate.Plugin.Companion.regionData
+import red.man10.realestate.Plugin.Companion.regionUserData
+import red.man10.realestate.Plugin.Companion.sendMessage
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import java.sql.Timestamp
 import java.util.*
 import kotlin.collections.HashMap
 
-class RegionUserDatabase (private val pl:Plugin){
+class RegionUserDatabase (private val pl: Plugin){
 
     val mysql = MySQLManager(pl,"mreUserData")
 
