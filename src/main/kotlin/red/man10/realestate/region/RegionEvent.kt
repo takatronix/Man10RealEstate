@@ -143,7 +143,7 @@ class RegionEvent (private val pl : Plugin) : Listener{
     @EventHandler
     fun signClickEvent(e:PlayerInteractEvent){
 
-        if (e.action != Action.RIGHT_CLICK_BLOCK || e.action !=Action.LEFT_CLICK_BLOCK)return
+        if (e.action != Action.RIGHT_CLICK_BLOCK && e.action !=Action.LEFT_CLICK_BLOCK)return
 
         val b= e.clickedBlock?:return
         val sign : Sign
@@ -170,10 +170,8 @@ class RegionEvent (private val pl : Plugin) : Listener{
 
         //左クリックでいいね
         if (e.action == Action.LEFT_CLICK_BLOCK && !p.isSneaking){
-
-            regionUserDatabase.saveUserData(p,id)
-
             e.isCancelled = true
+            p.performCommand("mre good $id")
             return
         }
 

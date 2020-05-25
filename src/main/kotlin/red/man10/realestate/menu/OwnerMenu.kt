@@ -156,7 +156,6 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
                 sendMessage(p,"§3§lこの土地には住人はいないようです")
 
-                p.closeInventory()
                 return@Runnable
             }
 
@@ -343,7 +342,13 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         val inv = Bukkit.createInventory(null,54,ownerMenu)
 
-        val list = ownerData[p]?:return
+        val list = ownerData[p]
+
+        if (list.isNullOrEmpty()){
+            sendMessage(p,"§e§lあなたは自分の土地を持っていません")
+            p.closeInventory()
+            return
+        }
 
         for (i in page*45 .. (page+1)*45){
 
@@ -509,6 +514,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
         //ユーザーリストの表示
         if (name  == customUserMenu){
 
+            //TODO:戻れない問題などをそのうち治す
             e.isCancelled = true
 
             val id = getId(e.inventory.getItem(0)!!,pl).split(",")[1].toInt()
