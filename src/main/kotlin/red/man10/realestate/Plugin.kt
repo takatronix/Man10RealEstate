@@ -62,9 +62,9 @@ class Plugin : JavaPlugin(), Listener {
 
         val mysqlQueue = LinkedBlockingQueue<String>()
 
-        val isLike = HashMap<Player,MutableList<Int>>()
+        val likedRegion = HashMap<Player,MutableList<Int>>()//いいねをしたリージョン
 
-        val ownerData = HashMap<Player,MutableList<Int>>()//オーナーメニューを開くための辞書
+        val ownerData = HashMap<Player,MutableList<Int>>()//管理できるリージョン
 
         var disableWorld = mutableListOf<String>()
 

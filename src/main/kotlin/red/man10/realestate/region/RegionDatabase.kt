@@ -105,11 +105,25 @@ class RegionDatabase(private val pl: Plugin) {
     //オーナーの変更
     fun setRegionOwner(id:Int,owner: Player){
 
+        val data = regionData[id]?:return
+
+        //旧オーナーがいた場合、リストから削除
+        if (data.owner_uuid!=null){
+
+            val p = Bukkit.getOfflinePlayer(data.owner_uuid!!)
+            if (p.isOnline){
+                val list = ownerData[p.player!!]!!
+                list.remove(id)
+                ownerData[p.player!!] = list
+            }
+        }
+
+        //新オーナー追加
         val list = ownerData[owner]?: mutableListOf()
         list.add(id)
         ownerData[owner] = list
 
-        val data = regionData[id]?:return
+        //リージョンのデータに追加
         data.owner_uuid = owner.uniqueId
         regionData[id] = data
 
@@ -127,7 +141,7 @@ class RegionDatabase(private val pl: Plugin) {
     }
 
     //土地の購入
-    fun buy(id: Int,user:Player){
+    fun buy(id: Int,user:Player,oldOwner: Player?){
 
         val data = regionData[id]?:when{
             else -> {
@@ -158,9 +172,8 @@ class RegionDatabase(private val pl: Plugin) {
             RegionUserDatabase(pl).addProfit(data.owner_uuid!!,data.price)
         }
 
-
-
         setRegionOwner(id,user)
+
         setRegionStatus(id,"Protected")
 
         sendMessage(user,"§a§l購入完了、土地の保護がされました！")

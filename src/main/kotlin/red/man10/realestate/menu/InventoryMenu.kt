@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Plugin
-import red.man10.realestate.Plugin.Companion.isLike
+import red.man10.realestate.Plugin.Companion.likedRegion
 import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.regionData
 import red.man10.realestate.Plugin.Companion.regionDatabase
@@ -62,7 +62,7 @@ class InventoryMenu(private val pl: Plugin) : Listener {
 
         val inv = Bukkit.createInventory(null,54,bookmark)
 
-        val list = isLike[p]!!
+        val list = likedRegion[p]!!
 
         for (i in page*45 .. (page+1)*45){
 

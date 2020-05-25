@@ -2,7 +2,7 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.realestate.Plugin.Companion.isLike
+import red.man10.realestate.Plugin.Companion.likedRegion
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.ownerData
 import red.man10.realestate.Plugin.Companion.regionData
@@ -119,7 +119,7 @@ class RegionUserDatabase (private val pl: Plugin){
             }
         }
 
-        isLike[p] = list
+        likedRegion[p] = list
 
         rs2.close()
         mysql.close()
@@ -214,13 +214,13 @@ class RegionUserDatabase (private val pl: Plugin){
             return
         }
 
-        val list = isLike[p]?: mutableListOf()
+        val list = likedRegion[p]?: mutableListOf()
 
         if (list.isEmpty()){
             mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('$id', '${p.name}', '${p.uniqueId}', '0');")
 
             list.add(id)
-            isLike[p] = list
+            likedRegion[p] = list
             sendMessage(p,"§a§lいいねしました！")
             return
         }
@@ -233,7 +233,7 @@ class RegionUserDatabase (private val pl: Plugin){
             sendMessage(p,"§a§lいいねしました！")
         }
 
-        isLike[p] = list
+        likedRegion[p] = list
 
         mysqlQueue.add("UPDATE `liked_index` SET `is_like`='${if (list.contains(id)){ 1 }else{ 0 }}' WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
 
