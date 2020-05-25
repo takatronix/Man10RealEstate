@@ -216,27 +216,17 @@ class RegionUserDatabase (private val pl: Plugin){
 
         val list = likedRegion[p]?: mutableListOf()
 
-        if (list.isEmpty()){
-            mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('$id', '${p.name}', '${p.uniqueId}', '0');")
-
-            list.add(id)
-            likedRegion[p] = list
-            sendMessage(p,"§a§lいいねしました！")
-            return
-        }
-
         if (list.contains(id)){
             list.remove(id)
+            mysqlQueue.add("DELETE FROM `liked_index` WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
             sendMessage(p,"§a§aいいね解除しました！")
         }else{
+            mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('$id', '${p.name}', '${p.uniqueId}', '0');")
             list.add(id)
             sendMessage(p,"§a§lいいねしました！")
         }
 
         likedRegion[p] = list
-
-        mysqlQueue.add("UPDATE `liked_index` SET `is_like`='${if (list.contains(id)){ 1 }else{ 0 }}' WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
-
 
     }
 
