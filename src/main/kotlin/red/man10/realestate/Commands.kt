@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.maxBalance
+import red.man10.realestate.Plugin.Companion.numbers
 import red.man10.realestate.Plugin.Companion.regionData
 import red.man10.realestate.Plugin.Companion.regionUserData
 import red.man10.realestate.Plugin.Companion.sendHoverText
@@ -21,10 +22,10 @@ import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
+import java.util.*
+import kotlin.random.Random
 
 class Commands (private val pl :Plugin):CommandExecutor{
-
-    val inventory = InventoryMenu(pl)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -37,7 +38,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
 
             if (args.isEmpty()){
-                inventory.openMainMenu(sender)
+                pl.invmain.openMainMenu(sender)
                 return true
             }
 
@@ -50,9 +51,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //onSaleの土地を購入する
             if (cmd == "buy"){
 
-                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
+                Thread(Runnable {
                     regionDatabase.buy(args[1].toInt(),sender)
-                })
+                }).start()
                 return true
             }
 
@@ -121,15 +122,29 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val p = Bukkit.getPlayer(args[2])?:return false
 
-                regionUserDatabase.createUserData(id,p)
-                sendMessage(sender,"§e§l${args[2]}§a§lを居住者に追加しました！")
+                if (regionUserData[p]!![id] != null){
+                    sendMessage(sender,"§3§lこのユーザーは既に住人です")
+                    return true
+                }
 
-                sendMessage(p,"§e§lあなたは居住者に追加されました")
+                sendMessage(sender,"§a§l現在承諾待ちです....")
+
+                val number = Random.nextInt()
+
+                numbers.add(number)
+
+                sendMessage(p,"§a§l居住者追加を求められています！")
+
                 sendMessage(p,"§a§l=================土地の情報==================")
-                sendMessage(p,"§a§lオーナー：${regionDatabase.getOwner(data)}")
+                sendMessage(p,"§a§lオーナー：${sender.name}")
                 sendMessage(p,"§a§l土地の名前：${data.name}")
                 sendMessage(p,"§a§l土地のステータス：${data.status}")
                 sendMessage(p,"§a§l===========================================")
+
+                sendMessage(p,"§e§l承諾する場合は下のチャット分をクリック、しない場合はこの文を無視してください")
+
+                sendHoverText(p,"§e§l[住人追加に承諾する]","","mre acceptuser $id ${sender.name} $number")
+
                 return true
 
             }
@@ -162,38 +177,36 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //賃料 /mre rent id rent
-            if (cmd == "rent" && args.size == 3){
 
-                if (!NumberUtils.isNumber(args[1])||!NumberUtils.isNumber(args[2])){
-                    sendMessage(sender,"§3§lパラメータの入力方法が違います")
-                    return true
-                }
+            //mre acceptuser id owner
+            if (cmd == "acceptuser"){
 
-                val id = args[1].toInt()
-                val rent = args[2].toDouble()
+                if (!numbers.contains(args[2].toInt()))return true
 
-                if (rent< 0.0 || rent> maxBalance){
-                    return true
-                }
+                numbers.remove(args[2].toInt())
 
-                if (!hasRegionAdmin(sender,id))return false
+                regionUserDatabase.createUserData(args[1].toInt(),sender)
 
-                regionDatabase.setRent(id,rent)
-                sendMessage(sender,"§a§l設定完了！")
+                sendMessage(sender,"§a§l登録完了！住人になりました！")
+
+                sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が賃料の支払いに承諾しました")
 
                 return true
             }
 
             //mre accept id owner
-            if (cmd == "accept"){
+            if (cmd == "acceptrent"){
+
+                if (!numbers.contains(args[2].toInt()))return true
+
+                numbers.remove(args[2].toInt())
+
 
                 if (regionUserData[sender]!![args[1].toInt()] == null){
                     return true
                 }
 
                 regionUserDatabase.setRent(sender,args[1].toInt())
-
 
                 sendMessage(sender,"§a§l設定追加完了！、あなたはこれから${args[1]}のオーナーに賃料を支払うことになります！")
 
@@ -275,6 +288,33 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
                 return true
             }
+
+            //賃料 /mre rent id p rent
+            if (cmd == "changerent" && args.size == 3){
+
+                if (!NumberUtils.isNumber(args[1])||!NumberUtils.isNumber(args[3])){
+                    sendMessage(sender,"§3§lパラメータの入力方法が違います")
+                    return true
+                }
+
+                val id = args[1].toInt()
+                val p = Bukkit.getPlayer(args[2])?:return true
+                val rent = args[3].toDouble()
+
+                if (rent< 0.0 || rent> maxBalance){
+                    return true
+                }
+
+                if (!hasRegionAdmin(sender,id))return false
+
+                regionUserDatabase.setRentPrice(p,id,rent)
+
+                sendMessage(sender,"§a§l設定完了！")
+                sendMessage(p,"§a§lID:$id　の賃料が変更されました！！ 賃料:$rent")
+
+                return true
+            }
+
 
             if (cmd == "changestatus" && args.size == 3){
 
@@ -420,29 +460,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            if (cmd == "list"){
-
-//                if (args.size == 2){
-//                    for (i in args[1].toInt() .. args[1].toInt()+15){
-//                        if (i >= regionData.size)break
-//                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
-//                    }
-//
-//                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${args[1].toInt()+16}")
-//                    sendHoverText(sender,"§e§l[Previous]","","mre list ${args[1].toInt()-16}")
-//
-//                }else{
-//                    for (i in 1 .. 16){
-//                        if (i >= regionData.size)break
-//                        if (regionData[i] == null)continue
-//                        sendMessage(sender,"$i : §b§l${regionData[i]!!.name}")
-//                    }
-//                    sendHoverText(sender,"§e§l[NEXT]","","mre list ${17}")
-//                }
-
-                return true
-            }
-
             //範囲指定ワンド取得
             if (cmd == "wand"){
                 val wand = ItemStack(Material.STICK)
@@ -518,6 +535,56 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     sendMessage(sender,"§e§l=====================================")
                 }).start()
             }
+
+            ///////////////////////
+            //リージョンの再指定
+            //////////////////////
+            if (cmd == "setregion"){
+
+                val id = args[1].toInt()
+
+                val wand = sender.inventory.itemInMainHand
+
+                if (!wand.hasItemMeta() || wand.itemMeta.displayName != WAND_NAME){
+                    sendMessage(sender,"${WAND_NAME}§e§lを持ってください！")
+                    return true
+                }
+
+                val lore = wand.lore
+
+                if (lore == null || wand.lore!!.size != 5){
+                    sendMessage(sender,"§e§fの範囲指定ができていません！")
+                    return true
+                }
+
+                val data = regionData[id]?:return true
+
+                sendMessage(sender,"§a§l現在登録中です・・・")
+
+                data.server = lore[1].replace("§aServer:§f","")
+                data.world = lore[2].replace("§aWorld:§f","")
+
+                val c1 = lore[3].replace("§aStart:§fX:","")
+                        .replace("Y","").replace("Z","")
+                        .replace(":","").split(",")
+
+                data.startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+
+                val c2 = lore[4].replace("§aEnd:§fX:","")
+                        .replace("Y","").replace("Z","")
+                        .replace(":","").split(",")
+
+                data.endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+
+                regionData[id] = data
+
+                regionDatabase.saveRegion(id)
+
+                sendMessage(sender,"§a§l範囲の再指定が完了しました！")
+
+                return true
+
+            }
         }
 
         return false
@@ -545,7 +612,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             sendMessage(p,"§e§l/mreop create <リージョン名> <値段> : 新規リージョンを作成します")
             sendMessage(p,"§e§l範囲指定済みの${WAND_NAME}§e§lを持ってコマンドを実行してください")
             sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
-            sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
+//            sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
             sendMessage(p,"§e§l/mreop reload : 再読み込みをします")
         }
     }

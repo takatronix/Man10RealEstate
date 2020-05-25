@@ -154,7 +154,8 @@ class RegionUserDatabase (private val pl: Plugin){
                 "`allow_all`='${if (data.allowAll){1}else{0}}'," +
                 "`allow_block`='${if (data.allowBlock){1}else{0}}'," +
                 "`allow_inv`='${if (data.allowInv){1}else{0}}'," +
-                "`allow_door`='${if (data.allowDoor){1}else{0}}'" +
+                "`allow_door`='${if (data.allowDoor){1}else{0}}'," +
+                "`rent`='${data.rent}'" +
                 " WHERE `uuid`='${p.uniqueId}' AND `region_id`='$id';"
         mysqlQueue.add(sql)
 
@@ -259,6 +260,18 @@ class RegionUserDatabase (private val pl: Plugin){
         return pd.isRent
     }
 
+    fun setRentPrice(p:Player,id: Int,price:Double){
+
+        val pd = regionUserData[p]!![id]?:return
+
+        pd.rent = price
+
+        regionUserData[p]!![id] = pd
+
+        saveUserData(p,id)
+
+    }
+
     class RegionUserData{
 
 //        var deposit : Double = 0.0  //この金がなくなったら支払えなくなる
@@ -270,6 +283,8 @@ class RegionUserDatabase (private val pl: Plugin){
         var allowBlock = false
         var allowInv = false
         var allowDoor = false
+
+        var rent = 0.0
     }
 
 }

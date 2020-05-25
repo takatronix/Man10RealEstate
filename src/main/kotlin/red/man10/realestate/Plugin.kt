@@ -70,6 +70,9 @@ class Plugin : JavaPlugin(), Listener {
 
         var maxBalance = 100000000.0
 
+
+        val numbers = mutableListOf<Int>()
+
         //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
         fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
             //////////////////////////////////////////
@@ -261,7 +264,10 @@ class Plugin : JavaPlugin(), Listener {
 
         while (rs.next()){
 
+            val rentPrice = rs.getDouble("rent")
+
             if (rs.getInt("is_rent") == 0)continue
+            if (rentPrice == 0.0)continue
 
             val uuid = UUID.fromString( rs.getString("uuid"))
             val id = rs.getInt("region_id")
@@ -283,16 +289,16 @@ class Plugin : JavaPlugin(), Listener {
 
                 val pd = regionUserData[p]!![id]?:continue
 
-                if (vault.getBalance(uuid) <data.rent){
+                if (vault.getBalance(uuid) <rentPrice){
                     sendMessage(p,"${data.name}§3§lの賃料が支払えません！支払えるまでロックされます！")
                     pd.status = "Lock"
                 }else{
                     sendMessage(p,"${data.name}§3§lの賃料の賃料を支払いました！")
-                    vault.withdraw(uuid,data.rent)
+                    vault.withdraw(uuid,rentPrice)
 
                     pd.status = "Share"
                     if (data.owner_uuid != null){
-                        regionUserDatabase.addProfit(data.owner_uuid!!,data.rent)
+                        regionUserDatabase.addProfit(data.owner_uuid!!,rentPrice)
                     }
                 }
                 pd.paid = Date()
@@ -303,16 +309,16 @@ class Plugin : JavaPlugin(), Listener {
             }
 
             //オフラインのとき
-            if (vault.getBalance(uuid) < data.rent){
+            if (vault.getBalance(uuid) < rentPrice){
 
                 mysqlQueue.add("UPDATE `region_user` SET status='Lock' WHERE uuid='$uuid' AND region_id=$id;")
                 continue
             }
 
-            vault.withdraw(uuid,data.rent)
+            vault.withdraw(uuid,rentPrice)
             mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$uuid' AND region_id=$id;")
             if (data.owner_uuid != null){
-                regionUserDatabase.addProfit(data.owner_uuid!!,data.rent)
+                regionUserDatabase.addProfit(data.owner_uuid!!,rentPrice)
             }
 
         }

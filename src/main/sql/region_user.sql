@@ -7,12 +7,12 @@ CREATE TABLE `region_user` (
   `created_time` datetime NOT NULL COMMENT '登録日',
   `status` varchar(16) DEFAULT '' COMMENT 'ステータス',
   `is_rent` TINYINT(1) DEFAULT '0' COMMENT '1:賃貸 0:賃貸じゃない',
-  `deposit` double NOT NULL DEFAULT '0' COMMENT '支払った額',
   `paid_date` datetime NOT NULL DEFAULT now() COMMENT '最後に支払った日',
   `allow_all` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
   `allow_block` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
   `allow_inv` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
   `allow_door` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
+  `rent`    double DEFAULT '0.0' COMMENT '賃料'
   INDEX `region_id` (`region_id`),
   KEY `uuid` (`uuid`)
 

@@ -20,6 +20,7 @@ import red.man10.realestate.Plugin.Companion.sendMessage
 import red.man10.realestate.Plugin.Companion.sendSuggest
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.numbers
 import red.man10.realestate.Plugin.Companion.regionUserDatabase
 import red.man10.realestate.menu.InventoryMenu.Companion.IS
 import red.man10.realestate.menu.InventoryMenu.Companion.getId
@@ -34,7 +35,6 @@ class OwnerMenu(val pl : Plugin) : Listener{
     val customUserMenu = "${prefix}§a§l住人の設定"
     val customUserData = "${prefix}§a§l住人の詳細設定"
     val changeStatus = "${prefix}§a§lステータスの変更"
-    val changeRent = "${prefix}§a§l賃料設定"
     val changeRentSpan = "${prefix}§a§lスパン設定"
     val perm = "$prefix§3§l権限設定"
 
@@ -93,9 +93,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         inv.setItem(16,IS(pl,Material.ENDER_PEARL,"§a§lテレポート設定", mutableListOf(),"$id"))
 
-        inv.setItem(38,IS(pl,Material.CLOCK,"§b§l賃貸設定",
-                mutableListOf("§e現在の賃料：${String.format("%,.1f",data.rent)}"
-                        ,"§aスパン：${when (data.span) {
+        inv.setItem(38,IS(pl,Material.CLOCK,"§b§l賃貸スパン設定",
+                mutableListOf("§a現在設定されているスパン：${when (data.span) {
                             0 -> "一ヶ月ごと"
                             1 -> "一週間ごと"
                             else -> "一日ごと"
@@ -121,15 +120,15 @@ class OwnerMenu(val pl : Plugin) : Listener{
     }
 
     //賃貸設定
-    fun changeRentSetting(p:Player, id:Int){
-
-        val inv = Bukkit.createInventory(null,9,changeRent)
-
-        inv.setItem(2, IS(pl,Material.EMERALD,"§e§l賃料の変更", mutableListOf(),"$id"))
-        inv.setItem(6, IS(pl,Material.CLOCK,"§e§lスパンの変更", mutableListOf(),"$id"))
-
-        p.openInventory(inv)
-    }
+//    fun changeRentSetting(p:Player, id:Int){
+//
+//        val inv = Bukkit.createInventory(null,9,changeRent)
+//
+//        inv.setItem(2, IS(pl,Material.EMERALD,"§e§l賃料の変更", mutableListOf(),"$id"))
+//        inv.setItem(6, IS(pl,Material.CLOCK,"§e§lスパンの変更", mutableListOf(),"$id"))
+//
+//        p.openInventory(inv)
+//    }
 
     //賃料の徴収スパンの設定
     fun changeSpan(p:Player,id: Int){
@@ -229,8 +228,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
         val inv = Bukkit.createInventory(null,9,customUserData)
 
         inv.setItem(1, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),"$uuid,$id"))
-        inv.setItem(4, IS(pl,Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),"$uuid,$id"))
-        inv.setItem(7,IS(pl,Material.REDSTONE_BLOCK,"§4§l住人を退去", mutableListOf(),"$uuid,$id"))
+        inv.setItem(3, IS(pl,Material.COMPASS,"§a§l賃料を設定する", mutableListOf(),"$uuid,$id"))
+        inv.setItem(5, IS(pl,Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),"$uuid,$id"))
+        inv.setItem(7,IS(pl,Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),"$uuid,$id"))
 
         p.openInventory(inv)
     }
@@ -455,7 +455,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
                     sendSuggest(p,"§e§l販売する料金を入力してください！","/mre changeprice ${getId(item, pl)} ")
                 } // 料金変更
                 16->p.performCommand("mre settp ${getId(item, pl)}")              //テレポート地点変更
-                38->changeRentSetting(p, getId(item,pl).toInt())                              //賃料設定
+                38->changeSpan(p, getId(item,pl).toInt())                        //賃料設定
                 42->{
                     p.closeInventory()
                     sendSuggest(p,"§e§l変更するオーナーの名前を入力してください！","/mre changeowner ${getId(item, pl)} ")
@@ -478,18 +478,18 @@ class OwnerMenu(val pl : Plugin) : Listener{
             }
         }
 
-        //賃料の設定
-        if (name == changeRent){
-            e.isCancelled = true
-            when(e.slot){
-                2-> {
-                    p.closeInventory()
-                    sendSuggest(p,"§e§l賃料を入力してください！","/mre rent ${getId(item, pl)} ")
-                }
-                6->changeSpan(p,getId(item, pl).toInt())
-            }
-
-        }
+//        //賃料の設定
+//        if (name == changeRent){
+//            e.isCancelled = true
+//            when(e.slot){
+//                2-> {
+//                    p.closeInventory()
+//                    sendSuggest(p,"§e§l賃料を入力してください！","/mre rent ${getId(item, pl)} ")
+//                }
+//                6->changeSpan(p,getId(item, pl).toInt())
+//            }
+//
+//        }
 
         //スパンの変更
         if (name == changeRentSpan){
@@ -535,7 +535,16 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             when(e.slot){
                 1->customPerm(p,id,uuid)
-                4->{
+                3->{
+                    p.closeInventory()
+                    if (!Bukkit.getOfflinePlayer(uuid).isOnline){
+                        sendMessage(p,"§e§lオフラインの住人の賃料は変更できません！")
+                        return
+                    }
+                    sendSuggest(p,"§e§l賃料を入力してください！","/mre changerent ${getId(item, pl)} $uuid ")
+                    return
+                }
+                5->{
 
                     val user = Bukkit.getOfflinePlayer(uuid).player
 
@@ -557,22 +566,17 @@ class OwnerMenu(val pl : Plugin) : Listener{
                         return
                     }
 
+                    val number = Random().nextInt()
+
+                    numbers.add(number)
+
                     sendMessage(p,"§e§l現在承諾待ちです...")
 
                     sendMessage(user,"§e§lあなたに賃料の支払いを求められています！")
                     sendMessage(user,"§e§l承諾する場合は下のチャット分をクリック、しない場合はこの文を無視してください")
                     sendMessage(user,"§a§lID:$id Owner:${p.name} rent:${String.format("%,.1f", regionData[id]!!.rent)}")
-                    sendHoverText(user,"§e§l[賃料の支払いに承諾する]","","mre accept $id ${p.name}")
+                    sendHoverText(user,"§e§l[賃料の支払いに承諾する]","","mre acceptrent $id ${p.name} $number")
 
-//                    val user = Bukkit.getOfflinePlayer(uuid)
-//                    if (user.isOnline && user.player !=null){
-//                        p.closeInventory()
-//                        regionUserDatabase.setRent(user.player!!,id)
-//                        sendMessage(p,"§a§l登録成功！、試験実装のため不具合があるかもしれません！")
-//                        return
-//                    }
-//                    sendMessage(p,"§3§lユーザーがオフラインです")
-//                    return
                 }
                 7->{
                     if (Bukkit.getOfflinePlayer(uuid).isOnline){

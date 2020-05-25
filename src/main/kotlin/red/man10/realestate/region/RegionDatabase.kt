@@ -117,15 +117,6 @@ class RegionDatabase(private val pl: Plugin) {
 
     }
 
-    //賃料の変更
-    fun setRent(id:Int,rent:Double){
-        val data = regionData[id]?:return
-        data.rent = rent
-        regionData[id] = data
-
-        saveRegion(id)
-    }
-
     //スパンの変更
     fun setSpan(id:Int,span:Int){
         val data = regionData[id]?:return
