@@ -67,6 +67,7 @@ class RegionUserDatabase (private val pl: Plugin){
     @Synchronized
     fun loadUserData(p:Player){
 
+        initUserData(p)
         //リージョンデータ
         val rs1 = mysql.query("SELECT * FROM `region_user` WHERE `uuid`='${p.uniqueId}';")?:return
 
@@ -128,7 +129,7 @@ class RegionUserDatabase (private val pl: Plugin){
             p.performCommand("mre bal")
         }
 
-
+        //オーナーリストに持っているリージョンを追加
         for (region in regionData){
             if (region.value.owner_uuid == p.uniqueId){
                 ownerList.add(region.key)
@@ -136,6 +137,11 @@ class RegionUserDatabase (private val pl: Plugin){
         }
 
         ownerData[p] = ownerList
+
+        //利益があったら通知
+        if (getProfit(p) >0){
+            p.performCommand("mre bal")
+        }
 
     }
 
@@ -262,9 +268,19 @@ class RegionUserDatabase (private val pl: Plugin){
 
     }
 
+    //////////////////////////
+    //ユーザーデータの初期化
+    //////////////////////////
+    fun initUserData(p:Player){
+
+        ownerData.remove(p)
+        regionUserData.remove(p)
+        likedRegion.remove(p)
+
+    }
+
     class RegionUserData{
 
-//        var deposit : Double = 0.0  //この金がなくなったら支払えなくなる
         var paid = Date()  //最後に支払った日
         var status = ""
         var isRent = false //賃貸の場合true

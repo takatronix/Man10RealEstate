@@ -1,6 +1,11 @@
 package red.man10.realestate.region
 
+import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.block.BlockState
+import org.bukkit.block.data.type.Door
+import org.bukkit.block.data.type.Fence
+import org.bukkit.block.data.type.Gate
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,7 +23,7 @@ import red.man10.realestate.Plugin.Companion.sendMessage
 
 class ProtectRegionEvent:Listener{
 
-    val allowList = mutableListOf(
+    val invList = mutableListOf(
             Material.CHEST,
             Material.ENDER_CHEST,
             Material.HOPPER,
@@ -28,6 +33,7 @@ class ProtectRegionEvent:Listener{
             Material.FURNACE,
             Material.BARREL,
             Material.SHULKER_BOX)
+
 
     @EventHandler
     fun blockBreakEvent(e:BlockBreakEvent){
@@ -46,6 +52,7 @@ class ProtectRegionEvent:Listener{
 
         if (!canBreak(p,e.block.location,e)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
+            Bukkit.getLogger().info("Place")
             e.isCancelled = true
         }
     }
@@ -78,6 +85,7 @@ class ProtectRegionEvent:Listener{
 
         if (!canBreak(p,e.clickedBlock!!.location,e)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+            Bukkit.getLogger().info("Interact")
             e.isCancelled = true
         }
     }
@@ -124,15 +132,18 @@ class ProtectRegionEvent:Listener{
                 if (pd.status == "Lock")return false
                 if (pd.allowAll)return true
 
+                //ブロックの設置、破壊　
                 if ((eventType is BlockBreakEvent || eventType is BlockPlaceEvent) && pd.allowBlock)return true
                 if ((eventType is SignChangeEvent || eventType is HangingBreakByEntityEvent) && pd.allowBlock)return true
 
-                if (eventType is PlayerInteractEvent && pd.allowInv){
-                    if (eventType.hasBlock() && allowList.contains(eventType.clickedBlock!!.type))return true
+                //ブロックの右クリック
+                if (eventType is PlayerInteractEvent){
+                    if (pd.allowInv && invList.contains(eventType.clickedBlock!!.type))return true
 
+                    val state = eventType.clickedBlock!!.state
+
+                    if ((state is Door || state is Gate) && pd.allowDoor)return true
                 }
-
-                if (eventType is PlayerInteractEvent && pd.allowDoor && !allowList.contains(eventType.clickedBlock!!.type))return true
 
                 return false
             }

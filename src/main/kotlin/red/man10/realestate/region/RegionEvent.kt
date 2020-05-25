@@ -143,13 +143,13 @@ class RegionEvent (private val pl : Plugin) : Listener{
     @EventHandler
     fun signClickEvent(e:PlayerInteractEvent){
 
-        if (e.action != Action.RIGHT_CLICK_BLOCK)return
+        if (e.action != Action.RIGHT_CLICK_BLOCK || e.action !=Action.LEFT_CLICK_BLOCK)return
 
         val b= e.clickedBlock?:return
-        val sign : org.bukkit.block.Sign
+        val sign : Sign
 
         try{
-            sign = b.state as org.bukkit.block.Sign
+            sign = b.state as Sign
         }catch (e:Exception){
             return
         }
@@ -168,6 +168,15 @@ class RegionEvent (private val pl : Plugin) : Listener{
 
         val p = e.player
 
+        //左クリックでいいね
+        if (e.action == Action.LEFT_CLICK_BLOCK && !p.isSneaking){
+
+            regionUserDatabase.saveUserData(p,id)
+
+            e.isCancelled = true
+            return
+        }
+
         sendMessage(p,"§a§l==========${data.name}§a§lの情報==========")
 
         sendMessage(p,"§a土地名:${data.name}")
@@ -178,7 +187,11 @@ class RegionEvent (private val pl : Plugin) : Listener{
         sendMessage(p,"§a§l==========================================")
 
         sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
-        sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")
+
+        if (data.status == "OnSale"){
+            sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")
+        }
+
 
         refreshSign(sign,id)
     }

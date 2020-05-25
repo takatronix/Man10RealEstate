@@ -141,7 +141,7 @@ class RegionDatabase(private val pl: Plugin) {
     }
 
     //土地の購入
-    fun buy(id: Int,user:Player,oldOwner: Player?){
+    fun buy(id: Int,user:Player){
 
         val data = regionData[id]?:when{
             else -> {
@@ -193,6 +193,7 @@ class RegionDatabase(private val pl: Plugin) {
     fun loadRegion(){
 
         regionData.clear()
+        worldRegion.clear()
 
         val sql = "SELECT * FROM `region`;"
 
