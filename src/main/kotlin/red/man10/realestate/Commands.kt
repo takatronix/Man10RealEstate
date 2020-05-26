@@ -13,6 +13,7 @@ import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.numbers
+import red.man10.realestate.Plugin.Companion.ownerData
 import red.man10.realestate.Plugin.Companion.regionData
 import red.man10.realestate.Plugin.Companion.regionUserData
 import red.man10.realestate.Plugin.Companion.sendHoverText
@@ -122,7 +123,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 val p = Bukkit.getPlayer(args[2])?:return false
 
-                if (regionUserData[p]!![id] != null){
+                if (regionUserData[p] != null && regionUserData[p]!![id] != null){
                     sendMessage(sender,"§3§lこのユーザーは既に住人です")
                     return true
                 }
@@ -181,15 +182,15 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //mre acceptuser id owner
             if (cmd == "acceptuser"){
 
-                if (!numbers.contains(args[2].toInt()))return true
+                if (!numbers.contains(args[3].toInt()))return true
 
-                numbers.remove(args[2].toInt())
+                numbers.remove(args[3].toInt())
 
                 regionUserDatabase.createUserData(args[1].toInt(),sender)
 
                 sendMessage(sender,"§a§l登録完了！住人になりました！")
 
-                sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が賃料の支払いに承諾しました")
+                sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が住人の追加に承諾しました")
 
                 return true
             }
@@ -197,9 +198,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //mre accept id owner
             if (cmd == "acceptrent"){
 
-                if (!numbers.contains(args[2].toInt()))return true
+                if (!numbers.contains(args[3].toInt()))return true
 
-                numbers.remove(args[2].toInt())
+                numbers.remove(args[3].toInt())
 
 
                 if (regionUserData[sender]!![args[1].toInt()] == null){
@@ -243,6 +244,10 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     "inv" -> pd.allowInv = args[4].toBoolean()
                     "door" -> pd.allowDoor = args[4].toBoolean()
                     else ->return true
+                }
+
+                if (pd.allowAll){
+                    ownerData[p]!!.add(id)
                 }
 
                 regionUserDatabase.saveMap(p,pd,id)
@@ -290,7 +295,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
 
             //賃料 /mre rent id p rent
-            if (cmd == "changerent" && args.size == 3){
+            if (cmd == "changerent" && args.size == 4){
+
+                if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
                 if (!NumberUtils.isNumber(args[1])||!NumberUtils.isNumber(args[3])){
                     sendMessage(sender,"§3§lパラメータの入力方法が違います")
@@ -304,8 +311,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 if (rent< 0.0 || rent> maxBalance){
                     return true
                 }
-
-                if (!hasRegionAdmin(sender,id))return false
 
                 regionUserDatabase.setRentPrice(p,id,rent)
 

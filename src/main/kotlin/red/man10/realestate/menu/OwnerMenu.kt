@@ -61,11 +61,11 @@ class OwnerMenu(val pl : Plugin) : Listener{
             return
         }
 
-        if (data.owner_uuid != p.uniqueId){
-            sendMessage(p,"§e§lあなたはこの土地のオーナーではありません")
-            p.closeInventory()
-            return
-        }
+//        if (data.owner_uuid != p.uniqueId){
+//            sendMessage(p,"§e§lあなたはこの土地のオーナーではありません")
+//            p.closeInventory()
+//            return
+//        }
 
         val inv = Bukkit.createInventory(null,27,regionCustomMenu)
 
@@ -167,6 +167,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
                 val user =  Bukkit.getOfflinePlayer(UUID.fromString(uuid))
 
+                if (p.uniqueId == user.uniqueId)continue
+
                 meta.owningPlayer = user
                 meta.setDisplayName("§6§l${user.name}")
                 meta.lore = mutableListOf(if (user.isOnline){"§aOnline"}else{"§4§lOffline"})
@@ -227,7 +229,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
         val inv = Bukkit.createInventory(null,9,customUserData)
 
         inv.setItem(1, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),"$uuid,$id"))
-        inv.setItem(3, IS(pl,Material.COMPASS,"§a§l賃料を設定する", mutableListOf(),"$uuid,$id"))
+        inv.setItem(3, IS(pl,Material.EMERALD,"§a§l賃料を設定する", mutableListOf(),"$uuid,$id"))
         inv.setItem(5, IS(pl,Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),"$uuid,$id"))
         inv.setItem(7,IS(pl,Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),"$uuid,$id"))
 
@@ -543,11 +545,12 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 1->customPerm(p,id,uuid)
                 3->{
                     p.closeInventory()
-                    if (!Bukkit.getOfflinePlayer(uuid).isOnline){
+                    val user = Bukkit.getOfflinePlayer(uuid)
+                    if (!user.isOnline){
                         sendMessage(p,"§e§lオフラインの住人の賃料は変更できません！")
                         return
                     }
-                    sendSuggest(p,"§e§l賃料を入力してください！","/mre changerent ${getId(item, pl)} $uuid ")
+                    sendSuggest(p,"§e§l賃料を入力してください！","/mre changerent $id ${user.name} ")
                     return
                 }
                 5->{
@@ -580,7 +583,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
                     sendMessage(user,"§e§lあなたに賃料の支払いを求められています！")
                     sendMessage(user,"§e§l承諾する場合は下のチャット分をクリック、しない場合はこの文を無視してください")
-                    sendMessage(user,"§a§lID:$id Owner:${p.name} rent:${String.format("%,.1f", regionData[id]!!.rent)}")
+                    sendMessage(user,"§a§lID:$id Owner:${p.name} rent:${String.format("%,.1f", pd.rent)}")
                     sendHoverText(user,"§e§l[賃料の支払いに承諾する]","","mre acceptrent $id ${p.name} $number")
 
                 }

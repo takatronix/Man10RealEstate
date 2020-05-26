@@ -48,7 +48,7 @@ class InventoryMenu(private val pl: Plugin) : Listener {
     fun openMainMenu(p:Player){
         val inv = Bukkit.createInventory(null,9,mainMenu)
 
-        inv.setItem(1,IS(pl,Material.PAPER,"§f§l自分がオーナーの土地を管理する", mutableListOf(),"manage"))
+        inv.setItem(1,IS(pl,Material.PAPER,"§f§l自分が管理できるの土地を管理する", mutableListOf(),"manage"))
         inv.setItem(4,IS(pl,Material.NETHER_STAR,"§f§lいいねした土地を確認する", mutableListOf(),"bookmark"))
         inv.setItem(7,IS(pl,Material.PAPER,"", mutableListOf(),"unnamed"))
 

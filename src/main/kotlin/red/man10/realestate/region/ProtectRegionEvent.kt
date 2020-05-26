@@ -52,7 +52,6 @@ class ProtectRegionEvent:Listener{
 
         if (!canBreak(p,e.block.location,e)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
-            Bukkit.getLogger().info("Place")
             e.isCancelled = true
         }
     }
@@ -85,7 +84,6 @@ class ProtectRegionEvent:Listener{
 
         if (!canBreak(p,e.clickedBlock!!.location,e)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
-            Bukkit.getLogger().info("Interact")
             e.isCancelled = true
         }
     }
