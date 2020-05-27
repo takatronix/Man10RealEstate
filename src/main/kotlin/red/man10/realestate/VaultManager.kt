@@ -32,6 +32,7 @@ class VaultManager(private val plugin: JavaPlugin) {
     //      残高確認
     /////////////////////////////////////
     fun getBalance(uuid: UUID?): Double {
+
         return economy!!.getBalance(Bukkit.getOfflinePlayer(uuid!!).name)
     }
 
@@ -49,10 +50,6 @@ class VaultManager(private val plugin: JavaPlugin) {
     /////////////////////////////////////
     fun withdraw(uuid: UUID, money: Double): Boolean {
         val p = Bukkit.getOfflinePlayer(uuid)
-        if (p == null) {
-            Bukkit.getLogger().info(uuid.toString() + "は見つからない")
-            return false
-        }
         val resp = economy!!.withdrawPlayer(p.name, money)
         if (resp.transactionSuccess()) {
             if (p.isOnline) {
@@ -68,10 +65,6 @@ class VaultManager(private val plugin: JavaPlugin) {
     /////////////////////////////////////
     fun deposit(uuid: UUID, money: Double): Boolean {
         val p = Bukkit.getOfflinePlayer(uuid)
-        if (p == null) {
-            Bukkit.getLogger().info(uuid.toString() + "は見つからない")
-            return false
-        }
         val resp = economy!!.depositPlayer(p.name, money)
         if (resp.transactionSuccess()) {
             if (p.isOnline) {

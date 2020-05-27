@@ -30,6 +30,11 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
+        if(args[0] == "test"){
+            pl.vault.withdraw(UUID.fromString(args[1]),args[2].toDouble())
+            return true
+        }
+
         if (sender !is Player)return false
 
         if (label == "mre"){
