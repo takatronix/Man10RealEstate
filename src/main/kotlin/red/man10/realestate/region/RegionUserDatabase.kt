@@ -16,7 +16,7 @@ import kotlin.collections.HashMap
 
 class RegionUserDatabase (private val pl: Plugin){
 
-    val mysql = MySQLManager(pl,"mreUserData")
+    var mysql : MySQLManager = MySQLManager(pl,"mreUserData")
 
     //////////////////////////////////
     //ユーザーデータを新規作成
@@ -49,7 +49,10 @@ class RegionUserDatabase (private val pl: Plugin){
     //ユーザーデータを削除
     ///////////////////////
     fun removeUserData(regionId: Int,user: Player){
+
         regionUserData[user]!!.remove(regionId)
+        ownerData[user]!!.remove(regionId)
+
         mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$regionId' AND `uuid`='${user.uniqueId}';")
     }
 
@@ -73,6 +76,8 @@ class RegionUserDatabase (private val pl: Plugin){
 
         val ownerList = mutableListOf<Int>()
 
+        val dataList = HashMap<Int,RegionUserData>()
+
         while (rs1.next()){
 
             val id = rs1.getInt("region_id")
@@ -91,9 +96,9 @@ class RegionUserDatabase (private val pl: Plugin){
 
             data.isRent = rs1.getInt("is_rent")==1
 
-            saveMap(p,data,id)
+            dataList[id] = data
 
-            if (data.allowAll){
+            if (data.allowAll && data.status !="Lock"){
                 ownerList.add(id)
             }
 
@@ -101,6 +106,9 @@ class RegionUserDatabase (private val pl: Plugin){
                 sendMessage(p,"§4§lLockされたリージョン:${d.name}")
             }
         }
+
+        regionUserData[p] = dataList
+
 
         rs1.close()
         mysql.close()
@@ -125,23 +133,14 @@ class RegionUserDatabase (private val pl: Plugin){
         rs2.close()
         mysql.close()
 
-        if (getProfit(p) > 0){
-            p.performCommand("mre bal")
-        }
-
         //オーナーリストに持っているリージョンを追加
         for (region in regionData){
-            if (region.value.owner_uuid == p.uniqueId){
+            if (region.value.owner_uuid == p.uniqueId && region.value.status !="Lock"){
                 ownerList.add(region.key)
             }
         }
 
         ownerData[p] = ownerList
-
-        //利益があったら通知
-        if (getProfit(p) >0){
-            p.performCommand("mre bal")
-        }
 
     }
 

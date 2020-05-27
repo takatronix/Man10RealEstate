@@ -173,7 +173,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 meta.setDisplayName("§6§l${user.name}")
                 meta.lore = mutableListOf(if (user.isOnline){"§aOnline"}else{"§4§lOffline"})
 
-                meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,"$uuid,$id")
+                meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,setID(uuid, id))
 
                 head.itemMeta = meta
 
@@ -228,10 +228,10 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
         val inv = Bukkit.createInventory(null,9,customUserData)
 
-        inv.setItem(1, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),"$uuid,$id"))
-        inv.setItem(3, IS(pl,Material.EMERALD,"§a§l賃料を設定する", mutableListOf(),"$uuid,$id"))
-        inv.setItem(5, IS(pl,Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),"$uuid,$id"))
-        inv.setItem(7,IS(pl,Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),"$uuid,$id"))
+        inv.setItem(1, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(3, IS(pl,Material.EMERALD,"§a§l賃料を設定する", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(5, IS(pl,Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(7,IS(pl,Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),setID(uuid.toString(), id)))
 
         p.openInventory(inv)
     }
@@ -250,20 +250,20 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             inv.setItem(13,IS(pl,
                     if (permData.allowAll){Material.LIME_STAINED_GLASS_PANE }
-                    else{Material.RED_STAINED_GLASS_PANE},"§3§l全権限", mutableListOf(),"$uuid,$id"))
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§l全権限", mutableListOf(),setID(uuid.toString(), id)))
             inv.setItem(22, IS(pl,
                     if (permData.allowBlock){Material.LIME_STAINED_GLASS_PANE }
-                    else{Material.RED_STAINED_GLASS_PANE},"§3§lブロックの設置、破壊権限", mutableListOf(),"$uuid,$id"))
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§lブロックの設置、破壊権限", mutableListOf("§fこの権限は、右クリックの権限が必須です"),setID(uuid.toString(), id)))
             inv.setItem(31, IS(pl,
                     if (permData.allowDoor){Material.LIME_STAINED_GLASS_PANE }
-                    else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなど、右クリックで触るものに対する権限", mutableListOf(),"$uuid,$id"))
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなど、右クリックで触るものに対する権限", mutableListOf(),setID(uuid.toString(), id)))
             inv.setItem(40, IS(pl,
                     if (permData.allowInv){Material.LIME_STAINED_GLASS_PANE }
-                    else{Material.RED_STAINED_GLASS_PANE},"§3§lインベントリを開く権限", mutableListOf(),"$uuid,$id"))
+                    else{Material.RED_STAINED_GLASS_PANE},"§3§lインベントリを開く権限", mutableListOf(),setID(uuid.toString(), id)))
 
-            inv.setItem(0,IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l戻る", mutableListOf(),"$uuid,$id"))
+            inv.setItem(0,IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l戻る", mutableListOf(),setID(uuid.toString(), id)))
 
-            inv.setItem(8,IS(pl,Material.YELLOW_STAINED_GLASS_PANE,"§3§lセーブ", mutableListOf(),"$uuid,$id"))
+            inv.setItem(8,IS(pl,Material.YELLOW_STAINED_GLASS_PANE,"§3§lセーブ", mutableListOf(),setID(uuid.toString(), id)))
 
         })
 
@@ -298,7 +298,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
         }
 
         if (p.isOnline){
-            val pd = regionUserData[p]!![id]!!
+            val pd = regionUserData[p.player]!![id]!!
 
             data.allowAll = pd.allowAll
             data.allowBlock = pd.allowBlock
@@ -516,10 +516,14 @@ class OwnerMenu(val pl : Plugin) : Listener{
         //ユーザーリストの表示
         if (name  == customUserMenu){
 
-            //TODO:戻れない問題などをそのうち治す
             e.isCancelled = true
 
-            val id = getId(e.inventory.getItem(0)!!,pl).split(",")[1].toInt()
+            val id0Item = e.inventory.getItem(0)
+
+            //リージョンのidを取得
+            val id = if (id0Item == null) -1 else{
+                getID(getId(id0Item,pl)).second.toInt()
+            }
 
             when(getId(item,pl)){
 
@@ -527,7 +531,10 @@ class OwnerMenu(val pl : Plugin) : Listener{
                 "next"->customUserMenu(p,id,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
                 "previous"->customUserMenu(p,id,item.itemMeta.persistentDataContainer[NamespacedKey(pl,"page"), PersistentDataType.INTEGER]!!)
                 else ->{
-                    val uuid = UUID.fromString(getId(item,pl).split(",")[0])
+
+                    if (id == -1)return
+
+                    val uuid = UUID.fromString(getID(getId(item,pl)).first)
 
                     customUserData(p,id, uuid)
                 }
@@ -538,8 +545,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
         if (name == customUserData){
 
             e.isCancelled = true
-            val uuid = UUID.fromString(getId(item,pl).split(",")[0])
-            val id = getId(item,pl).split(",")[1].toInt()
+            val uuid = UUID.fromString(getID(getId(item,pl)).first)
+            val id = getID(getId(item,pl)).second.toInt()
 
             when(e.slot){
                 1->customPerm(p,id,uuid)
@@ -603,8 +610,8 @@ class OwnerMenu(val pl : Plugin) : Listener{
         if (name == perm){
             e.isCancelled = true
 
-            val uuid = UUID.fromString(getId(item,pl).split(",")[0])
-            val id = getId(item,pl).split(",")[1].toInt()
+            val uuid = UUID.fromString(getID(getId(item,pl)).first)
+            val id = getID(getId(item,pl)).second.toInt()
             val data = map[Pair(uuid,id)]?:PermList()
 
             when(e.slot){
@@ -639,6 +646,20 @@ class OwnerMenu(val pl : Plugin) : Listener{
             customPerm(p,id,uuid)
         }
 
+    }
+
+    fun setID(uuid: String,id:Int): String {
+        return "$uuid;$id"
+    }
+
+    /**
+     * @return first:uuid second:id
+     */
+    fun getID(id:String): Pair<String,String> {
+
+        val data = id.split(";")
+
+        return Pair(data[0],data[1])
     }
 
     class PermList{

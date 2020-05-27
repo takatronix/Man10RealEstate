@@ -218,7 +218,6 @@ class RegionDatabase(private val pl: Plugin) {
             data.status = rs.getString("status")
             data.price = rs.getDouble("price")
 
-            data.rent = rs.getDouble("rent")
             data.span = rs.getInt("span")
 
             data.teleport = mutableListOf(
@@ -273,7 +272,6 @@ class RegionDatabase(private val pl: Plugin) {
                 "t.status = '${data.status}', " +
                 "t.price = ${data.price}, " +
                 "t.profit = 0, " +
-                "t.rent = ${data.rent}, " +
                 "t.span = ${data.span} " +
                 "WHERE t.id = $id")
 

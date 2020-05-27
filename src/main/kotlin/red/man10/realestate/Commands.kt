@@ -24,16 +24,10 @@ import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
 import java.util.*
-import kotlin.random.Random
 
 class Commands (private val pl :Plugin):CommandExecutor{
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-
-        if(args[0] == "test"){
-            pl.vault.withdraw(UUID.fromString(args[1]),args[2].toDouble())
-            return true
-        }
 
         if (sender !is Player)return false
 
@@ -135,7 +129,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
                 sendMessage(sender,"§a§l現在承諾待ちです....")
 
-                val number = Random.nextInt()
+                val number = Random().nextInt()
 
                 numbers.add(number)
 
@@ -155,8 +149,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             }
 
-            //共同者を削除
-            if (cmd == "removeuser" && args.size == 3){
+            //居住者を削除
+            if (cmd == "removeuser"){
 
                 val id = args[1].toInt()
 
@@ -283,6 +277,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //owner変更
             if (cmd == "changeowner"){
+
+                if (!NumberUtils.isNumber(args[1]))return false
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 

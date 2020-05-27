@@ -137,10 +137,8 @@ class ProtectRegionEvent:Listener{
                 //ブロックの右クリック
                 if (eventType is PlayerInteractEvent){
                     if (pd.allowInv && invList.contains(eventType.clickedBlock!!.type))return true
+                    if (pd.allowDoor && !invList.contains(eventType.clickedBlock!!.type))return true
 
-                    val state = eventType.clickedBlock!!.state
-
-                    if ((state is Door || state is Gate) && pd.allowDoor)return true
                 }
 
                 return false
