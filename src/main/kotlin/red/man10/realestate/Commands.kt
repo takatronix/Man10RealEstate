@@ -27,29 +27,29 @@ import java.util.*
 
 class Commands (private val pl :Plugin):CommandExecutor{
 
+    val USER = "mre.user"
+    val GUEST = "mre.guest"
+    val OP = "mre.op"
+    val RENT = "mre.rent"
+
+
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
         if (sender !is Player)return false
 
         if (label == "mre"){
 
-            if (!sender.hasPermission("mre.user")){
-                return false
-            }
-
             if (args.isEmpty()){
+                if (!sender.hasPermission(USER))return true
                 pl.invmain.openMainMenu(sender)
                 return true
             }
 
             val cmd = args[0]
 
-            if (cmd == "help"){
-                help(sender,false)
-            }
-
             //onSaleの土地を購入する
             if (cmd == "buy"){
+                if (!sender.hasPermission(USER))return true
 
                 Thread(Runnable {
                     regionDatabase.buy(args[1].toInt(),sender)
@@ -58,6 +58,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             }
 
             if (cmd == "buycheck"){
+
+                if (!sender.hasPermission(USER))return true
 
                 val data = regionData[args[1].toInt()]?:return true
 
@@ -72,6 +74,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //いいね
             if (cmd == "good" && args.size == 2){
 
+                if (!sender.hasPermission(GUEST))return true
+
                 if (!NumberUtils.isNumber(args[1])){
                     sendMessage(sender,"§3§l数字のIDを入力してください")
                     return true
@@ -83,6 +87,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //取り出し
             if (cmd == "withdraw"){
+
+                if (!sender.hasPermission(GUEST))return true
+
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
                     regionUserDatabase.takeProfit(sender)
                 })
@@ -91,6 +98,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //利益を表示
             if (cmd == "bal"){
+
+                if (!sender.hasPermission(GUEST))return true
+
                 Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
 
                     val profit = regionUserDatabase.getProfit(sender)
@@ -107,6 +117,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //共同者を追加する ex)/mre adduser [id] [user]
             //def: type:2 status:Share
             if (cmd == "adduser" && args.size == 3){
+
+                if (!sender.hasPermission(USER))
 
                 if (!NumberUtils.isNumber(args[1]))return false
                 val id = args[1].toInt()
@@ -152,6 +164,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //居住者を削除
             if (cmd == "removeuser"){
 
+                if (!sender.hasPermission(USER))return true
+
                 val id = args[1].toInt()
 
                 if (!hasRegionAdmin(sender,id)){ return true }
@@ -163,6 +177,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //tp
             if (cmd == "tp" && args.size == 2){
+
+                if (!sender.hasPermission(USER))return true
+
                 val data = regionData[args[1].toInt()]?:return false
 
                 sender.teleport(Location(
@@ -181,6 +198,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //mre acceptuser id owner
             if (cmd == "acceptuser"){
 
+                if (!sender.hasPermission(GUEST))return true
+
                 if (!numbers.contains(args[3].toInt()))return true
 
                 numbers.remove(args[3].toInt())
@@ -196,6 +215,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //mre accept id owner
             if (cmd == "acceptrent"){
+
+                if (!sender.hasPermission(GUEST))return true
 
                 if (!numbers.contains(args[3].toInt()))return true
 
@@ -217,6 +238,9 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //スパン /mre span id span
             if (cmd == "span" && args.size == 3){
+
+                if (!sender.hasPermission(RENT))return true
+
                 val id = args[1].toInt()
                 val span = args[2].toInt()
 
@@ -231,6 +255,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //権限設定 [id] [user] [permname] [true or false]
             if (cmd == "setperm"){
+
+                if (!sender.hasPermission(USER))return true
 
                 val p = Bukkit.getPlayer(args[2])?:return true
                 val id = args[1].toInt()
@@ -258,6 +284,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //指定地点をテレポート地点にする
             if (cmd == "settp" && args.size == 2){
+                if (!sender.hasPermission(USER))return true
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
@@ -278,6 +305,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
             //owner変更
             if (cmd == "changeowner"){
 
+                if (!sender.hasPermission(USER))return true
+
                 if (!NumberUtils.isNumber(args[1]))return false
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
@@ -297,6 +326,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             //賃料 /mre rent id p rent
             if (cmd == "changerent" && args.size == 4){
+
+                if (!sender.hasPermission(RENT))return true
 
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
@@ -324,6 +355,8 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             if (cmd == "changestatus" && args.size == 3){
 
+                if (!sender.hasPermission(USER))return true
+
                 if (!hasRegionAdmin(sender,args[1].toInt()))return false
 
                 if (sender.hasPermission("mre.op") && args[2]=="Lock"){
@@ -339,6 +372,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
 
             if (cmd == "changeprice" && args.size == 3){
 
+                if (!sender.hasPermission(USER))return true
 
                 if (!NumberUtils.isNumber(args[1]))return true
 
@@ -368,7 +402,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            if (!sender.hasPermission("mre.op"))return true
+            if (!sender.hasPermission(OP))return true
 
             val cmd = args[0]
 
