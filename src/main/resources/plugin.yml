@@ -8,6 +8,7 @@ description: Man10 Real Estate Plugin
 softdepend:
   - Man10CommonLibs
   - Vault
+  - Man10OfflineBank
 commands:
   mre:
     default: op

@@ -212,9 +212,6 @@ class RegionEvent (private val pl : Plugin) : Listener{
         Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
             regionUserDatabase.loadUserData(e.player)
         })
-        if (regionUserDatabase.getProfit(e.player) >0){
-            e.player.performCommand("mre bal")
-        }
 
     }
 

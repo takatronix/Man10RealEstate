@@ -14,6 +14,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
+import red.man10.man10offlinebank.Bank
+import red.man10.man10offlinebank.BankAPI
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.menu.OwnerMenu
 import red.man10.realestate.region.ProtectRegionEvent
@@ -48,6 +50,7 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var regionDatabase :RegionDatabase
         lateinit var regionUserDatabase : RegionUserDatabase
 
+        lateinit var offlineBank : BankAPI
 
         const val WAND_NAME = "範囲指定ワンド"
 
@@ -119,6 +122,8 @@ class Plugin : JavaPlugin(), Listener {
         vault = VaultManager(this)
         invmain = InventoryMenu(this)
         ownerInv = OwnerMenu(this)
+
+        offlineBank = BankAPI(this)
 
         regionDatabase = RegionDatabase(this)
         regionUserDatabase = RegionUserDatabase(this)
@@ -289,16 +294,18 @@ class Plugin : JavaPlugin(), Listener {
 
                 val pd = regionUserData[p]!![id]?:continue
 
-                if (vault.getBalance(uuid) <rentPrice){
+                if (!offlineBank.withdraw(uuid,rentPrice,"RealEstate Rent")){
+
                     sendMessage(p,"${data.name}§3§lの賃料が支払えません！支払えるまでロックされます！")
                     pd.status = "Lock"
+
                 }else{
+
                     sendMessage(p,"${data.name}§3§lの賃料の賃料を支払いました！")
-                    vault.withdraw(uuid,rentPrice)
 
                     pd.status = "Share"
                     if (data.owner_uuid != null){
-                        regionUserDatabase.addProfit(data.owner_uuid!!,rentPrice)
+                        offlineBank.deposit(data.owner_uuid!!,rentPrice,"RealEstate RentProfit")
                     }
                 }
                 pd.paid = Date()
@@ -309,16 +316,15 @@ class Plugin : JavaPlugin(), Listener {
             }
 
             //オフラインのとき
-            if (vault.getBalance(uuid) < rentPrice){
+            if (!offlineBank.withdraw(uuid,rentPrice,"RealEstate Rent")){
 
                 mysqlQueue.add("UPDATE `region_user` SET status='Lock' WHERE uuid='$uuid' AND region_id=$id;")
                 continue
             }
 
-            vault.withdraw(uuid,rentPrice)
             mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$uuid' AND region_id=$id;")
             if (data.owner_uuid != null){
-                regionUserDatabase.addProfit(data.owner_uuid!!,rentPrice)
+                offlineBank.deposit(data.owner_uuid!!,rentPrice,"RealEstate RentProfit")
             }
 
         }

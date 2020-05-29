@@ -10,6 +10,7 @@ import red.man10.realestate.Plugin.Companion.regionUserData
 import red.man10.realestate.Plugin.Companion.sendMessage
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.offlineBank
 import java.sql.Timestamp
 import java.util.*
 import kotlin.collections.HashMap
@@ -166,46 +167,6 @@ class RegionUserDatabase (private val pl: Plugin){
 
     }
 
-    ///////////////////////////////
-    //利益を取り出す
-    ///////////////////////////////
-    fun takeProfit(p:Player){
-
-        pl.vault.deposit(p.uniqueId,getProfit(p))
-
-        val sql = "UPDATE `user_index` SET `received`='1' WHERE `uuid`='${p.uniqueId}';"
-
-        mysqlQueue.add(sql)
-    }
-
-    /////////////////////////////
-    //利益の取得
-    /////////////////////////////
-    fun getProfit(p:Player):Double{
-
-        val mysql = MySQLManager(pl,"mreGetProfit")
-        var profit = 0.0
-        val rs = mysql.query("SELECT `profit` FROM `user_index` " +
-                "WHERE `uuid`='${p.uniqueId}' AND `received`='0';")?:return 0.0
-
-        while (rs.next()){
-            profit += rs.getDouble("profit")
-        }
-        return profit
-    }
-
-    //////////////////////////////
-    //利益の追加
-    //////////////////////////////
-    fun addProfit(uuid:UUID,amount:Double){
-        val p = Bukkit.getOfflinePlayer(uuid)
-
-        if (p.isOnline && p.player != null){
-            sendMessage(p.player!!,"§e§l入金情報:$${amount}")
-        }
-        mysqlQueue.add("INSERT INTO user_index (uuid, player, profit, type, received, date) " +
-                "VALUES ('$uuid', '${p.name}', '$amount', DEFAULT, DEFAULT, DEFAULT)")
-    }
 
     ///////////////////////////////
     //いいね、いいね解除する

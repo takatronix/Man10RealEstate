@@ -169,7 +169,7 @@ class RegionDatabase(private val pl: Plugin) {
         pl.vault.withdraw(user.uniqueId,data.price)
 
         if (data.owner_uuid != null){
-            RegionUserDatabase(pl).addProfit(data.owner_uuid!!,data.price)
+            Plugin.offlineBank.deposit(data.owner_uuid!!,data.price,"RealEstate RegionProfit")
         }
 
         setRegionOwner(id,user)

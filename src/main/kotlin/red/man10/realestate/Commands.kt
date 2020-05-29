@@ -85,35 +85,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //取り出し
-            if (cmd == "withdraw"){
-
-                if (!sender.hasPermission(GUEST))return true
-
-                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-                    regionUserDatabase.takeProfit(sender)
-                })
-                return true
-            }
-
-            //利益を表示
-            if (cmd == "bal"){
-
-                if (!sender.hasPermission(GUEST))return true
-
-                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
-
-                    val profit = regionUserDatabase.getProfit(sender)
-
-                    sendMessage(sender,"§l§kXX§r§e§l利益の合計：${String.format("%,.1f",profit)}§e§l§kXX")
-
-                    if (profit >0){
-                        sendHoverText(sender,"§e§l§n受け取る","§b§l§io§n${String.format("%,.1f",profit)}","mre withdraw")
-                    }
-                })
-                return true
-            }
-
             //共同者を追加する ex)/mre adduser [id] [user]
             //def: type:2 status:Share
             if (cmd == "adduser" && args.size == 3){

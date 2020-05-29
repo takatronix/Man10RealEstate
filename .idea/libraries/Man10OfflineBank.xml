@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="paper-105">
+  <library name="Man10OfflineBank">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/libs/paper-105.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/Man10OfflineBank.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
