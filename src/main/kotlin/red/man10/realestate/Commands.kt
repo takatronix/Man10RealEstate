@@ -596,6 +596,34 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
 
             }
+
+            if (cmd == "list"){
+
+                val page = if (args.size == 2)args[1].toInt() else 0
+
+                val regionList = regionData.keys.toList()
+
+                for (i in (page*10) .. (page*10)+10){
+
+                    if (regionList.size <=i){
+                        break
+                    }
+
+                    val id = regionList[i]
+                    val rg = regionData[id]!!
+
+                    sendHoverText(sender,"§e§lID:$id ${rg.name} [Teleport]","§e§l[Teleport]","mre tp $id")
+
+                }
+
+                if (page!=0){
+                    sendHoverText(sender,"§e§l[戻る]","戻る","mreop list ${page -1}")
+                }
+                if (regionList.size >(page*10)+10){
+                    sendHoverText(sender,"§e§l[進む]","戻る","mreop list ${page +1}")
+                }
+
+            }
         }
 
         return false
@@ -623,8 +651,11 @@ class Commands (private val pl :Plugin):CommandExecutor{
             sendMessage(p,"§e§l/mreop create <リージョン名> <値段> : 新規リージョンを作成します")
             sendMessage(p,"§e§l範囲指定済みの${WAND_NAME}§e§lを持ってコマンドを実行してください")
             sendMessage(p,"§e§l/mreop delete <id> : 指定idのリージョンを削除します")
-//            sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
+            sendMessage(p,"§e§l/mreop list : リージョンID:リージョン名 のリストを表示します")
             sendMessage(p,"§e§l/mreop reload : 再読み込みをします")
+            sendMessage(p,"§e§l/mreop where : 現在地点がどのリージョンが確認します")
+            sendMessage(p,"§e§l/mreop setregion <id> : 指定idのリージョンを再指定します")
+            sendMessage(p,"§e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します")
         }
     }
 
