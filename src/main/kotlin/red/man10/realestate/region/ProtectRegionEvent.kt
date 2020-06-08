@@ -8,6 +8,7 @@ import org.bukkit.block.data.type.Fence
 import org.bukkit.block.data.type.Gate
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
@@ -35,7 +36,7 @@ class ProtectRegionEvent:Listener{
             Material.SHULKER_BOX)
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun blockBreakEvent(e:BlockBreakEvent){
 
         val p = e.player
@@ -46,7 +47,7 @@ class ProtectRegionEvent:Listener{
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun blockPlaceEvent(e:BlockPlaceEvent){
         val p = e.player
 
@@ -56,7 +57,7 @@ class ProtectRegionEvent:Listener{
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun shootBowEvent(e:EntityShootBowEvent){
 
         val p = e.entity
@@ -70,7 +71,7 @@ class ProtectRegionEvent:Listener{
 
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun blockTouchEvent(e:PlayerInteractEvent){
         if (e.action != Action.RIGHT_CLICK_BLOCK)return
         if (!e.hasBlock())return
@@ -88,24 +89,24 @@ class ProtectRegionEvent:Listener{
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun signEvent(e:SignChangeEvent){
         val p = e.player
 
-        if (!canBreak(p,p.location,e)){
+        if (!canBreak(p,e.block.location,e)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
 
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun breakEntity(e:HangingBreakByEntityEvent){
         val p = e.remover?:return
 
         if (p !is Player)return
 
-        if (!canBreak(p,p.location,e)){
+        if (!canBreak(p,e.entity.location,e)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }

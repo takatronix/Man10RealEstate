@@ -20,6 +20,7 @@ import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.menu.OwnerMenu
 import red.man10.realestate.region.ProtectRegionEvent
 import red.man10.realestate.region.RegionDatabase
+import red.man10.realestate.region.RegionDatabase.RegionData
 import red.man10.realestate.region.RegionEvent
 import red.man10.realestate.region.RegionUserDatabase
 import java.util.*
@@ -57,7 +58,9 @@ class Plugin : JavaPlugin(), Listener {
         var prefix = "[§5Man10RealEstate§f]"
 
         //リージョンのデータ
-        val regionData = ConcurrentHashMap<Int, RegionDatabase.RegionData>()
+        val regionData = ConcurrentHashMap<Int, RegionData>()
+        //都市のデータ
+        val cityData = ConcurrentHashMap<Int, RegionData>()
         //プレイヤーごとのリージョン情報
         val regionUserData = ConcurrentHashMap<Player, HashMap<Int,RegionUserDatabase.RegionUserData>>()
         //worldごとのリージョンid <ワールド名,ワールドないにあるリージョンのidのlist>
@@ -76,6 +79,7 @@ class Plugin : JavaPlugin(), Listener {
 
         val numbers = mutableListOf<Int>()
 
+        ////////////////////////////////////////////
         //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
         fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
             //////////////////////////////////////////

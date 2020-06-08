@@ -161,19 +161,19 @@ class OwnerMenu(val pl : Plugin) : Listener{
 
             inv.remove(loadItem)
 
-            for (uuid in list){
+            for (listData in list){
                 val head = ItemStack(Material.PLAYER_HEAD)
                 val meta = head.itemMeta as SkullMeta
 
-                val user =  Bukkit.getOfflinePlayer(UUID.fromString(uuid))
+                val user =  Bukkit.getOfflinePlayer(UUID.fromString(listData.first))
 
                 if (p.uniqueId == user.uniqueId)continue
 
                 meta.owningPlayer = user
                 meta.setDisplayName("§6§l${user.name}")
-                meta.lore = mutableListOf(if (user.isOnline){"§aOnline"}else{"§4§lOffline"})
+                meta.lore = mutableListOf(if (user.isOnline){"§aOnline"}else{"§4§lOffline"},"§a§lステータス：${listData.second}")
 
-                meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,setID(uuid, id))
+                meta.persistentDataContainer.set(NamespacedKey(pl,"id"), PersistentDataType.STRING,setID(listData.first, id))
 
                 head.itemMeta = meta
 
@@ -226,12 +226,13 @@ class OwnerMenu(val pl : Plugin) : Listener{
     //ユーザーの設定
     fun customUserData(p:Player,id:Int,uuid:UUID){
 
-        val inv = Bukkit.createInventory(null,9,customUserData)
+        val inv = Bukkit.createInventory(null,27,customUserData)
 
-        inv.setItem(1, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),setID(uuid.toString(), id)))
-        inv.setItem(3, IS(pl,Material.EMERALD,"§a§l賃料を設定する", mutableListOf(),setID(uuid.toString(), id)))
-        inv.setItem(5, IS(pl,Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),setID(uuid.toString(), id)))
-        inv.setItem(7,IS(pl,Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(0, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l戻る", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(10, IS(pl,Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(12, IS(pl,Material.EMERALD,"§a§l賃料を設定する", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(14, IS(pl,Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),setID(uuid.toString(), id)))
+        inv.setItem(16,IS(pl,Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),setID(uuid.toString(), id)))
 
         p.openInventory(inv)
     }
@@ -270,15 +271,15 @@ class OwnerMenu(val pl : Plugin) : Listener{
         p.openInventory(inv)
     }
 
-    @Synchronized
-    fun loadUsersList(id:Int, page: Int): MutableList<String>? {
+    @Synchronized//uuid,status
+    fun loadUsersList(id:Int, page: Int): MutableList<Pair<String,String>>? {
 
-        val rs = mysql!!.query("SELECT `uuid` FROM `region_user` WHERE `region_id`='$id' LIMIT ${page*45}, ${(page+1)*45};")?:return null
+        val rs = mysql!!.query("SELECT uuid,status FROM `region_user` WHERE `region_id`='$id' LIMIT ${page*45}, ${(page+1)*45};")?:return null
 
-        val list = mutableListOf<String>()
+        val list = mutableListOf<Pair<String,String>>()
 
         while (rs.next()){
-            list.add(rs.getString("uuid"))
+            list.add(Pair(rs.getString("uuid"),rs.getString("status")))
         }
 
         rs.close()
@@ -549,8 +550,9 @@ class OwnerMenu(val pl : Plugin) : Listener{
             val id = getID(getId(item,pl)).second.toInt()
 
             when(e.slot){
-                1->customPerm(p,id,uuid)
-                3->{
+                0 ->customUserMenu(p,id,0)
+                10->customPerm(p,id,uuid)
+                12->{
                     p.closeInventory()
                     val user = Bukkit.getOfflinePlayer(uuid)
                     if (!user.isOnline){
@@ -560,7 +562,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
                     sendSuggest(p,"§e§l賃料を入力してください！","/mre changerent $id ${user.name} ")
                     return
                 }
-                5->{
+                14->{
 
                     val user = Bukkit.getOfflinePlayer(uuid).player
 
@@ -594,7 +596,7 @@ class OwnerMenu(val pl : Plugin) : Listener{
                     sendHoverText(user,"§e§l[賃料の支払いに承諾する]","","mre acceptrent $id ${p.name} $number")
 
                 }
-                7->{
+                16->{
                     if (Bukkit.getOfflinePlayer(uuid).isOnline){
                         regionUserDatabase.removeUserData(id,Bukkit.getOfflinePlayer(uuid).player!!)
                     }else{

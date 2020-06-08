@@ -9,6 +9,7 @@ import red.man10.realestate.Plugin.Companion.sendMessage
 import red.man10.realestate.Plugin.Companion.worldRegion
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.cityData
 import java.util.*
 
 class RegionDatabase(private val pl: Plugin) {
@@ -238,7 +239,12 @@ class RegionDatabase(private val pl: Plugin) {
                     rs.getDouble("ez")
             )
 
-            regionData[id] = data
+            //都市経っだ場合別辞書に保存
+            if (data.status == "City"){
+                cityData[id] = data
+            }else{
+                regionData[id] = data
+            }
             val list = worldRegion[data.world]?: mutableListOf()
             list.add(id)
             worldRegion[data.world] = list

@@ -146,25 +146,6 @@ class Commands (private val pl :Plugin):CommandExecutor{
                 return true
             }
 
-            //tp
-            if (cmd == "tp" && args.size == 2){
-
-                if (!sender.hasPermission(USER))return true
-
-                val data = regionData[args[1].toInt()]?:return false
-
-                sender.teleport(Location(
-                        Bukkit.getWorld(data.world),
-                        data.teleport[0],
-                        data.teleport[1],
-                        data.teleport[2],
-                        data.teleport[3].toFloat(),
-                        data.teleport[4].toFloat()
-                ))
-                sendMessage(sender,"§a§lテレポートしました！")
-                return true
-            }
-
 
             //mre acceptuser id owner
             if (cmd == "acceptuser"){
@@ -623,7 +604,102 @@ class Commands (private val pl :Plugin):CommandExecutor{
                     sendHoverText(sender,"§e§l[進む]","戻る","mreop list ${page +1}")
                 }
 
+                return true
             }
+
+            //新規都市を作成、/mreop createcity <cityname> <tax>
+            if (cmd == "createcity"){
+
+                val wand = sender.inventory.itemInMainHand
+
+                if (!wand.hasItemMeta() || wand.itemMeta.displayName != WAND_NAME){
+                    sendMessage(sender,"${WAND_NAME}§e§lを持ってください！")
+                    return true
+                }
+
+                val lore = wand.lore
+
+                if (lore == null || wand.lore!!.size != 5){
+                    sendMessage(sender,"§e§fの範囲指定ができていません！")
+                    return true
+                }
+
+                if (!NumberUtils.isNumber(args[2])){
+                    sendMessage(sender,"§3§lパラメータの入力方法が違います！")
+                    sendMessage(sender,"§3§l/mreop createcity [都市の名前] [初期の値段]")
+                    return true
+                }
+
+                sendMessage(sender,"§a§l現在登録中です・・・")
+
+                val data = RegionDatabase.RegionData()
+
+                data.name = args[1]
+                data.status = "City"
+                data.price = args[2].toDouble()
+
+                data.owner_uuid = null
+                data.server = lore[1].replace("§aServer:§f","")
+                data.world = lore[2].replace("§aWorld:§f","")
+
+                val c1 = lore[3].replace("§aStart:§fX:","")
+                        .replace("Y","").replace("Z","")
+                        .replace(":","").split(",")
+
+                data.startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+
+                val c2 = lore[4].replace("§aEnd:§fX:","")
+                        .replace("Y","").replace("Z","")
+                        .replace(":","").split(",")
+
+                data.endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+
+
+                data.teleport = mutableListOf(
+                        sender.location.x,
+                        sender.location.y,
+                        sender.location.z,
+                        sender.location.yaw.toDouble(),
+                        sender.location.pitch.toDouble()
+                )
+
+                Bukkit.getScheduler().runTaskAsynchronously(pl, Runnable {
+
+                    val id = regionDatabase.registerRegion(data)
+
+                    if (id == -1){
+                        sendMessage(sender,"§3§l登録失敗！")
+                        return@Runnable
+                    }
+
+                    sendMessage(sender,"§a§l登録完了！")
+                    //sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
+
+                })
+
+                return true
+
+            }
+
+            //tp
+            if (cmd == "tp" && args.size == 2){
+
+                if (!sender.hasPermission(USER))return true
+
+                val data = regionData[args[1].toInt()]?:return false
+
+                sender.teleport(Location(
+                        Bukkit.getWorld(data.world),
+                        data.teleport[0],
+                        data.teleport[1],
+                        data.teleport[2],
+                        data.teleport[3].toFloat(),
+                        data.teleport[4].toFloat()
+                ))
+                sendMessage(sender,"§a§lテレポートしました！")
+                return true
+            }
+
         }
 
         return false
@@ -656,6 +732,7 @@ class Commands (private val pl :Plugin):CommandExecutor{
             sendMessage(p,"§e§l/mreop where : 現在地点がどのリージョンが確認します")
             sendMessage(p,"§e§l/mreop setregion <id> : 指定idのリージョンを再指定します")
             sendMessage(p,"§e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します")
+            sendMessage(p,"§e§l/mreop createcity <都市の名前> <固定資産税> : 新規都市を作成します")
         }
     }
 
