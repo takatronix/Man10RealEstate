@@ -49,39 +49,6 @@ class Plugin : JavaPlugin(), Listener {
 
         val numbers = mutableListOf<Int>()
 
-        //ホバーテキスト、クリックイベント
-        fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
-            //////////////////////////////////////////
-            //      ホバーテキストとイベントを作成する
-            val hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(hoverText).create())
-
-            //////////////////////////////////////////
-            //   クリックイベントを作成する
-            val clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$command")
-            val message = ComponentBuilder(prefix+text).event(hoverEvent).event(clickEvent).create()
-            p.spigot().sendMessage(*message)
-        }
-
-        //サジェストメッセージ
-        fun sendSuggest(p: Player, text: String?, command: String?) {
-
-            //////////////////////////////////////////
-            //   クリックイベントを作成する
-            var clickEvent: ClickEvent? = null
-            if (command != null) {
-                clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)
-            }
-
-            val message = ComponentBuilder("$prefix$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()
-            p.spigot().sendMessage(*message)
-        }
-
-        //prefix付きのメッセージ
-        fun sendMessage(player: Player, message: String) {
-            player.sendMessage("$prefix $message")
-        }
-
-
     }
 
     override fun onEnable() { // Plugin startup logic

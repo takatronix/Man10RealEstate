@@ -9,6 +9,7 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.HashMap
 
 class Region(private val pl:Plugin) {
 
@@ -17,6 +18,10 @@ class Region(private val pl:Plugin) {
 
     fun get(id:Int):RegionData?{
         return regionData[id]
+    }
+
+    fun map(): Map<Int, RegionData> {
+        return regionData.toMap()
     }
 
     fun set(id: Int,region: RegionData){
@@ -173,7 +178,6 @@ class Region(private val pl:Plugin) {
                 "t.span = ${data.span} " +
                 "WHERE t.id = $id")
 
-        return
     }
 
     /**
