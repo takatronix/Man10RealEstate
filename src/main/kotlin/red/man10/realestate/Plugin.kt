@@ -9,37 +9,18 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
-import red.man10.man10offlinebank.Bank
 import red.man10.man10offlinebank.BankAPI
-import red.man10.realestate.menu.InventoryMenu
-import red.man10.realestate.menu.OwnerMenu
-import red.man10.realestate.region.ProtectRegionEvent
-import red.man10.realestate.region.RegionDatabase
-import red.man10.realestate.region.RegionDatabase.RegionData
-import red.man10.realestate.region.RegionEvent
-import red.man10.realestate.region.RegionUserDatabase
+import red.man10.realestate.region.Region
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.*
 
 
 class Plugin : JavaPlugin(), Listener {
 
-    lateinit var regionEvent: RegionEvent
-    lateinit var protectEvent: ProtectRegionEvent
-    lateinit var cmd : Commands
-    lateinit var protocolManager : ProtocolManager
-    lateinit var mysql : MySQLManager
     lateinit var vault : VaultManager
-    lateinit var invmain : InventoryMenu
-    lateinit var ownerInv : OwnerMenu
-
-    lateinit var sqlThread : Thread
 
     var wandStartLocation: Location? = null
     var wandEndLocation: Location? = null
@@ -48,39 +29,27 @@ class Plugin : JavaPlugin(), Listener {
 
     companion object{
 
-        lateinit var regionDatabase :RegionDatabase
-        lateinit var regionUserDatabase : RegionUserDatabase
-
         lateinit var offlineBank : BankAPI
+
+        lateinit var es : ExecutorService
+
+        lateinit var region : Region
 
         const val WAND_NAME = "範囲指定ワンド"
 
         var prefix = "[§5Man10RealEstate§f]"
 
-        //リージョンのデータ
-        val regionData = ConcurrentHashMap<Int, RegionData>()
-        //都市のデータ
-        val cityData = ConcurrentHashMap<Int, RegionData>()
-        //プレイヤーごとのリージョン情報
-        val regionUserData = ConcurrentHashMap<Player, HashMap<Int,RegionUserDatabase.RegionUserData>>()
-        //worldごとのリージョンid <ワールド名,ワールドないにあるリージョンのidのlist>
-        val worldRegion = HashMap<String,MutableList<Int>>()
-
+        //キューにクエリを入れる
         val mysqlQueue = LinkedBlockingQueue<String>()
 
-        val likedRegion = HashMap<Player,MutableList<Int>>()//いいねをしたリージョン
-
-        val ownerData = HashMap<Player,MutableList<Int>>()//管理できるリージョン
-
+        //保護を無効にするワールド
         var disableWorld = mutableListOf<String>()
 
         var maxBalance = 100000000.0
 
-
         val numbers = mutableListOf<Int>()
 
-        ////////////////////////////////////////////
-        //  マインクラフトチャットに、ホバーテキストや、クリックコマンドを設定する関数
+        //ホバーテキスト、クリックイベント
         fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
             //////////////////////////////////////////
             //      ホバーテキストとイベントを作成する
@@ -89,7 +58,7 @@ class Plugin : JavaPlugin(), Listener {
             //////////////////////////////////////////
             //   クリックイベントを作成する
             val clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$command")
-            val message = ComponentBuilder(text).event(hoverEvent).event(clickEvent).create()
+            val message = ComponentBuilder(prefix+text).event(hoverEvent).event(clickEvent).create()
             p.spigot().sendMessage(*message)
         }
 
@@ -103,7 +72,7 @@ class Plugin : JavaPlugin(), Listener {
                 clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)
             }
 
-            val message = ComponentBuilder("$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()
+            val message = ComponentBuilder("$prefix$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()
             p.spigot().sendMessage(*message)
         }
 
@@ -119,99 +88,49 @@ class Plugin : JavaPlugin(), Listener {
         logger.info("Man10 Real Estate plugin enabled.")
         saveDefaultConfig()
 
-        regionEvent = RegionEvent(this)
-        protectEvent = ProtectRegionEvent()
-        cmd = Commands(this)
-        protocolManager = ProtocolLibrary.getProtocolManager()
+        es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
         vault = VaultManager(this)
-        invmain = InventoryMenu(this)
-        ownerInv = OwnerMenu(this)
-
         offlineBank = BankAPI(this)
-
-        regionDatabase = RegionDatabase(this)
-        regionUserDatabase = RegionUserDatabase(this)
+        region = Region(this)
 
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
 
-        server.pluginManager.registerEvents(this, this)
-        server.pluginManager.registerEvents(regionEvent,this)
-        server.pluginManager.registerEvents(protectEvent,this)
-        server.pluginManager.registerEvents(invmain,this)
-        server.pluginManager.registerEvents(ownerInv,this)
-
-        getCommand("mre")!!.setExecutor(cmd)
-        getCommand("mreop")!!.setExecutor(cmd)
-
         saveResource("config.yml", false)
 
+        server.pluginManager.registerEvents(this, this)
 
-        object : BukkitRunnable() {
-            override fun run() {
-               //  broadcast("timer")
-                if(wandStartLocation != null && wandEndLocation != null){
+        Bukkit.getScheduler().runTaskTimer(this, Runnable {
+            if(wandStartLocation != null && wandEndLocation != null){
 
-                    drawCube(wandStartLocation!!,wandEndLocation!!)
-                }
-                particleTime++;
+                drawCube(wandStartLocation!!,wandEndLocation!!)
             }
-        }.runTaskTimer(this, 0, 10)
+            particleTime++
 
-        mysql = MySQLManager(this,"mreRentThread")
-
-
-        Thread(Runnable {
-            while (true){
-                rentTimer()
-                Thread.sleep(3600000)
-            }
-        }).start()
-
-        regionDatabase.loadRegion()
+        },0,10)
 
         mysqlQueue()
-        rentTimer()
+
+        region.load()
 
     }
 
     override fun onDisable() { // Plugin shutdown logic
 
-        sqlThread.interrupt()
-    }
+        //起動中のスレッドを全て止める
+        try {
+            es.shutdownNow()
 
-    fun drawLine(point1: Location, point2: Location, space: Double) {
-        //broadcast("draw {${point1.toString()}- {${point2.toString()}}}")
-        val world = point1.world
-        val distance = point1.distance(point2)
-        val p1 = point1.toVector()
-        val p2 = point2.toVector()
-        val vector = p2.clone().subtract(p1).normalize().multiply(space)
-        var length = 0.0
-        while (length < distance) {
-            world.spawnParticle(Particle.HEART, p1.getX(), p1.getY(), p1.getZ(), 1)
-            length += space
-            p1.add(vector)
+        }catch (e:InterruptedException){
+            logger.info(e.message)
         }
+
     }
 
     fun drawCube(pos1:Location,pos2:Location){
         getCube(pos1,pos2)?.forEach { ele->
             ele.world.spawnParticle(Particle.HEART, ele.getX(), ele.getY(), ele.getZ(), 1)
         }
-
-//        val packet = PacketContainer(PacketType.Play.Server.WORLD_PARTICLES)
-//        for (l in getCube(pos1,pos2)?:return){
-//            packet.doubles.write(0,pos1.x)
-//            packet.doubles.write(1,pos1.y)
-//            packet.doubles.write(2,pos1.z)
-//            packet.particles.write(0,EnumWrappers.Particle.HEART)
-//
-//            try {
-//                protocolManager.sendServerPacket(p,packet)
-//            }catch (e:InvocationTargetException){
-//            }
-//        }
 
     }
 
@@ -251,7 +170,8 @@ class Plugin : JavaPlugin(), Listener {
     //dbのクエリキュー
     ////////////////////////
     fun mysqlQueue(){
-        sqlThread = Thread(Runnable {
+
+        es.execute {
             val sql = MySQLManager(this,"man10realestate queue")
             try{
                 while (true){
@@ -259,80 +179,8 @@ class Plugin : JavaPlugin(), Listener {
                     sql.execute(take)
                 }
             }catch (e:InterruptedException){
-
             }
-        })
-        sqlThread.start()
-    }
-
-    /////////////////////////////////////
-    //貸出のタイマー(期限が過ぎたらロックされる)
-    //////////////////////////////////////
-    fun rentTimer(){
-        val rs = mysql.query("SELECT * FROM region_user;")!!
-
-        while (rs.next()){
-
-            val rentPrice = rs.getDouble("rent")
-
-            if (rs.getInt("is_rent") == 0)continue
-            if (rentPrice == 0.0)continue
-
-            val uuid = UUID.fromString( rs.getString("uuid"))
-            val id = rs.getInt("region_id")
-            val p = Bukkit.getPlayer(uuid)
-
-            //1時間ごと
-            val different = (Date().time - rs.getDate("paid_date").time)/1000/3600/24
-
-            val data = regionData[id]?:continue
-
-            if (!debugMode){
-                if (data.span == 0 && different < 30)continue
-                if (data.span == 1 && different < 7)continue
-                if (data.span == 2 && different < 1)continue
-            }
-
-            //ユーザーがオンラインのとき
-            if (p != null&&regionUserData[p]!=null){
-
-                val pd = regionUserData[p]!![id]?:continue
-
-                if (!offlineBank.withdraw(uuid,rentPrice,"RealEstate Rent")){
-
-                    sendMessage(p,"${data.name}§3§lの賃料が支払えません！支払えるまでロックされます！")
-                    pd.status = "Lock"
-
-                }else{
-
-                    sendMessage(p,"${data.name}§3§lの賃料の賃料を支払いました！")
-
-                    pd.status = "Share"
-                    if (data.owner_uuid != null){
-                        offlineBank.deposit(data.owner_uuid!!,rentPrice,"RealEstate RentProfit")
-                    }
-                }
-                pd.paid = Date()
-
-                regionUserDatabase.saveMap(p,pd,id)
-                regionUserDatabase.saveUserData(p,id)
-                continue
-            }
-
-            //オフラインのとき
-            if (!offlineBank.withdraw(uuid,rentPrice,"RealEstate Rent")){
-
-                mysqlQueue.add("UPDATE `region_user` SET status='Lock' WHERE uuid='$uuid' AND region_id=$id;")
-                continue
-            }
-
-            mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$uuid' AND region_id=$id;")
-            if (data.owner_uuid != null){
-                offlineBank.deposit(data.owner_uuid!!,rentPrice,"RealEstate RentProfit")
-            }
-
         }
-        rs.close()
-        mysql.close()
     }
+
 }
