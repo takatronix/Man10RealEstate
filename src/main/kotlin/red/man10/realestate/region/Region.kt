@@ -148,10 +148,6 @@ class Region(private val pl:Plugin) {
         set(id,data)
     }
 
-
-
-
-
     /**
      * リージョンのデータをdbに保存する
      */

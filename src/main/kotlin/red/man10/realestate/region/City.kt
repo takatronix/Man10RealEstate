@@ -6,7 +6,7 @@ import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.region
-import java.util.*
+import red.man10.realestate.Utility
 import java.util.concurrent.ConcurrentHashMap
 
 class City(private val pl:Plugin) {
@@ -23,7 +23,6 @@ class City(private val pl:Plugin) {
 
     /**
      * 新規都市作成
-     *
      */
     fun create(pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>,name:String,tax:Double,tp:Location):Int{
 
