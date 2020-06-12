@@ -28,9 +28,9 @@ class User(private val pl :Plugin) {
         (userData[p]?: HashMap())[id] = data
     }
 
-    fun get(p:Player,id:Int): UserData {
+    fun get(p:Player,id:Int): UserData? {
         val data = userData[p]?: HashMap()
-        return data[id]?: UserData()
+        return data[id]
     }
 
     /**
@@ -148,7 +148,7 @@ class User(private val pl :Plugin) {
      */
     fun save(p:Player,id:Int){
 
-        val data = get(p,id)
+        val data = get(p,id)?:return
 
         mysqlQueue.add("UPDATE `region_user` " +
                 "SET " +
@@ -208,7 +208,7 @@ class User(private val pl :Plugin) {
      */
     fun setStatus(p:Player,id:Int,status:String){
 
-        val data = get(p,id)
+        val data = get(p,id)?:return
         data.status = status
         set(p,id,data)
     }
@@ -218,7 +218,7 @@ class User(private val pl :Plugin) {
      */
     fun setRentPrice(p:Player,id:Int,rent:Double){
 
-        val data = get(p,id)
+        val data = get(p,id)?:return
         data.rent = rent
         set(p,id,data)
     }
@@ -228,7 +228,7 @@ class User(private val pl :Plugin) {
      */
     fun changeRent(p:Player,id:Int,isRent:Boolean){
 
-        val data = get(p,id)
+        val data = get(p,id)?:return
         data.isRent = isRent
         set(p,id,data)
 
@@ -239,7 +239,7 @@ class User(private val pl :Plugin) {
      */
     fun setPermission(p:Player,id:Int,perm:Permission,value:Boolean){
 
-        val data = get(p,id)
+        val data = get(p,id)?:return
 
         when(perm){
             ALL-> data.allowAll = value

@@ -13,6 +13,7 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
 import red.man10.man10offlinebank.BankAPI
+import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import java.util.*
@@ -35,6 +36,7 @@ class Plugin : JavaPlugin(), Listener {
 
         lateinit var region : Region
         lateinit var user : User
+        lateinit var city : City
 
         const val WAND_NAME = "範囲指定ワンド"
 
@@ -61,6 +63,7 @@ class Plugin : JavaPlugin(), Listener {
         offlineBank = BankAPI(this)
         region = Region(this)
         user = User(this)
+        city = City(this)
 
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
@@ -81,6 +84,8 @@ class Plugin : JavaPlugin(), Listener {
         mysqlQueue()
 
         region.load()
+        city.load()
+
 
         //賃料スレッド
         es.execute {

@@ -7,8 +7,6 @@ create table city
 	z double default 0.0 null,
 	pitch float default 0.0 null,
 	yaw float default 0.0 null,
-	owner varchar(16) null,
-	owner_uuid varchar(36) null,
 	server varchar(16) null,
 	world varchar(16) null,
 	sx int default 0 null,

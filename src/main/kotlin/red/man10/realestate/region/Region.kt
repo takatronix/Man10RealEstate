@@ -6,7 +6,9 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
+import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
@@ -98,6 +100,11 @@ class Region(private val pl:Plugin) {
 
         set(id,data)
 
+        val cID = city.where(data.teleport)
+        if (cID != -1){
+            city.updateRegion(cID)
+        }
+
         return id
 
     }
@@ -147,6 +154,19 @@ class Region(private val pl:Plugin) {
         data.span = span
         set(id,data)
     }
+
+    /**
+     *
+     */
+    fun where(loc:Location): Int {
+        for (rg in regionData){
+            if (Utility.isWithinRange(loc,rg.value.startPosition,rg.value.endPosition,rg.value.world)){
+                return rg.key
+            }
+        }
+        return -1
+    }
+
 
     /**
      * リージョンのデータをdbに保存する
@@ -233,6 +253,19 @@ class Region(private val pl:Plugin) {
         sql.close()
     }
 
+    /**
+     * オーナー名を取得
+     */
+    fun getOwner(data:RegionData):String{
+
+        val uuid = data.ownerUUID
+
+        return if (uuid == null){
+            "Admin"
+        }else{
+            Bukkit.getOfflinePlayer(uuid).name!!
+        }
+    }
 
     class RegionData{
 

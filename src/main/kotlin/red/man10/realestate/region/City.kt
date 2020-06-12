@@ -7,6 +7,7 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Utility
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class City(private val pl:Plugin) {
@@ -20,6 +21,15 @@ class City(private val pl:Plugin) {
     fun set(id:Int,data:CityData){
         cityData[id] = data
     }
+
+    fun delete(id: Int){
+
+        cityData.remove(id)
+
+        mysqlQueue.add("DELETE FROM `city` WHERE  `id`=$id;")
+
+    }
+
 
     /**
      * 新規都市作成
@@ -75,6 +85,58 @@ class City(private val pl:Plugin) {
         updateRegion(id)
 
         return id
+
+    }
+
+    /**
+     * 読み込み
+     */
+    fun load(){
+        cityData.clear()
+
+        val sql = MySQLManager(pl,"Man10RealEstate Loading")
+
+        val rs = sql.query("SELECT * FROM city;")?:return
+
+        while (rs.next()){
+
+            val id = rs.getInt("id")
+
+            val data = CityData()
+
+            data.name = rs.getString("name")
+            data.world = rs.getString("world")
+            data.server = rs.getString("server")
+
+            data.tax = rs.getDouble("tax")
+
+            data.startPosition = Triple(
+                    rs.getDouble("sx"),
+                    rs.getDouble("sy"),
+                    rs.getDouble("sz")
+            )
+            data.endPosition = Triple(
+                    rs.getDouble("ex"),
+                    rs.getDouble("ey"),
+                    rs.getDouble("ez")
+            )
+
+            data.teleport = Location(
+                    Bukkit.getWorld(data.world),
+                    rs.getDouble("x"),
+                    rs.getDouble("y"),
+                    rs.getDouble("z"),
+                    rs.getFloat("yaw"),
+                    rs.getFloat("pitch")
+            )
+
+            cityData[id] = data
+
+            updateRegion(id)
+        }
+
+        rs.close()
+        sql.close()
 
     }
 
@@ -167,13 +229,6 @@ class City(private val pl:Plugin) {
 
     }
 
-    fun delete(id: Int){
-
-        cityData.remove(id)
-
-        mysqlQueue.add("DELETE FROM `city` WHERE  `id`=$id;")
-
-    }
 
     class CityData{
 
