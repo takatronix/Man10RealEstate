@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
@@ -11,6 +12,7 @@ import red.man10.realestate.Utility
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
@@ -31,6 +33,30 @@ class User(private val pl :Plugin) {
     fun get(p:Player,id:Int): UserData? {
         val data = userData[p]?: HashMap()
         return data[id]
+    }
+
+    /**
+     * 住人データを削除
+     */
+    fun remove(p:Player,id:Int){
+        if (!userData[p].isNullOrEmpty()){
+            userData[p]!!.remove(id)
+        }
+
+        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$id' AND `uuid`='${p.uniqueId}';")
+
+    }
+
+    /**
+     * 指定idの全住人データを削除
+     */
+    fun removeAll(id:Int){
+
+        for (data in userData.values){
+            data.remove(id)
+        }
+
+        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$id';")
     }
 
     /**
@@ -59,17 +85,6 @@ class User(private val pl :Plugin) {
 
     }
 
-    /**
-     * 住人データを削除
-     */
-    fun remove(p:Player,id:Int){
-        if (!userData[p].isNullOrEmpty()){
-            userData[p]!!.remove(id)
-        }
-
-        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$id' AND `uuid`='${p.uniqueId}';")
-
-    }
 
     /**
      * 指定プレイヤーの住人データを読み込む
@@ -304,6 +319,15 @@ class User(private val pl :Plugin) {
 
         rs.close()
         mysql.close()
+
+        val sdf = SimpleDateFormat("dd").format(Date())
+
+        if (sdf.toInt() == 1){
+            for (rg in region.map()){
+                val uuid = rg.value.ownerUUID?:continue
+                city.payingTax(uuid,rg.key)
+            }
+        }
 
     }
 

@@ -4,8 +4,11 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.mysqlQueue
+import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
+import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -229,6 +232,52 @@ class City(private val pl:Plugin) {
 
     }
 
+    /**
+     * 税金を支払う
+     * @param p プレイヤーのuuid
+     * @param id リージョンのid
+     */
+    fun payingTax(p:UUID,id:Int):Boolean{
+
+        val rg = region.get(id)?:return false
+        val cityID = where(rg.teleport)
+
+        if (cityID == -1)return false
+
+        val city = get(cityID)?:return false
+
+        if (city.tax == 0.0)return false
+
+        //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
+        if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
+
+            region.setOwner(id,null)
+            region.setStatus(id,"OnSale")
+
+            user.removeAll(id)
+
+            return false
+
+        }
+
+        return true
+    }
+
+
+    /**
+     * 土地の税金を計算する
+     */
+    fun getTax(cityID:Int,rgID:Int):Double{
+
+        val city = get(cityID)?:return 0.0
+        val rg = region.get(rgID)?:return 0.0
+
+        val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
+        val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.third)
+
+        return width * height * city.tax
+
+    }
 
     class CityData{
 

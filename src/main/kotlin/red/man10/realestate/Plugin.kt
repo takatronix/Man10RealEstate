@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
 import red.man10.man10offlinebank.BankAPI
 import red.man10.realestate.region.City
+import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import java.util.*
@@ -71,6 +72,7 @@ class Plugin : JavaPlugin(), Listener {
         saveResource("config.yml", false)
 
         server.pluginManager.registerEvents(this, this)
+        server.pluginManager.registerEvents(Event(this), this)
 
         Bukkit.getScheduler().runTaskTimer(this, Runnable {
             if(wandStartLocation != null && wandEndLocation != null){

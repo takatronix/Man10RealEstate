@@ -2,16 +2,15 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.World
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
+import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashMap
 
 class Region(private val pl:Plugin) {
 
@@ -35,7 +34,8 @@ class Region(private val pl:Plugin) {
         regionData.remove(id)
 
         mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
-        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$id;")
+
+        user.removeAll(id)
     }
 
 
@@ -130,9 +130,13 @@ class Region(private val pl:Plugin) {
     /**
      * set owner
      */
-    fun setOwner(id:Int,p:Player){
+    fun setOwner(id:Int, p: Player?){
         val data = get(id)?:return
-        data.ownerUUID = p.uniqueId
+        if (p != null){
+            data.ownerUUID = p.uniqueId
+        }else{
+            data.ownerUUID = p
+        }
         set(id,data)
     }
 

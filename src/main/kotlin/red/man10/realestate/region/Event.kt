@@ -217,7 +217,6 @@ class Event(private val pl :Plugin) :Listener{
     //保護処理
     ///////////////////////////////////////////////////////////////////////////
 
-
     val invList = mutableListOf(
             Material.CHEST,
             Material.ENDER_CHEST,
@@ -307,49 +306,15 @@ class Event(private val pl :Plugin) :Listener{
 
     }
 
-//    fun canBreak(p:Player,loc: org.bukkit.Location,eventType:Any):Boolean{
-//
-//        //adminなどはプロテクト無視
-//        if (p.hasPermission("mre.op"))return true
-//
-//        for (id in region.map().values){
-//
-//            val data = id.value
-//
-//            if (isWithinRange(loc,data.startPosition,data.endPosition,data.world)){
-//                if (data.status == "Lock")return false
-//                if (data.owner_uuid == p.uniqueId)return true
-//
-//                val pd = (regionUserData[p]?:return false)[id.key]?:return false
-//
-//                if (pd.status == "Lock")return false
-//                if (pd.allowAll)return true
-//
-//                //ブロックの設置、破壊　
-//                if ((eventType is BlockBreakEvent || eventType is BlockPlaceEvent) && pd.allowBlock)return true
-//                if ((eventType is SignChangeEvent || eventType is HangingBreakByEntityEvent) && pd.allowBlock)return true
-//
-//                //ブロックの右クリック
-//                if (eventType is PlayerInteractEvent){
-//                    if (pd.allowInv && invList.contains(eventType.clickedBlock!!.type))return true
-//                    if (pd.allowDoor && !invList.contains(eventType.clickedBlock!!.type))return true
-//
-//                }
-//
-//                return false
-//            }
-//        }
-//
-//        if (disableWorld.contains(loc.world.name)){
-//            return true
-//        }
-//        return false
-//    }
 
     //ブロック破壊処理
     fun canBreak(p:Player,loc: Location,e:Any):Boolean{
 
         if (p.hasPermission("mre.op"))return true
+
+        if (disableWorld.contains(loc.world.name)){
+            return true
+        }
 
         val cityID = city.where(loc)
 
@@ -388,12 +353,6 @@ class Event(private val pl :Plugin) :Listener{
             }
         }
 
-        if (disableWorld.contains(loc.world.name)){
-            return true
-        }
-
         return false
     }
-
-
 }
