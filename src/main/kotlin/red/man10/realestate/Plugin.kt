@@ -1,18 +1,12 @@
 package red.man10.realestate
 
-import com.comphenix.protocol.ProtocolLibrary
-import com.comphenix.protocol.ProtocolManager
-import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.ComponentBuilder
-import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Particle
-import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.scheduler.BukkitRunnable
 import red.man10.man10offlinebank.BankAPI
+import red.man10.realestate.menu.CustomInventory
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
@@ -38,6 +32,10 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var region : Region
         lateinit var user : User
         lateinit var city : City
+
+        lateinit var customInventory : CustomInventory
+
+        lateinit var plugin: Plugin
 
         const val WAND_NAME = "範囲指定ワンド"
 
@@ -66,6 +64,10 @@ class Plugin : JavaPlugin(), Listener {
         user = User(this)
         city = City(this)
 
+        customInventory = CustomInventory(this)
+
+        plugin = this
+
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
 
@@ -73,6 +75,9 @@ class Plugin : JavaPlugin(), Listener {
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(Event(this), this)
+
+        getCommand("mre")!!.setExecutor(Command())
+        getCommand("mreop")!!.setExecutor(Command())
 
         Bukkit.getScheduler().runTaskTimer(this, Runnable {
             if(wandStartLocation != null && wandEndLocation != null){

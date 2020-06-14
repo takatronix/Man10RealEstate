@@ -1,5 +1,7 @@
 package red.man10.realestate.region
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Sign
@@ -29,7 +31,9 @@ class Event(private val pl :Plugin) :Listener{
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
-        Plugin.es.execute { Plugin.user.load(e.player) }
+        GlobalScope.launch {
+            user.load(e.player)
+        }
     }
 
     /**

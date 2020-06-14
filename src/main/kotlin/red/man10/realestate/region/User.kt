@@ -8,10 +8,8 @@ import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
-import red.man10.realestate.Utility
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -20,7 +18,7 @@ import kotlin.collections.HashMap
 class User(private val pl :Plugin) {
 
     val userData = ConcurrentHashMap<Player,HashMap<Int,UserData>>()
-    val likeData = ConcurrentHashMap<Player,HashMap<Int,Boolean>>()
+    val likeData = ConcurrentHashMap<Player,MutableList<Int>>()
 
     val ownerList = ConcurrentHashMap<Player,MutableList<Int>>()
 
@@ -33,6 +31,37 @@ class User(private val pl :Plugin) {
     fun get(p:Player,id:Int): UserData? {
         val data = userData[p]?: HashMap()
         return data[id]
+    }
+
+    @Synchronized
+    fun get(uuid: UUID,id:Int):UserData?{
+        val p = Bukkit.getOfflinePlayer(uuid)
+        if (p.isOnline){
+            return get(p.player!!,id)
+        }
+
+        val rs = mysql.query("SELECT * FROM `region_user` WHERE `uuid`='${p.uniqueId}' AND region_id=$id;")?:return null
+
+        val data = UserData()
+
+        while (rs.next()){
+
+
+            data.status = rs.getString("status")
+
+            data.allowAll = rs.getInt("allow_all")==1
+            data.allowBlock = rs.getInt("allow_block")==1
+            data.allowInv = rs.getInt("allow_inv")==1
+            data.allowDoor = rs.getInt("allow_door")==1
+
+            data.isRent = rs.getInt("is_rent")==1
+
+        }
+
+        rs.close()
+        mysql.close()
+
+        return data
     }
 
     /**
@@ -108,9 +137,6 @@ class User(private val pl :Plugin) {
 
             val data = UserData()
 
-//            val rg = Plugin.region.get(id)?:continue
-
-//            data.paid = rs1.getDate("paid_date")
             data.status = rs1.getString("status")
 
             data.allowAll = rs1.getInt("allow_all")==1
@@ -137,15 +163,15 @@ class User(private val pl :Plugin) {
         rs1.close()
         mysql.close()
 
-        val rs2 = mysql.query("SELECT * FROM `liked_index` WHERE `uuid`='${p.uniqueId}';")?:return
+        val rs2 = mysql.query("SELECT * FROM `liked_index` WHERE `uuid`='${p.uniqueId}' AND is_like=1;")?:return
 
-        val likeMap = HashMap<Int,Boolean>()
+        val likeList = mutableListOf<Int>()
 
         while (rs2.next()){
-            likeMap[rs2.getInt("id")] = rs2.getInt("is_like") == 1
+            likeList.add(rs2.getInt("region_id"))
         }
 
-        likeData[p] = likeMap
+        likeData[p] = likeList
 
         rs2.close()
         mysql.close()
@@ -157,6 +183,39 @@ class User(private val pl :Plugin) {
         this.ownerList[p] = ownerList
 
     }
+
+    /**
+     * 住人のリストを返す(inventory用)
+     */
+    @Synchronized//uuid,data
+    fun loadUsers(id:Int, page: Int): MutableList<Pair<String,UserData>>? {
+
+        val rs = mysql.query("SELECT * FROM `region_user` WHERE `region_id`='$id' LIMIT ${page*45}, ${(page+1)*45};")?:return null
+
+        val list = mutableListOf<Pair<String,UserData>>()
+
+        while (rs.next()){
+
+            val data = UserData()
+
+            data.status = rs.getString("status")
+
+            data.allowAll = rs.getInt("allow_all")==1
+            data.allowBlock = rs.getInt("allow_block")==1
+            data.allowInv = rs.getInt("allow_inv")==1
+            data.allowDoor = rs.getInt("allow_door")==1
+
+            data.isRent = rs.getInt("is_rent")==1
+
+            list.add(Pair(rs.getString("uuid"),data))
+        }
+
+        rs.close()
+        mysql.close()
+
+        return list
+    }
+
 
     /**
      * ユーザーデータの保存
@@ -188,9 +247,9 @@ class User(private val pl :Plugin) {
 
         if (data.isNullOrEmpty())return false
 
-        if (data[id] == null || !data[id]!!)return false
+        if (data.contains(id))return true
 
-        return true
+        return false
     }
 
     /**
@@ -206,14 +265,14 @@ class User(private val pl :Plugin) {
         }
 
         if (isLike(p,id)){
-            likeData[p]!![id] = false
+            likeData[p]!!.remove(id)
 
             mysqlQueue.add("DELETE FROM `liked_index` WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
             sendMessage(p,"§a§aいいね解除しました！")
             return
         }
 
-        likeData[p]!![id] = true
+        likeData[p]!!.add(id)
         mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('$id', '${p.name}', '${p.uniqueId}', '0');")
         sendMessage(p,"§a§lいいねしました！")
     }
@@ -249,21 +308,34 @@ class User(private val pl :Plugin) {
 
     }
 
-    /**
-     * 権限を変更する
-     */
-    fun setPermission(p:Player,id:Int,perm:Permission,value:Boolean){
+    fun setPermission(uuid:UUID,id:Int,perm:Permission,value:Boolean){
 
-        val data = get(p,id)?:return
+        val p = Bukkit.getOfflinePlayer(uuid)
 
-        when(perm){
-            ALL-> data.allowAll = value
-            BLOCK-> data.allowBlock = value
-            DOOR-> data.allowDoor = value
-            INVENTORY-> data.allowInv = value
+        if (p.isOnline){
+
+            val player = p.player!!
+
+            val data = get(player,id)?:return
+
+            when(perm){
+                ALL-> data.allowAll = value
+                BLOCK-> data.allowBlock = value
+                DOOR-> data.allowDoor = value
+                INVENTORY-> data.allowInv = value
+            }
+
+            set(player,id,data)
+
+            return
         }
 
-        set(p,id,data)
+        when(perm){
+            ALL -> mysqlQueue.add("UPDATE region_user SET allow_all='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+            BLOCK -> mysqlQueue.add("UPDATE region_user SET allow_block='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+            DOOR-> mysqlQueue.add("UPDATE region_user SET allow_door='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+            INVENTORY -> mysqlQueue.add("UPDATE region_user SET allow_inv='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+        }
     }
 
     /**
