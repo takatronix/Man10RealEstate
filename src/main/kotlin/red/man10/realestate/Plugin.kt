@@ -18,7 +18,6 @@ import java.util.concurrent.*
 
 class Plugin : JavaPlugin(), Listener {
 
-    lateinit var vault : VaultManager
 
     var wandStartLocation: Location? = null
     var wandEndLocation: Location? = null
@@ -33,6 +32,8 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var region : Region
         lateinit var user : User
         lateinit var city : City
+
+        lateinit var vault : VaultManager
 
         lateinit var customInventory : CustomInventory
 

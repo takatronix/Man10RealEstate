@@ -7,8 +7,11 @@ import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
+import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.user
+import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility
+import red.man10.realestate.Utility.Companion.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -255,6 +258,38 @@ class Region(private val pl:Plugin) {
 
         rs.close()
         sql.close()
+    }
+
+    fun buy(p:Player,id:Int){
+
+        val data = get(id)
+
+        if (data == null){
+            sendMessage(p,"§c§l存在しない土地です！")
+            return
+        }
+
+        if (p.uniqueId == data.ownerUUID){
+            sendMessage(p,"§c§lあなたはこの土地のオーナーです！")
+            return
+        }
+
+        if (vault.getBalance(p.uniqueId) < data.price){
+            sendMessage(p,"§c§l所持金が足りません！")
+            return
+        }
+
+        vault.withdraw(p.uniqueId,data.price)
+
+        if (data.ownerUUID != null){
+            offlineBank.deposit(data.ownerUUID!!,data.price,"Man10RealEstate RegionProfit")
+        }
+
+        setOwner(id,p)
+        setStatus(id,"Protected")
+
+        sendMessage(p,"§a§l土地の購入成功！土地の保護がされました！")
+
     }
 
     /**
