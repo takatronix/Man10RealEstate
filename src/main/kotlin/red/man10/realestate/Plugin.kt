@@ -7,6 +7,7 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10offlinebank.BankAPI
 import red.man10.realestate.menu.CustomInventory
+import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
@@ -75,6 +76,7 @@ class Plugin : JavaPlugin(), Listener {
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(Event(this), this)
+        server.pluginManager.registerEvents(InventoryListener(),this)
 
         getCommand("mre")!!.setExecutor(Command())
         getCommand("mreop")!!.setExecutor(Command())

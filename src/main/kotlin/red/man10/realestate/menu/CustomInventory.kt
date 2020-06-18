@@ -108,9 +108,9 @@ class CustomInventory (private val pl: Plugin){
             REGION_MENU,
             REGION_STATUS,
             REGION_SPAN,
-            CUSTOM_REGION_MENU,
             USER_LIST,
-            CUSTOM_USER_MENU,
+            REGION_SETTING,
+            USER_MENU,
             USER_PERMISSION
         }
     }

@@ -2,14 +2,11 @@ package red.man10.realestate.menu
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.customInventory
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.plugin
@@ -18,8 +15,6 @@ import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashMap
 
 class InventoryMenu {
 
@@ -231,7 +226,7 @@ class InventoryMenu {
         inventory.setItem(42, customInventory.IS(Material.PLAYER_HEAD,"§3§lオーナーの変更", mutableListOf(),id))
 
         p.openInventory(inventory)
-        customInventory.open(p,CUSTOM_REGION_MENU)
+        customInventory.open(p,REGION_SETTING)
 
     }
 
@@ -247,8 +242,9 @@ class InventoryMenu {
 
         inventory.setItem(0,backBtn)
 
-        inventory.setItem(1, customInventory.IS(Material.EMERALD,"§e§l販売中", mutableListOf(),id))
-        inventory.setItem(4, customInventory.IS(Material.LIME_WOOL,"§a§lフリー", mutableListOf("§f§l保護が外れるので注意してください"),id))
+        inventory.setItem(1, customInventory.IS(Material.RED_STAINED_GLASS_PANE,"§c§l無法地帯", mutableListOf("§f§l保護を外します"),id))
+        inventory.setItem(3, customInventory.IS(Material.LIME_WOOL,"§a§lフリー", mutableListOf("§f§lブロックの設置破壊以外できる"),id))
+        inventory.setItem(5, customInventory.IS(Material.EMERALD,"§e§l販売中", mutableListOf(),id))
         inventory.setItem(7, customInventory.IS(Material.IRON_DOOR,"§c§l保護", mutableListOf(),id))
 
         p.openInventory(inventory)
@@ -380,7 +376,7 @@ class InventoryMenu {
         inventory.setItem(16,customInventory.IS(Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),uuid,id))
 
         p.openInventory(inventory)
-        customInventory.open(p,CUSTOM_USER_MENU)
+        customInventory.open(p,USER_MENU)
 
     }
 

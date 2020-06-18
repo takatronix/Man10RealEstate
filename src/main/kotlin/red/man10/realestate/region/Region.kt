@@ -275,7 +275,7 @@ class Region(private val pl:Plugin) {
 
         var name = "RegionName"
         var ownerUUID : UUID? = null
-        var status = "OnSale"
+        var status = "OnSale" //Danger,Free,OnSale,Protected
 
         var world = "builder"
         var server = "server"

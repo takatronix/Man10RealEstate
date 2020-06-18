@@ -340,7 +340,11 @@ class Event(private val pl :Plugin) :Listener{
                 val data = user.get(p,id)?:return false
 
                 if (data.status == "Lock")return false
+                if (data.status == "Danger")return true
                 if (data.allowAll)return true
+
+                if (!(e is BlockBreakEvent || e is BlockPlaceEvent) && data.status == "Free")return true
+                if (!(e is SignChangeEvent || e is HangingBreakByEntityEvent) && data.status == "Free")return true
 
                 //ブロックの設置、破壊　
                 if ((e is BlockBreakEvent || e is BlockPlaceEvent) && data.allowBlock)return true
