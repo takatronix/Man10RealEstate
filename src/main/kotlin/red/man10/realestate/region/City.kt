@@ -4,7 +4,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
-import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
@@ -187,18 +186,6 @@ class City(private val pl:Plugin) {
         return  -1
     }
 
-    /**
-     * 都市の範囲を再指定する
-     */
-    fun setRegion(id:Int,pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>){
-
-        val data = get(id)?:return
-
-        data.startPosition = pos1
-        data.endPosition = pos2
-
-        set(id,data)
-    }
 
     /**
      * 税金の変更

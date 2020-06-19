@@ -29,6 +29,13 @@ class CustomInventory (private val pl: Plugin){
         invMap.remove(p)
     }
 
+    fun close(p:Player,inv:Boolean){
+        if (inv){
+            p.closeInventory()
+        }
+        invMap.remove(p)
+    }
+
 
     fun IS(type:Material,name:String,lore:MutableList<String>):ItemStack{
         val item = ItemStack(type)

@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Sign
+import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -13,8 +14,10 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
+import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
+import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import red.man10.realestate.Plugin
@@ -310,6 +313,31 @@ class Event(private val pl :Plugin) :Listener{
 
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun interact(e:PlayerInteractEntityEvent){
+
+        val p = e.player
+
+        if (!canBreak(p, e.rightClicked.location,e)){
+            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
+            e.isCancelled = true
+        }
+
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun breakEntity(e:EntityDamageByEntityEvent){
+
+        val p = e.damager
+
+        if (p !is Player)return
+
+        if (!canBreak(p, e.entity.location,e)){
+            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
+            e.isCancelled = true
+        }
+
+    }
 
     //ブロック破壊処理
     fun canBreak(p:Player,loc: Location,e:Any):Boolean{
@@ -326,6 +354,7 @@ class Event(private val pl :Plugin) :Listener{
             if (disableWorld.contains(loc.world.name)){
                 return true
             }
+            return false
         }
 
         for (id in city.get(cityID)!!.regionList){
@@ -345,10 +374,12 @@ class Event(private val pl :Plugin) :Listener{
 
                 if (!(e is BlockBreakEvent || e is BlockPlaceEvent) && data.status == "Free")return true
                 if (!(e is SignChangeEvent || e is HangingBreakByEntityEvent) && data.status == "Free")return true
+                if (!(e is EntityDamageByEntityEvent || e is PlayerInteractEntityEvent) && data.status == "Free")return true
 
                 //ブロックの設置、破壊　
                 if ((e is BlockBreakEvent || e is BlockPlaceEvent) && data.allowBlock)return true
                 if ((e is SignChangeEvent || e is HangingBreakByEntityEvent) && data.allowBlock)return true
+                if ((e is EntityDamageByEntityEvent || e is PlayerInteractEntityEvent) && data.allowBlock)return true
 
                 //ブロックの右クリック
                 if (e is PlayerInteractEvent){

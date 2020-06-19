@@ -48,7 +48,7 @@ class Utility {
             //   クリックイベントを作成する
             var clickEvent: ClickEvent? = null
             if (command != null) {
-                clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)
+                clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/$command")
             }
 
             val message = ComponentBuilder("${Plugin.prefix}$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()

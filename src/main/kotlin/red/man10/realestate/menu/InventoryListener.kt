@@ -1,11 +1,13 @@
 package red.man10.realestate.menu
 
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import red.man10.realestate.Plugin.Companion.customInventory
+import red.man10.realestate.Utility
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
 import java.util.*
 
@@ -20,9 +22,12 @@ class InventoryListener : Listener{
 
         if (p !is Player)return
 
-        val inv = e.inventory
         val slot = e.slot
         val item = e.currentItem?:return
+
+        if (customInventory.get(p) ==null)return
+
+        e.isCancelled = true
 
         when(customInventory.get(p)){
 
@@ -92,8 +97,8 @@ class InventoryListener : Listener{
                     13 -> invMenu.userList(p,id,0)
                     15 -> {
                         customInventory.close(p)
-                        p.performCommand("")
-                        //TODO: コマンドを設定
+                        Utility.sendSuggest(p,"§a§住人を追加する","mre adduser $id ")
+                        return
                     }
                 }
 
@@ -108,12 +113,14 @@ class InventoryListener : Listener{
                     0->invMenu.regionMenu(p,id)
                     10->invMenu.statusMenu(p,id)
                     13->{
-                        //TODO:料金設定のコマンド表示(サジェスト)
+                        customInventory.close(p)
+                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setprice $id ")
                     }
                     16->{}
                     38->invMenu.spanMenu(p,id)
                     42->{
-                        //TODO:オーナー変更コマンド表示
+                        customInventory.close(p)
+                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setowner $id ")
                     }
                 }
 
@@ -124,8 +131,23 @@ class InventoryListener : Listener{
                 val id = customInventory.getData(item,"id").toInt()
 
                 when(slot){
-                    //TODO: コマンド
                     0->invMenu.regionSetting(p,id)
+                    1->{
+                        customInventory.close(p)
+                        p.performCommand("mre setstatus $id Danger")
+                    }
+                    3->{
+                        customInventory.close(p)
+                        p.performCommand("mre setstatus $id Free")
+                    }
+                    5->{
+                        customInventory.close(p)
+                        p.performCommand("mre setstatus $id OnSale")
+                    }
+                    7->{
+                        customInventory.close(p)
+                        p.performCommand("mre setstatus $id Protected")
+                    }
 
                 }
 
@@ -137,10 +159,19 @@ class InventoryListener : Listener{
 
                 when(slot){
                     0 ->invMenu.regionSetting(p,id)
-                    //TODO:コマンド
-
+                    1 ->{
+                        customInventory.close(p)
+                        p.performCommand("mre span $id 2")
+                    }
+                    4 -> {
+                        customInventory.close(p)
+                        p.performCommand("mre span $id 1")
+                    }
+                    7 -> {
+                        customInventory.close(p)
+                        p.performCommand("mre span $id 0")
+                    }
                 }
-
             }
 
 
@@ -183,8 +214,13 @@ class InventoryListener : Listener{
 
                     0->invMenu.userList(p,id,0)
 
-                    10->invMenu.setPermission(p,id,uuid)
-                    //TODO:設定
+                    11->invMenu.setPermission(p,id,uuid)
+                    13->{
+                        customInventory.close(p)
+                        Utility.sendSuggest(p,"§a§l賃料を設定する","mre setrent $id" +
+                                " ${Bukkit.getOfflinePlayer(uuid).name} ")
+                    }
+                    15->p.performCommand("mre removeuser $id ${Bukkit.getOfflinePlayer(uuid).name}")
 
                 }
 
@@ -198,7 +234,7 @@ class InventoryListener : Listener{
 
                     0->invMenu.userMenu(p,id,uuid)
 
-                    //TODO:コマンド
+
 
                 }
 
@@ -213,7 +249,7 @@ class InventoryListener : Listener{
 
         val p = e.player
         if (p !is Player)return
-        customInventory.close(p)
+        customInventory.close(p,false)
     }
 
 

@@ -8,7 +8,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import red.man10.realestate.Plugin.Companion.customInventory
-import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
@@ -370,10 +369,9 @@ class InventoryMenu {
 
         inventory.setItem(0,backBtn)
 
-        inventory.setItem(10, customInventory.IS(Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),uuid,id))
-        inventory.setItem(12, customInventory.IS(Material.EMERALD,"§a§l賃料を設定する", mutableListOf(),uuid,id))
-        inventory.setItem(14, customInventory.IS(Material.COMPASS,"§a§l賃料を徴収する", mutableListOf(),uuid,id))
-        inventory.setItem(16,customInventory.IS(Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),uuid,id))
+        inventory.setItem(11, customInventory.IS(Material.RED_STAINED_GLASS_PANE,"§3§l権限設定", mutableListOf(),uuid,id))
+        inventory.setItem(13, customInventory.IS(Material.EMERALD,"§a§l賃料を設定する", mutableListOf(),uuid,id))
+        inventory.setItem(15,customInventory.IS(Material.REDSTONE_BLOCK,"§4§l住人を退去させる", mutableListOf(),uuid,id))
 
         p.openInventory(inventory)
         customInventory.open(p,USER_MENU)

@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Man10OfflineBank">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/libs/Man10OfflineBank.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

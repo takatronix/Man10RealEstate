@@ -26,6 +26,7 @@ class User(private val pl :Plugin) {
 
     fun set(p:Player,id:Int,data:UserData){
         (userData[p]?: HashMap())[id] = data
+        save(p,id)
     }
 
     fun get(p:Player,id:Int): UserData? {
@@ -293,6 +294,13 @@ class User(private val pl :Plugin) {
     fun setRentPrice(p:Player,id:Int,rent:Double){
 
         val data = get(p,id)?:return
+
+        if (rent == 0.0){
+            changeRent(p,id,false)
+        }else{
+            changeRent(p,id,true)
+        }
+
         data.rent = rent
         set(p,id,data)
     }

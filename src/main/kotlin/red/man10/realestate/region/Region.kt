@@ -61,7 +61,7 @@ class Region(private val pl:Plugin) {
                 "sx, sy, sz, ex, ey, ez) " +
                 "VALUES(" +
                 "'${Bukkit.getServer().name}', " +
-                "'${tp.world}', " +
+                "'${tp.world.name}', " +
                 "'$name', " +
                 "'OnSale', " +
                 "$price, " +
