@@ -23,6 +23,11 @@ class City(private val pl:Plugin) {
 
     fun set(id:Int,data:CityData){
         cityData[id] = data
+        save(id,data)
+    }
+
+    fun map():ConcurrentHashMap<Int,CityData>{
+        return cityData
     }
 
     fun delete(id: Int){
@@ -164,7 +169,7 @@ class City(private val pl:Plugin) {
 
         data.regionList = list
 
-        set(id,data)
+        cityData[id] = data
 
     }
 
@@ -193,9 +198,6 @@ class City(private val pl:Plugin) {
         data.endPosition = pos2
 
         set(id,data)
-
-        save(id,data)
-
     }
 
     /**
@@ -205,7 +207,6 @@ class City(private val pl:Plugin) {
         val data = get(id)?:return
         data.tax = tax
         set(id,data)
-        save(id,data)
     }
 
     /**

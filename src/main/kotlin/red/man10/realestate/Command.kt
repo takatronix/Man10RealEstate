@@ -4,12 +4,18 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import red.man10.realestate.Plugin.Companion.WAND_NAME
+import red.man10.realestate.Plugin.Companion.city
+import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.numbers
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility.Companion.sendHoverText
@@ -305,10 +311,301 @@ class Command:CommandExecutor {
 
         if (label == "mreop"){
 
+            if (!hasPerm(sender,OP))return false
+
+            when(args[0]){
+
+                //mreop create city <name> <tax>
+                //mreop create rg <name> <tax>
+                "create" ->{
+
+                    if (args.size != 4)return false
+
+                    val wand = sender.inventory.itemInMainHand
+
+                    if (!wand.hasItemMeta() || wand.itemMeta.displayName != WAND_NAME){
+                        sendMessage(sender,"${WAND_NAME}§e§lを持ってください！")
+                        return true
+                    }
+
+                    val lore = wand.lore
+
+                    if (lore == null || wand.lore!!.size != 5){
+                        sendMessage(sender,"§e§fの範囲指定ができていません！")
+                        return true
+                    }
+
+                    if (!NumberUtils.isNumber(args[3])){
+                        sendMessage(sender,"§3§lパラメータの入力方法が違います！")
+                        sendMessage(sender,"§3§l/mreop create city [都市の名前] [税額]")
+                        sendMessage(sender,"§3§l/mreop create rg [リージョンの名前] [初期の値段]")
+                        return true
+                    }
+
+                    val amount = args[3].toDouble()
+
+                    sendMessage(sender,"§a§l現在登録中です・・・")
+
+                    GlobalScope.launch {
+                        val c1 = lore[3].replace("§aStart:§fX:","")
+                                .replace("Y","").replace("Z","")
+                                .replace(":","").split(",")
+
+                        val startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+
+                        val c2 = lore[4].replace("§aEnd:§fX:","")
+                                .replace("Y","").replace("Z","")
+                                .replace(":","").split(",")
+
+                        val endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+
+                        var id = -1
+
+                        if (args[1] == "city"){
+
+                            id = city.create(startPosition,endPosition,args[2],amount,sender.location)
+
+                        }else if (args[1] == "rg"){
+                            id = region.create(startPosition,endPosition,args[2],amount,sender.location)
+                        }
+
+                        if (id == -1){
+                            sendMessage(sender,"§c§l登録失敗！")
+                            return@launch
+                        }
+
+                        sendMessage(sender,"§a§l登録完了！")
+
+                        if (args[1] == "rg"){
+                            sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
+                        }
 
 
+                    }
+                }
 
-            sendMessage(sender,"§c§l不明なコマンドです！")
+                "delete" ->{
+
+                    if (args.size == 3)return false
+
+                    if (!NumberUtils.isNumber(args[2])){
+                        sendMessage(sender,"§c§l数字を入力してください")
+                        return true
+                    }
+
+                    val id = args[2].toInt()
+
+                    val isRg = args[1] == "rg"
+
+                    if (isRg){
+                        if (region.get(id) == null){
+                            sendMessage(sender,"§c§l存在しない土地です！")
+                            return true
+
+                        }
+
+                        region.delete(id)
+                        sendMessage(sender,"§a§l削除完了！")
+
+                        return true
+
+                    }
+
+                    if (city.get(id) == null){
+                        sendMessage(sender,"§c§l存在しない都市です！")
+                        return true
+
+                    }
+                    city.delete(id)
+                    sendMessage(sender,"§a§l削除完了！")
+
+                }
+
+                "wand" ->{
+                    val wand = ItemStack(Material.STICK)
+                    val meta = wand.itemMeta
+                    meta.setDisplayName(WAND_NAME)
+                    wand.itemMeta = meta
+                    sender.inventory.addItem(wand)
+                    return true
+
+                }
+
+                "reload" ->{
+
+                    GlobalScope.launch {
+
+                        region.load()
+                        city.load()
+
+                        for (p in Bukkit.getOnlinePlayers()){
+                            user.load(p)
+                        }
+
+                        plugin.reloadConfig()
+
+                        disableWorld = plugin.config.getStringList("disableWorld")
+                        maxBalance = plugin.config.getDouble("maxBalance",100000000.0)
+
+                        sendMessage(sender,"§e§lリロード完了")
+
+                    }
+
+                }
+
+                "disableWorld" ->{
+
+                    if (args.size != 3)return true
+
+                    if (args[2].isBlank()){
+                        sendMessage(sender,"§3§l保護を外すワールドを指定してください")
+                        return true
+                    }
+
+                    if (args[1] == "add"){
+                        disableWorld.add(args[2])
+
+                        GlobalScope.launch {
+                            plugin.config.set("disableWorld", disableWorld)
+                            plugin.saveConfig()
+                            sendMessage(sender,"追加完了！")
+
+                        }
+                    }
+                    if (args[1] == "remove"){
+                        disableWorld.remove(args[2])
+                        GlobalScope.launch {
+                            plugin.config.set("disableWorld", disableWorld)
+                            plugin.saveConfig()
+                            sendMessage(sender,"削除完了！")
+                        }
+                    }
+                }
+
+                "where" ->{
+
+                    val loc = sender.location
+
+                    GlobalScope.launch {
+                        sendMessage(sender, "§e§l=====================================")
+
+                        for (rg in region.map()) {
+
+                            val data = rg.value
+
+                            if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world)) {
+                                sendMessage(sender, "§e§lRegionID:${rg.key}")
+                            }
+                        }
+
+                        for (c in city.map()){
+
+                            val data = c.value
+
+                            if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world)) {
+                                sendMessage(sender, "§e§lCityID:${c.key}")
+                            }
+
+                        }
+
+                        sendMessage(sender, "§e§l=====================================")
+
+                    }
+                }
+
+                "reset" ->{//mreop reset city id
+
+                    if (args.size != 3)return false
+
+                    val wand = sender.inventory.itemInMainHand
+
+                    if (!wand.hasItemMeta() || wand.itemMeta.displayName != WAND_NAME){
+                        sendMessage(sender,"${WAND_NAME}§e§lを持ってください！")
+                        return true
+                    }
+
+                    val lore = wand.lore
+
+                    if (lore == null || wand.lore!!.size != 5){
+                        sendMessage(sender,"§e§fの範囲指定ができていません！")
+                        return true
+                    }
+
+                    if (!NumberUtils.isNumber(args[2]))return true
+
+                    val id = args[2].toInt()
+
+                    val isRg = args[1] == "rg"
+
+                    val c1 = lore[3].replace("§aStart:§fX:","")
+                            .replace("Y","").replace("Z","")
+                            .replace(":","").split(",")
+
+                    val startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+
+                    val c2 = lore[4].replace("§aEnd:§fX:","")
+                            .replace("Y","").replace("Z","")
+                            .replace(":","").split(",")
+
+                    val endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+
+
+                    if (isRg){
+                        val data = region.get(id)
+
+                        if (data == null){
+                            sendMessage(sender,"§c§l存在しない土地です！")
+                            return true
+                        }
+
+                        data.startPosition = startPosition
+                        data.endPosition = endPosition
+
+                        region.set(id,data)
+
+                        sendMessage(sender,"§a§l再設定完了！")
+                        return true
+                    }
+
+                    val data = city.get(id)
+
+                    if (data == null){
+                        sendMessage(sender,"§c§l存在しない土地です！")
+                        return true
+                    }
+
+                    data.startPosition = startPosition
+                    data.endPosition = endPosition
+
+                    city.set(id, data)
+
+                    sendMessage(sender,"§a§l再設定完了！")
+                }
+
+                "tax" ->{
+
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+
+                    val id = args[1].toInt()
+                    val tax= args[2].toDouble()
+
+                    val data = city.get(id)?:return true
+                    data.tax = tax
+                    city.set(id,data)
+
+                    return  true
+                }
+
+                else ->{
+
+                    sendMessage(sender,"§c§l不明なコマンドです！")
+
+                    return false
+
+                }
+
+            }
 
             return false
         }
