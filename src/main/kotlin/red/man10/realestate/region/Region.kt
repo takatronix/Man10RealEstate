@@ -135,8 +135,22 @@ class Region(private val pl:Plugin) {
      */
     fun setOwner(id:Int, p: Player?){
         val data = get(id)?:return
+
+        if (data.ownerUUID !=null){
+            val old = Bukkit.getPlayer(data.ownerUUID!!)
+
+            if (old !=null){
+                val list = user.ownerList[p]!!
+                list.remove(id)
+                user.ownerList[old] = list
+            }
+        }
+
         if (p != null){
             data.ownerUUID = p.uniqueId
+            val list = user.ownerList[p]?: mutableListOf()
+            list.add(id)
+            user.ownerList[p] = list
         }else{
             data.ownerUUID = p
         }

@@ -88,7 +88,10 @@ class InventoryListener : Listener{
 
             REGION_MENU ->{
 
-                if (slot == 0) invMenu.openRegionList(p,0)
+                if (slot == 0){
+                    invMenu.openRegionList(p,0)
+                    return
+                }
 
                 val id = customInventory.getData(item,"id").toInt()
 

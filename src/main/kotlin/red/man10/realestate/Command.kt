@@ -44,6 +44,7 @@ class Command:CommandExecutor {
                 return true
 
             }
+            //TODO:Intを少数にしたときの処理修正
 
             when(args[0]){
 
@@ -312,6 +313,21 @@ class Command:CommandExecutor {
         if (label == "mreop"){
 
             if (!hasPerm(sender,OP))return false
+
+            if (args.isEmpty()){
+                sendMessage(sender,"§e§l==============================================")
+                sendMessage(sender,"§e§l/mreop wand : 範囲指定用のワンドを取得")
+                sendMessage(sender,"§e§l/mreop create <rg/city> <リージョン名/都市名> <値段/税額> : 新規リージョンを作成します")
+                sendMessage(sender,"§e§l範囲指定済みの${WAND_NAME}§e§lを持ってコマンドを実行してください")
+                sendMessage(sender,"§e§l/mreop delete <rg/city> <id> : 指定idのリージョンを削除します")
+                sendMessage(sender,"§e§l/mreop reload : 再読み込みをします")
+                sendMessage(sender,"§e§l/mreop where : 現在地点がどのリージョンが確認します")
+                sendMessage(sender,"§e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します")
+                sendMessage(sender,"§e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します")
+                sendMessage(sender,"§e§l/mreop tax <id> <tax>: 指定都市の税額を変更します")
+
+                return true
+            }
 
             when(args[0]){
 
@@ -593,6 +609,8 @@ class Command:CommandExecutor {
                     val data = city.get(id)?:return true
                     data.tax = tax
                     city.set(id,data)
+
+                    sendMessage(sender,"§a§l設定完了！")
 
                     return  true
                 }
