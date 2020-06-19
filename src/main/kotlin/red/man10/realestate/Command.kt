@@ -94,7 +94,7 @@ class Command:CommandExecutor {
                         sendMessage(sender,"§c§l入力方法に問題があります！")
                         return false
                     }
-                    val id = args[1].toInt()
+                    val id = parse(args[1])?:return false
 
                     if (!hasRegionPermission(sender,id))return false
 
@@ -160,11 +160,11 @@ class Command:CommandExecutor {
 
                 "removeuser" ->{
 
-                    if (args.size != 3 || !NumberUtils.isNumber(args[1]))return false
+                    if (args.size != 3)return false
 
                     if (!hasPerm(sender,USER))return false
 
-                    val id = args[1].toInt()
+                    val id = parse(args[1])?:return false
 
                     if (!hasRegionPermission(sender,id))return false
 
@@ -201,9 +201,7 @@ class Command:CommandExecutor {
 
                     if (args.size != 3)return false
 
-                    if (!NumberUtils.isNumber(args[1]))return false
-
-                    val id = args[1].toInt()
+                    val id = parse(args[1])?:return false
 
                     if (sender.uniqueId != region.get(id)!!.ownerUUID)return false
 
@@ -229,9 +227,9 @@ class Command:CommandExecutor {
 
                     if (args.size != 4)return false
 
-                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[3]))return false
+                    if (!NumberUtils.isNumber(args[3]))return false
 
-                    val id = args[1].toInt()
+                    val id = parse(args[1])?:return false
                     val rent = args[3].toDouble()
 
                     if (!hasRegionPermission(sender,id))return false
@@ -262,9 +260,7 @@ class Command:CommandExecutor {
 
                     if (args.size != 3)return false
 
-                    if (!NumberUtils.isNumber(args[1]))return false
-
-                    val id = args[1].toInt()
+                    val id = parse(args[1])?:return false
 
                     if (!hasRegionPermission(sender,id))return false
 
@@ -283,9 +279,9 @@ class Command:CommandExecutor {
 
                     if (args.size != 3)return false
 
-                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+                    if (!NumberUtils.isNumber(args[2]))return false
 
-                    val id = args[1].toInt()
+                    val id = parse(args[1])?:return false
 
                     if (!hasRegionPermission(sender,id))return false
 
@@ -402,7 +398,7 @@ class Command:CommandExecutor {
 
                 "delete" ->{
 
-                    if (args.size == 3)return false
+                    if (args.size != 3)return false
 
                     if (!NumberUtils.isNumber(args[2])){
                         sendMessage(sender,"§c§l数字を入力してください")
@@ -640,6 +636,13 @@ class Command:CommandExecutor {
         sendMessage(p,"§c§lYou do not have permission!")
         return false
 
+    }
+
+    fun parse(str:String):Int?{
+
+        if (!NumberUtils.isNumber(str) || !NumberUtils.isDigits(str))return null
+
+        return str.toInt()
     }
 
     fun hasRegionPermission(p:Player,id:Int):Boolean{
