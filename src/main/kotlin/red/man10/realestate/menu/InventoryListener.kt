@@ -1,14 +1,19 @@
 package red.man10.realestate.menu
 
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import red.man10.realestate.Plugin.Companion.customInventory
+import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
+import red.man10.realestate.menu.InventoryMenu.Companion.cache
+import red.man10.realestate.region.User
+import red.man10.realestate.region.User.Companion.Permission.*
 import java.util.*
 
 class InventoryListener : Listener{
@@ -234,13 +239,42 @@ class InventoryListener : Listener{
                 val id = customInventory.getData(item,"id").toInt()
                 val uuid = UUID.fromString(customInventory.getData(item,"uuid"))
 
+                val cacheData = cache[Pair(uuid,id)]!!
+
+                if (slot == 0){
+                    cache.remove(Pair(uuid,id))
+                    invMenu.userMenu(p,id,uuid)
+                    return
+                }
+
+                val value = item.type == Material.RED_STAINED_GLASS_PANE
+
                 when(slot){
 
-                    0->invMenu.userMenu(p,id,uuid)
+                    13 ->{
+                        cacheData.allowAll = value
+                        user.setPermission(uuid,id, ALL,value)
+                    }
 
+                    22 ->{
+                        cacheData.allowBlock = value
+                        user.setPermission(uuid,id, BLOCK,value)
+                    }
 
+                    31 ->{
+                        cacheData.allowInv = value
+                        user.setPermission(uuid,id, INVENTORY,value)
+                    }
+
+                    40 ->{
+                        cacheData.allowDoor = value
+                        user.setPermission(uuid,id, DOOR,value)
+                    }
 
                 }
+
+                invMenu.setPermission(p,id,uuid)
+                cache[Pair(uuid,id)] = cacheData
 
             }
 

@@ -13,7 +13,9 @@ import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
+import red.man10.realestate.region.User
 import java.util.*
+import kotlin.collections.HashMap
 
 class InventoryMenu {
 
@@ -385,7 +387,7 @@ class InventoryMenu {
         inventory.setItem(22,loadItem)
 
         GlobalScope.launch {
-            val data = user.get(uuid,id)!!
+            val data = cache[Pair(uuid,id)]?:user.get(uuid,id)!!
 
             Bukkit.getScheduler().runTask(plugin, Runnable {
 
@@ -393,18 +395,25 @@ class InventoryMenu {
                 customInventory.setData(backBtn,"id","$id")
                 customInventory.setData(backBtn,"uuid","$uuid")
 
+                inventory.setItem(0,backBtn)
 
                 inventory.setItem(13, customInventory.IS(if (data.allowAll){Material.LIME_STAINED_GLASS_PANE }
                 else{Material.RED_STAINED_GLASS_PANE},"§3§l全権限", mutableListOf(),uuid,id))
 
-                inventory.setItem(22, customInventory.IS(if (data.allowAll){Material.LIME_STAINED_GLASS_PANE }
-                else{Material.RED_STAINED_GLASS_PANE},"§3§ブロックの設置、破壊", mutableListOf(),uuid,id))
+                inventory.setItem(22, customInventory.IS(if (data.allowBlock){Material.LIME_STAINED_GLASS_PANE }
+                else{Material.RED_STAINED_GLASS_PANE},"§3§lブロックの設置、破壊", mutableListOf(),uuid,id))
 
-                inventory.setItem(31, customInventory.IS(if (data.allowAll){Material.LIME_STAINED_GLASS_PANE }
+                inventory.setItem(31, customInventory.IS(if (data.allowInv){Material.LIME_STAINED_GLASS_PANE }
                 else{Material.RED_STAINED_GLASS_PANE},"§3§lチェストなどのインベントリを開く", mutableListOf(),uuid,id))
 
-                inventory.setItem(40, customInventory.IS(if (data.allowAll){Material.LIME_STAINED_GLASS_PANE }
+                inventory.setItem(40, customInventory.IS(if (data.allowDoor){Material.LIME_STAINED_GLASS_PANE }
                 else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなどの右クリック、左クリック(看板を除く)", mutableListOf(),uuid,id))
+
+//                inventory.setItem(8, customInventory.IS(Material.YELLOW_STAINED_GLASS_PANE,"§e§lセーブ", mutableListOf(),uuid,id))
+
+                if (cache[Pair(uuid,id)] == null){
+                    cache[Pair(uuid,id)] = data
+                }
 
             })
 
@@ -412,6 +421,10 @@ class InventoryMenu {
 
         p.openInventory(inventory)
         customInventory.open(p,USER_PERMISSION)
+    }
+
+    companion object{
+        val cache = HashMap<Pair<UUID,Int>,User.UserData>()
     }
 
 
