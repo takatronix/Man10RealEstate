@@ -90,7 +90,7 @@ class Command:CommandExecutor {
 
                     if (!hasPerm(sender,USER))return false
 
-                    if (args.size == 3|| !NumberUtils.isNumber(args[1])){
+                    if (args.size != 3){
                         sendMessage(sender,"§c§l入力方法に問題があります！")
                         return false
                     }
@@ -119,7 +119,7 @@ class Command:CommandExecutor {
 
                     val number = Random().nextInt()
 
-                    number.and(number)
+                    numbers.add(number)
 
 
                     sendMessage(p,"§a§l=================土地の情報==================")
@@ -130,8 +130,9 @@ class Command:CommandExecutor {
 
                     sendMessage(p,"§e§l承諾する場合は下のチャット文をクリック、しない場合はこの文を無視してください")
 
-                    sendHoverText(p,"§e§l[住人追加に承諾する]","","mre acceptuser $id ${sender.name} $number")
+                    sendHoverText(p,"§e§l[住人追加に承諾する]","§a§l承諾する","mre acceptuser $id ${sender.name} $number")
 
+                    sendMessage(sender,"§a§l現在承諾待ちです....")
                     return true
 
                 }
@@ -507,6 +508,10 @@ class Command:CommandExecutor {
 
                             if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world)) {
                                 sendMessage(sender, "§e§lRegionID:${rg.key}")
+                                sendMessage(sender, "§7Name:${rg.value.name}")
+                                sendMessage(sender, "§8Price:${rg.value.price}")
+                                sendMessage(sender, "§7Owner:${region.getOwner(rg.value)}")
+
                             }
                         }
 
@@ -516,6 +521,8 @@ class Command:CommandExecutor {
 
                             if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world)) {
                                 sendMessage(sender, "§e§lCityID:${c.key}")
+                                sendMessage(sender, "§7Name:${c.value.name}")
+                                sendMessage(sender, "§8Tax:${c.value.tax}")
                             }
 
                         }

@@ -201,12 +201,12 @@ class User(private val pl :Plugin) {
 
             data.status = rs.getString("status")
 
+            data.rent = rs.getDouble("rent")
+
             data.allowAll = rs.getInt("allow_all")==1
             data.allowBlock = rs.getInt("allow_block")==1
             data.allowInv = rs.getInt("allow_inv")==1
             data.allowDoor = rs.getInt("allow_door")==1
-
-            data.isRent = rs.getInt("is_rent")==1
 
             list.add(Pair(rs.getString("uuid"),data))
         }
@@ -377,7 +377,7 @@ class User(private val pl :Plugin) {
 
     fun rentTimer(){
 
-        val rs = mysql.query("SELECT * FROM region_user WHERE is_rent=1 AND rent>0.0;")?:return
+        val rs = mysql.query("SELECT * FROM region_user WHERE rent>0.0;")?:return
 
         while (rs.next()){
 

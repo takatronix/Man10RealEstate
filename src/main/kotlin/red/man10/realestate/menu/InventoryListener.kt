@@ -209,6 +209,7 @@ class InventoryListener : Listener{
                 val id = customInventory.getData(item,"id").toInt()
                 if (slot == 0){
                     invMenu.userList(p,id,0)
+                    return
                 }
 
                 val uuid = UUID.fromString(customInventory.getData(item,"uuid"))

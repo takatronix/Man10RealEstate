@@ -214,7 +214,7 @@ class Event(private val pl :Plugin) :Listener{
         sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
 
         if (data.status == "OnSale"){
-            sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","","mre buycheck $id")
+            sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","§a値段:${String.format("%,.1f",data.price)}","mre buycheck $id")
         }
 
         updateSign(sign,id)
@@ -279,7 +279,6 @@ class Event(private val pl :Plugin) :Listener{
         val p = e.player
 
         if (e.hasBlock()&&e.clickedBlock!!.state is Sign){
-            e.isCancelled = true
             return
         }
 

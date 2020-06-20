@@ -261,7 +261,7 @@ class City(private val pl:Plugin) {
         val rg = region.get(rgID)?:return 0.0
 
         val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
-        val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.third)
+        val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
 
         return width * height * city.tax
 
