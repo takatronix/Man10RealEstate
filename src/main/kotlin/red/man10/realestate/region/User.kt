@@ -134,7 +134,7 @@ class User(private val pl :Plugin) {
 
         while (rs1.next()){
 
-            val id = rs1.getInt("id")
+            val id = rs1.getInt("region_id")
 
             val data = UserData()
 
