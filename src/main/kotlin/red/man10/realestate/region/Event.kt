@@ -5,7 +5,6 @@ import kotlinx.coroutines.launch
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Sign
-import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -29,6 +28,7 @@ import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.Companion.sendHoverText
 import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.region.User.Companion.Permission.*
 
 class Event(private val pl :Plugin) :Listener{
 
@@ -241,7 +241,7 @@ class Event(private val pl :Plugin) :Listener{
 
         val p = e.player
 
-        if (!canBreak(p,e.block.location,e)){
+        if (!hasPermission(p,e.block.location, BLOCK)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを破壊する権限がありません！")
             e.isCancelled = true
         }
@@ -251,7 +251,7 @@ class Event(private val pl :Plugin) :Listener{
     fun blockPlaceEvent(e: BlockPlaceEvent){
         val p = e.player
 
-        if (!canBreak(p,e.block.location,e)){
+        if (!hasPermission(p,e.block.location,BLOCK)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
             e.isCancelled = true
         }
@@ -282,18 +282,32 @@ class Event(private val pl :Plugin) :Listener{
             return
         }
 
-        if (!canBreak(p,e.clickedBlock!!.location,e)){
+        if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
         }
+
+        if (invList.contains(e.clickedBlock!!.type)){
+            if (!hasPermission(p,e.clickedBlock!!.location,INVENTORY)){
+                sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+                e.isCancelled = true
+            }
+        }else{
+            if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
+                sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+                e.isCancelled = true
+            }
+
+        }
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun signEvent(e:SignChangeEvent){
         val p = e.player
 
-        if (!canBreak(p,e.block.location,e)){
-            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
+        if (!hasPermission(p,e.block.location,BLOCK)){
+            sendMessage(p,"§4§lあなたにはこの場所で看板を設置する権限がありません")
             e.isCancelled = true
         }
 
@@ -305,7 +319,7 @@ class Event(private val pl :Plugin) :Listener{
 
         if (p !is Player)return
 
-        if (!canBreak(p,e.entity.location,e)){
+        if (!hasPermission(p,e.entity.location,BLOCK)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
@@ -317,7 +331,7 @@ class Event(private val pl :Plugin) :Listener{
 
         val p = e.player
 
-        if (!canBreak(p, e.rightClicked.location,e)){
+        if (!hasPermission(p, e.rightClicked.location,DOOR)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
@@ -331,66 +345,70 @@ class Event(private val pl :Plugin) :Listener{
 
         if (p !is Player)return
 
-        if (!canBreak(p, e.entity.location,e)){
+        if (!hasPermission(p, e.entity.location,DOOR)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
 
     }
 
-    //ブロック破壊処理
-    fun canBreak(p:Player,loc: Location,e:Any):Boolean{
+    companion object{
+        fun hasPermission(p:Player, loc: Location, perm:User.Companion.Permission):Boolean{
 
-        if (p.hasPermission("mre.op"))return true
+            if (p.hasPermission("mre.op"))return true
 
-        if (disableWorld.contains(loc.world.name)){
-            return true
-        }
-
-        val cityID = city.where(loc)
-
-        if (cityID == -1){
             if (disableWorld.contains(loc.world.name)){
                 return true
             }
+
+            val cityID = city.where(loc)
+
+            if (cityID == -1){
+                if (disableWorld.contains(loc.world.name)){
+                    return true
+                }
+                return false
+            }
+
+            for (id in city.get(cityID)!!.regionList){
+
+                val rg = region.get(id)?:continue
+
+                if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world)){
+
+                    if (rg.status == "Lock")return false
+                    if (rg.ownerUUID == p.uniqueId)return true
+
+                    val data = user.get(p,id)?:return false
+
+                    if (data.status == "Lock")return false
+                    if (data.status == "Danger")return true
+                    if (data.allowAll)return true
+
+                    if (perm != BLOCK &&data.status == "Free")return true
+
+                    when(perm){
+
+                        BLOCK ->{
+                            if (data.allowBlock)return true
+                        }
+                        INVENTORY ->{
+                            if (data.allowInv)return true
+                        }
+                        DOOR ->{
+                            if (data.allowDoor)return true
+                        }
+                        else->return false
+
+                    }
+
+                    return false
+                }
+            }
+
             return false
         }
 
-        for (id in city.get(cityID)!!.regionList){
-
-            val rg = region.get(id)?:continue
-
-            if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world)){
-
-                if (rg.status == "Lock")return false
-                if (rg.ownerUUID == p.uniqueId)return true
-
-                val data = user.get(p,id)?:return false
-
-                if (data.status == "Lock")return false
-                if (data.status == "Danger")return true
-                if (data.allowAll)return true
-
-                if (!(e is BlockBreakEvent || e is BlockPlaceEvent) && data.status == "Free")return true
-                if (!(e is SignChangeEvent || e is HangingBreakByEntityEvent) && data.status == "Free")return true
-                if (!(e is EntityDamageByEntityEvent || e is PlayerInteractEntityEvent) && data.status == "Free")return true
-
-                //ブロックの設置、破壊　
-                if ((e is BlockBreakEvent || e is BlockPlaceEvent) && data.allowBlock)return true
-                if ((e is SignChangeEvent || e is HangingBreakByEntityEvent) && data.allowBlock)return true
-                if ((e is EntityDamageByEntityEvent || e is PlayerInteractEntityEvent) && data.allowBlock)return true
-
-                //ブロックの右クリック
-                if (e is PlayerInteractEvent){
-                    if (data.allowInv && invList.contains(e.clickedBlock!!.type))return true
-                    if (data.allowDoor && !invList.contains(e.clickedBlock!!.type))return true
-
-                }
-
-                return false
-            }
-        }
-
-        return false
     }
+
 }
