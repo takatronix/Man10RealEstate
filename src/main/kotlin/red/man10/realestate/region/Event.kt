@@ -19,6 +19,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.EquipmentSlot
 import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.city
@@ -258,20 +259,6 @@ class Event(private val pl :Plugin) :Listener{
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun shootBowEvent(e: EntityShootBowEvent){
-
-        val p = e.entity
-
-        if (p !is Player)return
-
-        if (!disableWorld.contains(p.world.name)){
-            e.isCancelled = true
-            return
-        }
-
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
     fun blockTouchEvent(e:PlayerInteractEvent){
         if (e.action != Action.RIGHT_CLICK_BLOCK)return
         if (!e.hasBlock())return
@@ -285,17 +272,20 @@ class Event(private val pl :Plugin) :Listener{
         if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
             sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
+            return
         }
 
         if (invList.contains(e.clickedBlock!!.type)){
             if (!hasPermission(p,e.clickedBlock!!.location,INVENTORY)){
                 sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
                 e.isCancelled = true
+                return
             }
         }else{
             if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
                 sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
                 e.isCancelled = true
+                return
             }
 
         }
