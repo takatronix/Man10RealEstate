@@ -236,6 +236,8 @@ class City(private val pl:Plugin) {
 
         if (city.tax == 0.0)return false
 
+        Bukkit.getLogger().info("${Bukkit.getOfflinePlayer(p).name} bal:${offlineBank.getBalance(p)}")
+
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
         if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
@@ -248,6 +250,7 @@ class City(private val pl:Plugin) {
 
         }
 
+        Bukkit.getLogger().info("$id ${Bukkit.getOfflinePlayer(p).name} tax:${city.tax}")
         return true
     }
 

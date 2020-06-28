@@ -8,6 +8,7 @@ import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
+import red.man10.realestate.Plugin.Companion.taxTimer
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
 import java.text.SimpleDateFormat
@@ -402,11 +403,21 @@ class User(private val pl :Plugin) {
 
         val sdf = SimpleDateFormat("dd").format(Date())
 
-        if (sdf.toInt() == 1){
+        if (sdf.toInt() == 1&& taxTimer){
+            pl.logger.info("税金の徴収開始")
             for (rg in region.map()){
                 val uuid = rg.value.ownerUUID?:continue
                 city.payingTax(uuid,rg.key)
             }
+            pl.logger.info("税金の徴収完了！")
+
+            taxTimer = false
+            pl.config.set("taxTimer", taxTimer)
+            pl.saveConfig()
+        }else if (sdf.toInt() != 1&& !taxTimer){
+            taxTimer = true
+            pl.config.set("taxTimer", taxTimer)
+            pl.saveConfig()
         }
 
     }

@@ -53,6 +53,8 @@ class Plugin : JavaPlugin(), Listener {
 
         val numbers = mutableListOf<Int>()
 
+        var taxTimer = false
+
     }
 
     override fun onEnable() { // Plugin startup logic
@@ -72,6 +74,7 @@ class Plugin : JavaPlugin(), Listener {
 
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
+        taxTimer = config.getBoolean("taxTimer",false)
 
         saveResource("config.yml", false)
 
