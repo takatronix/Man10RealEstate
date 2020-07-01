@@ -401,9 +401,9 @@ class User(private val pl :Plugin) {
         rs.close()
         mysql.close()
 
-        val sdf = SimpleDateFormat("dd").format(Date())
+        val time = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
-        if (sdf.toInt() == 1&& taxTimer){
+        if (time == 1&& taxTimer){
             pl.logger.info("税金の徴収開始")
             for (rg in region.map()){
                 val uuid = rg.value.ownerUUID?:continue
@@ -414,7 +414,7 @@ class User(private val pl :Plugin) {
             taxTimer = false
             pl.config.set("taxTimer", taxTimer)
             pl.saveConfig()
-        }else if (sdf.toInt() != 1&& !taxTimer){
+        }else if (time != 1&& !taxTimer){
             taxTimer = true
             pl.config.set("taxTimer", taxTimer)
             pl.saveConfig()

@@ -12,6 +12,7 @@ import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.*
 
@@ -102,9 +103,26 @@ class Plugin : JavaPlugin(), Listener {
 
         //賃料スレッド
         es.execute {
+//            while (true){
+//                user.rentTimer()
+//                Thread.sleep(60000)
+//            }
+
+            var ranRentTimer = false
+
             while (true){
-                user.rentTimer()
-                Thread.sleep(36000000)
+                val time = Calendar.getInstance()
+
+                ranRentTimer = if (time.get(Calendar.MINUTE) == 0 && time.get(Calendar.HOUR) == 0  && !ranRentTimer){
+                    Bukkit.getLogger().info("Running rent timer")
+                    user.rentTimer()
+                    Bukkit.getLogger().info("Ran rent timer")
+                    true
+                }else{
+                    false
+                }
+                Thread.sleep(10000)
+
             }
         }
 
