@@ -113,13 +113,13 @@ class Plugin : JavaPlugin(), Listener {
             while (true){
                 val time = Calendar.getInstance()
 
-                ranRentTimer = if (time.get(Calendar.MINUTE) == 0 && time.get(Calendar.HOUR) == 0  && !ranRentTimer){
+                if (time.get(Calendar.MINUTE) == 0 && time.get(Calendar.HOUR) == 0  && !ranRentTimer){
                     Bukkit.getLogger().info("Running rent timer")
                     user.rentTimer()
                     Bukkit.getLogger().info("Ran rent timer")
-                    true
-                }else{
-                    false
+                    ranRentTimer = true
+                }else if(time.get(Calendar.MINUTE) != 0 || time.get(Calendar.HOUR_OF_DAY) != 0){
+                    ranRentTimer= false
                 }
                 Thread.sleep(10000)
 
