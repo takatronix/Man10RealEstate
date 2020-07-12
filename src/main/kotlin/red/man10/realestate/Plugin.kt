@@ -24,11 +24,11 @@ class Plugin : JavaPlugin(), Listener {
     var wandEndLocation: Location? = null
     var particleTime:Int = 0
 
-    lateinit var es : ExecutorService
-
     companion object{
 
         lateinit var offlineBank : BankAPI
+
+        lateinit var es : ExecutorService
 
         lateinit var region : Region
         lateinit var user : User

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import red.man10.realestate.Plugin.Companion.customInventory
+import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
@@ -283,8 +284,7 @@ class InventoryMenu {
 
         inventory.setItem(22,loadItem)
 
-        GlobalScope.launch {
-
+        es.execute {
             val list = user.loadUsers(id,page)
 
             //メインスレッドでguiに書き込み
@@ -356,7 +356,9 @@ class InventoryMenu {
                     }
                 }
             })
+
         }
+
         p.openInventory(inventory)
         customInventory.open(p,USER_LIST)
 

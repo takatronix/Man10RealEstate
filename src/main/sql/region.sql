@@ -19,7 +19,7 @@ create table region
     ez         double       null comment '終点',
     name       varchar(128) null comment '名称',
     created    datetime     not null default now() comment '作成日',
-    status     varchar(16)  not null DEFAULT "OnSale" comment '"OnSale" 販売中 ：保護あり（admin,ownerのみ）
+    status     varchar(16)  not null DEFAULT "OnSale" comment 'OnSale' 販売中 ：保護あり（admin,ownerのみ）
 "Free" 保護なし だれでもいじられるエリア
 "Protected" 保護あり :　admin,owner,userのみ
 "Lock" 違法などでロック中：　admin以外いじれない

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
+import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.numbers
 import red.man10.realestate.Plugin.Companion.plugin
@@ -446,8 +447,7 @@ class Command:CommandExecutor {
 
                 "reload" ->{
 
-                    GlobalScope.launch {
-
+                    es.execute {
                         region.load()
                         city.load()
 
@@ -616,6 +616,18 @@ class Command:CommandExecutor {
                     sendMessage(sender,"§a§l設定完了！")
 
                     return  true
+                }
+
+                "tp" ->{
+
+                    val id = args[1].toInt()
+
+                    val data = region.get(id)?:return true
+
+                    sender.teleport(data.teleport)
+
+                    return true
+
                 }
 
                 else ->{

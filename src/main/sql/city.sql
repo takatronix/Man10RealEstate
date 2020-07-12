@@ -20,6 +20,3 @@ create table city
 		primary key (id)
 );
 
-create index city_id_owner_owner_uuid_index
-	on city (id, owner, owner_uuid);
-

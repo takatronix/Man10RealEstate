@@ -24,6 +24,7 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
+import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
@@ -35,7 +36,7 @@ class Event(private val pl :Plugin) :Listener{
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
-        GlobalScope.launch {
+        es.execute {
             user.load(e.player)
         }
     }
