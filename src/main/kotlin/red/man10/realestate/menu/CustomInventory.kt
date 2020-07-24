@@ -25,7 +25,9 @@ class CustomInventory (private val pl: Plugin){
     }
 
     fun close(p:Player){
-        p.closeInventory()
+        Bukkit.getScheduler().runTask(pl, Runnable {
+            p.closeInventory()
+        })
         invMap.remove(p)
     }
 

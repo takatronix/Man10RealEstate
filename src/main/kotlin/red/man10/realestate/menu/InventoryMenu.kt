@@ -284,14 +284,13 @@ class InventoryMenu {
 
         inventory.setItem(22,loadItem)
 
-        es.execute {
+        GlobalScope.launch {
             val list = user.loadUsers(id,page)
 
-            //メインスレッドでguiに書き込み
             if (list.isNullOrEmpty()){
                 sendMessage(p,"§c§lこの土地には住人がいないようです")
                 customInventory.close(p)
-                return@execute
+                return@launch
             }
 
             inventory.remove(loadItem)
@@ -356,6 +355,10 @@ class InventoryMenu {
 
         }
 
+        es.execute {
+
+        }
+
         p.openInventory(inventory)
         customInventory.open(p,USER_LIST)
 
@@ -405,7 +408,7 @@ class InventoryMenu {
 
             inventory.setItem(40, customInventory.IS(if (data.allowDoor){Material.LIME_STAINED_GLASS_PANE }
             else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなどの右クリック、左クリック(看板を除く)", mutableListOf(),uuid,id))
-            
+
             if (cache[Pair(uuid,id)] == null){
                 cache[Pair(uuid,id)] = data
             }
