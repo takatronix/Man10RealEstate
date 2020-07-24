@@ -287,7 +287,7 @@ class InventoryMenu {
         GlobalScope.launch {
             val list = user.loadUsers(id,page)
 
-            if (list.isNullOrEmpty()){
+            if (list == null){
                 sendMessage(p,"§c§lこの土地には住人がいないようです")
                 customInventory.close(p)
                 return@launch
@@ -352,10 +352,6 @@ class InventoryMenu {
                     inventory.setItem(i,next)
                 }
             }
-
-        }
-
-        es.execute {
 
         }
 
