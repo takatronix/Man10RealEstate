@@ -405,9 +405,7 @@ class InventoryMenu {
 
             inventory.setItem(40, customInventory.IS(if (data.allowDoor){Material.LIME_STAINED_GLASS_PANE }
             else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなどの右クリック、左クリック(看板を除く)", mutableListOf(),uuid,id))
-
-//                inventory.setItem(8, customInventory.IS(Material.YELLOW_STAINED_GLASS_PANE,"§e§lセーブ", mutableListOf(),uuid,id))
-
+            
             if (cache[Pair(uuid,id)] == null){
                 cache[Pair(uuid,id)] = data
             }
