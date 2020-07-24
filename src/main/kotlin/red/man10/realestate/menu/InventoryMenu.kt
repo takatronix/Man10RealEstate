@@ -288,74 +288,71 @@ class InventoryMenu {
             val list = user.loadUsers(id,page)
 
             //メインスレッドでguiに書き込み
-            Bukkit.getScheduler().runTask(plugin, Runnable {
+            if (list.isNullOrEmpty()){
+                sendMessage(p,"§c§lこの土地には住人がいないようです")
+                customInventory.close(p)
+                return@execute
+            }
 
-                if (list.isNullOrEmpty()){
-                    sendMessage(p,"§c§lこの土地には住人がいないようです")
-                    customInventory.close(p)
-                    return@Runnable
+            inventory.remove(loadItem)
+
+            for (d in list){
+
+                val head = ItemStack(Material.PLAYER_HEAD)
+                val meta = head.itemMeta as SkullMeta
+
+                val user = Bukkit.getOfflinePlayer(UUID.fromString(d.first))
+                val userData = d.second
+
+                if (p.uniqueId == user.uniqueId)continue
+
+                meta.owningPlayer = user
+                meta.setDisplayName("§6§l${user.name}")
+                meta.lore = mutableListOf(
+                        if (user.isOnline){"§aOnline"}else{"§4§lOffline"},
+                        "§7§lステータス:${userData.status}",
+                        "§8§l賃料:${userData.rent}"
+                )
+
+                head.itemMeta = meta
+                customInventory.setData(head,"id","$id")
+                customInventory.setData(head,"uuid","${user.uniqueId}")
+
+                inventory.addItem(head)
+
+            }
+
+            //////////////////戻る進む、バックボタン
+            val backBtn = back.clone()
+            customInventory.setData(backBtn,"id","$id")
+
+            for (i in 45..53){
+                inventory.setItem(i,backBtn)
+            }
+
+            if (inventory.getItem(44)!=null){
+
+                val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ")
+                customInventory.setData(next,"type","next")
+                customInventory.setData(next,"page","$page")
+                customInventory.setData(next,"id","$id")
+
+                for (i in 51..53){
+                    inventory.setItem(i,next)
                 }
 
-                inventory.remove(loadItem)
+            }
 
-                for (d in list){
+            if (page!=0){
+                val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ")
+                customInventory.setData(next,"type","previous")
+                customInventory.setData(next,"page","$page")
+                customInventory.setData(next,"id","$id")
 
-                    val head = ItemStack(Material.PLAYER_HEAD)
-                    val meta = head.itemMeta as SkullMeta
-
-                    val user = Bukkit.getOfflinePlayer(UUID.fromString(d.first))
-                    val userData = d.second
-
-                    if (p.uniqueId == user.uniqueId)continue
-
-                    meta.owningPlayer = user
-                    meta.setDisplayName("§6§l${user.name}")
-                    meta.lore = mutableListOf(
-                            if (user.isOnline){"§aOnline"}else{"§4§lOffline"},
-                            "§7§lステータス:${userData.status}",
-                            "§8§l賃料:${userData.rent}"
-                    )
-
-                    head.itemMeta = meta
-                    customInventory.setData(head,"id","$id")
-                    customInventory.setData(head,"uuid","${user.uniqueId}")
-
-                    inventory.addItem(head)
-
+                for (i in 51..53){
+                    inventory.setItem(i,next)
                 }
-
-                //////////////////戻る進む、バックボタン
-                val backBtn = back.clone()
-                customInventory.setData(backBtn,"id","$id")
-
-                for (i in 45..53){
-                    inventory.setItem(i,backBtn)
-                }
-
-                if (inventory.getItem(44)!=null){
-
-                    val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ")
-                    customInventory.setData(next,"type","next")
-                    customInventory.setData(next,"page","$page")
-                    customInventory.setData(next,"id","$id")
-
-                    for (i in 51..53){
-                        inventory.setItem(i,next)
-                    }
-
-                }
-
-                if (page!=0){
-                    val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ")
-                    customInventory.setData(next,"type","previous")
-                    customInventory.setData(next,"page","$page")
-                    customInventory.setData(next,"id","$id")
-
-                    for (i in 51..53){
-                        inventory.setItem(i,next)
-                    }
-                }
-            })
+            }
 
         }
 
@@ -391,33 +388,29 @@ class InventoryMenu {
         GlobalScope.launch {
             val data = cache[Pair(uuid,id)]?:user.get(uuid,id)!!
 
-            Bukkit.getScheduler().runTask(plugin, Runnable {
+            val backBtn = back.clone()
+            customInventory.setData(backBtn,"id","$id")
+            customInventory.setData(backBtn,"uuid","$uuid")
 
-                val backBtn = back.clone()
-                customInventory.setData(backBtn,"id","$id")
-                customInventory.setData(backBtn,"uuid","$uuid")
+            inventory.setItem(0,backBtn)
 
-                inventory.setItem(0,backBtn)
+            inventory.setItem(13, customInventory.IS(if (data.allowAll){Material.LIME_STAINED_GLASS_PANE }
+            else{Material.RED_STAINED_GLASS_PANE},"§3§l全権限", mutableListOf(),uuid,id))
 
-                inventory.setItem(13, customInventory.IS(if (data.allowAll){Material.LIME_STAINED_GLASS_PANE }
-                else{Material.RED_STAINED_GLASS_PANE},"§3§l全権限", mutableListOf(),uuid,id))
+            inventory.setItem(22, customInventory.IS(if (data.allowBlock){Material.LIME_STAINED_GLASS_PANE }
+            else{Material.RED_STAINED_GLASS_PANE},"§3§lブロックの設置、破壊", mutableListOf(),uuid,id))
 
-                inventory.setItem(22, customInventory.IS(if (data.allowBlock){Material.LIME_STAINED_GLASS_PANE }
-                else{Material.RED_STAINED_GLASS_PANE},"§3§lブロックの設置、破壊", mutableListOf(),uuid,id))
+            inventory.setItem(31, customInventory.IS(if (data.allowInv){Material.LIME_STAINED_GLASS_PANE }
+            else{Material.RED_STAINED_GLASS_PANE},"§3§lチェストなどのインベントリを開く", mutableListOf(),uuid,id))
 
-                inventory.setItem(31, customInventory.IS(if (data.allowInv){Material.LIME_STAINED_GLASS_PANE }
-                else{Material.RED_STAINED_GLASS_PANE},"§3§lチェストなどのインベントリを開く", mutableListOf(),uuid,id))
-
-                inventory.setItem(40, customInventory.IS(if (data.allowDoor){Material.LIME_STAINED_GLASS_PANE }
-                else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなどの右クリック、左クリック(看板を除く)", mutableListOf(),uuid,id))
+            inventory.setItem(40, customInventory.IS(if (data.allowDoor){Material.LIME_STAINED_GLASS_PANE }
+            else{Material.RED_STAINED_GLASS_PANE},"§3§lドアなどの右クリック、左クリック(看板を除く)", mutableListOf(),uuid,id))
 
 //                inventory.setItem(8, customInventory.IS(Material.YELLOW_STAINED_GLASS_PANE,"§e§lセーブ", mutableListOf(),uuid,id))
 
-                if (cache[Pair(uuid,id)] == null){
-                    cache[Pair(uuid,id)] = data
-                }
-
-            })
+            if (cache[Pair(uuid,id)] == null){
+                cache[Pair(uuid,id)] = data
+            }
 
         }
 
