@@ -6,6 +6,7 @@ import org.bukkit.Particle
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10offlinebank.BankAPI
+import red.man10.realestate.fly.Fly
 import red.man10.realestate.menu.CustomInventory
 import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.City
@@ -33,6 +34,8 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var region : Region
         lateinit var user : User
         lateinit var city : City
+
+        lateinit var fly: Fly
 
         lateinit var vault : VaultManager
 
@@ -71,6 +74,8 @@ class Plugin : JavaPlugin(), Listener {
         user = User(this)
         city = City(this)
 
+        fly = Fly()
+
         customInventory = CustomInventory(this)
 
         plugin = this
@@ -105,20 +110,20 @@ class Plugin : JavaPlugin(), Listener {
 
         //賃料スレッド
         es.execute {
-//            while (true){
-//                user.rentTimer()
-//                Thread.sleep(60000)
-//            }
+
 
             var ranRentTimer = false
 
             while (true){
+
+                fly.checkFly()
+
                 val time = Calendar.getInstance()
 
                 if (time.get(Calendar.MINUTE) == 0 && time.get(Calendar.HOUR) == 0  && !ranRentTimer){
-                    Bukkit.getLogger().info("Running rent timer")
+
                     user.rentTimer()
-                    Bukkit.getLogger().info("Ran rent timer")
+
                     ranRentTimer = true
                 }else if(time.get(Calendar.MINUTE) != 0 || time.get(Calendar.HOUR_OF_DAY) != 0){
                     ranRentTimer= false

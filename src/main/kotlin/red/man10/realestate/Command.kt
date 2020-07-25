@@ -309,6 +309,14 @@ class Command:CommandExecutor {
 
                 }
 
+                "fly" ->{ //mre fly <time>
+
+                    if (!hasPerm(sender,"mre.fly"))return false
+
+                    Plugin.fly.addFlyTime(sender,args[1].toInt())
+
+                }
+
                 else ->{
                     sendMessage(sender,"§c§l不明なコマンドです！")
 
@@ -648,6 +656,15 @@ class Command:CommandExecutor {
 
                     region.initRegion(id)
 
+                    return true
+                }
+
+                "checkfly" ->{//mreop checkfly <user>
+                    val p = Bukkit.getPlayer(args[1])?:return false
+
+                    sendMessage(sender,"§e§lフライモード:${Plugin.fly.isFlyMode(p)}")
+
+                    return true
                 }
 
                 else ->{
