@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class Fly {
 
-    val flyData = ConcurrentHashMap<Player,FlyData?>()
+    val flyData = ConcurrentHashMap<UUID,FlyData?>()
 
     fun flyOn(p:Player){
         sendMessage(p,"§e§lflyをオンにしました！")
@@ -29,11 +29,11 @@ class Fly {
         flyOff(p)
         sendMessage(p,"§b§lFlyモードの時間が切れました！")
         p.removePotionEffect(PotionEffectType.GLOWING)
-        flyData[p] = null
+        flyData[p.uniqueId] = null
     }
 
     fun isFlyMode(p:Player): Boolean {
-        return flyData[p] !=null
+        return flyData[p.uniqueId] !=null
     }
 
     fun addFlyTime(p:Player,time:Int){
@@ -42,10 +42,10 @@ class Fly {
             flyOn(p)
         }
 
-        val data = if (flyData[p] !=null)flyData[p]!! else FlyData()
+        val data = if (flyData[p.uniqueId] !=null)flyData[p.uniqueId]!! else FlyData()
         data.time = addDate(data.time,time)
 
-        flyData[p] = data
+        flyData[p.uniqueId] = data
     }
 
     //現在地点がfly可能かどうか確認する
@@ -53,7 +53,7 @@ class Fly {
 
         for (p in Bukkit.getOnlinePlayers()){
 
-            val data = flyData[p]?:continue
+            val data = flyData[p.uniqueId]?:continue
 
             p.addPotionEffect(PotionEffect(PotionEffectType.GLOWING,10000,1))
 
