@@ -52,6 +52,8 @@ class Plugin : JavaPlugin(), Listener {
 
         var maxBalance = 100000000.0
 
+        var defaultPrice = 400000.0
+
         val numbers = mutableListOf<Int>()
 
         var taxTimer = false

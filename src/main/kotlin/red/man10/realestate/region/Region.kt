@@ -320,6 +320,15 @@ class Region(private val pl:Plugin) {
         }
     }
 
+    fun initRegion(id:Int){
+
+        setOwner(id,null)
+        setPrice(id,Plugin.defaultPrice)
+        setStatus(id,"OnSale")
+        user.removeAll(id)
+
+    }
+
     class RegionData{
 
         var name = "RegionName"

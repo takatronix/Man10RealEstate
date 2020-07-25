@@ -55,6 +55,13 @@ class Command:CommandExecutor {
 
                     if (args.size != 2 || !NumberUtils.isNumber(args[1]))return false
 
+                    val data = region.get(args[1].toInt())?:return false
+
+                    if (data.status != "OnSale"){
+                        sendMessage(sender,"§4§lこの土地は販売されていません！")
+                        return false
+                    }
+
                     region.buy(sender,args[1].toInt())
 
                     return true
@@ -67,6 +74,11 @@ class Command:CommandExecutor {
                     if (args.size != 2 || !NumberUtils.isNumber(args[1]))return false
 
                     val data = region.get(args[1].toInt())?:return false
+
+                    if (data.status != "OnSale"){
+                        sendMessage(sender,"§4§lこの土地は販売されていません！")
+                        return false
+                    }
 
                     sendMessage(sender,"§3§l料金：${data.price} 名前：${data.name}" +
                             " §a§l現在のオーナー名：${region.getOwner(data)}")
@@ -627,6 +639,14 @@ class Command:CommandExecutor {
                     sender.teleport(data.teleport)
 
                     return true
+
+                }
+
+                "init" ->{
+
+                    val id = args[1].toInt()
+
+                    region.initRegion(id)
 
                 }
 

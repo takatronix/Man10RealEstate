@@ -241,10 +241,7 @@ class City(private val pl:Plugin) {
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
         if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
-            region.setOwner(id,null)
-            region.setStatus(id,"OnSale")
-
-            user.removeAll(id)
+            region.initRegion(id)
 
             return false
 
