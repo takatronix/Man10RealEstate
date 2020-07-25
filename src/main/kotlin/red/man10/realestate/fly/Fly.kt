@@ -5,6 +5,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import red.man10.realestate.Plugin
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.User
@@ -16,20 +17,33 @@ class Fly {
     val flyData = ConcurrentHashMap<UUID,FlyData?>()
 
     fun flyOn(p:Player){
-        sendMessage(p,"§e§lflyをオンにしました！")
+
+        if (!p.isFlying){
+            sendMessage(p,"§e§lflyをオンにしました！")
+        }
+
+        p.allowFlight = true
         p.isFlying = true
     }
 
     fun flyOff(p:Player){
-        sendMessage(p,"§e§lflyをオフにしました！")
+        if (p.isFlying){
+            sendMessage(p,"§e§lflyをオフにしました！")
+        }
+
         p.isFlying = false
+        p.allowFlight = false
     }
 
     fun finishFlyMode(p:Player){
         flyOff(p)
         sendMessage(p,"§b§lFlyモードの時間が切れました！")
-        p.removePotionEffect(PotionEffectType.GLOWING)
-        flyData[p.uniqueId] = null
+
+        Bukkit.getScheduler().runTask(Plugin.plugin, Runnable {
+            p.removePotionEffect(PotionEffectType.GLOWING)
+        })
+
+        flyData.remove(p.uniqueId)
     }
 
     fun isFlyMode(p:Player): Boolean {
@@ -37,6 +51,8 @@ class Fly {
     }
 
     fun addFlyTime(p:Player,time:Int){
+
+        sendMessage(p,"§b§lflyモードをオンにしました！")
 
         if (Event.hasPermission(p,p.location,User.Companion.Permission.ALL)){
             flyOn(p)
@@ -55,17 +71,21 @@ class Fly {
 
             val data = flyData[p.uniqueId]?:continue
 
-            p.addPotionEffect(PotionEffect(PotionEffectType.GLOWING,10000,1))
+            Bukkit.getScheduler().runTask(Plugin.plugin, Runnable {
+                p.addPotionEffect(PotionEffect(PotionEffectType.GLOWING,10000,1))
+            })
 
             if (data.time.time<Date().time){
                 finishFlyMode(p)
+                continue
             }
 
             if (Event.hasPermission(p,p.location,User.Companion.Permission.ALL)){
                 flyOn(p)
-            }else{
-                flyOff(p)
+                continue
             }
+
+            flyOff(p)
 
         }
 
