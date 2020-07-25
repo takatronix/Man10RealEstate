@@ -18,10 +18,6 @@ class Fly {
 
     fun flyOn(p:Player){
 
-        if (!p.isFlying){
-            sendMessage(p,"§e§lflyをオンにしました！")
-        }
-
         p.allowFlight = true
         p.isFlying = true
     }
