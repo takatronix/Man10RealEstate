@@ -140,7 +140,7 @@ class Region(private val pl:Plugin) {
             val old = Bukkit.getPlayer(data.ownerUUID!!)
 
             if (old !=null){
-                val list = user.ownerList[p]!!
+                val list = user.ownerList[old]!!
                 list.remove(id)
                 user.ownerList[old] = list
             }
