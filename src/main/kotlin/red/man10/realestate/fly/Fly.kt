@@ -17,13 +17,16 @@ class Fly {
     val flyData = ConcurrentHashMap<UUID,FlyData?>()
 
     fun flyOn(p:Player){
+        if (!p.allowFlight){
+            sendMessage(p,"§e§lflyをオンにしました！")
+        }
 
         p.allowFlight = true
-        p.isFlying = true
+//        p.isFlying = true
     }
 
     fun flyOff(p:Player){
-        if (p.isFlying){
+        if (p.allowFlight){
             sendMessage(p,"§e§lflyをオフにしました！")
         }
 
