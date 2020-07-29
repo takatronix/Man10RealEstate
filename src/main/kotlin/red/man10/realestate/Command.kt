@@ -656,6 +656,8 @@ class Command:CommandExecutor {
 
                     region.initRegion(id)
 
+                    sendMessage(sender,"§a§l初期化完了")
+
                     return true
                 }
 

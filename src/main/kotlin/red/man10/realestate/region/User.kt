@@ -279,15 +279,6 @@ class User(private val pl :Plugin) {
         sendMessage(p,"§a§lいいねしました！")
     }
 
-    /**
-     * ステータスの変更
-     */
-    fun setStatus(p:Player,id:Int,status:String){
-
-        val data = get(p,id)?:return
-        data.status = status
-        set(p,id,data)
-    }
 
     /**
      * 賃料の変更
