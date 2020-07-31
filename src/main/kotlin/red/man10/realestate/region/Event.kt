@@ -145,6 +145,14 @@ class Event(private val pl :Plugin) :Listener{
         val lines = e.lines
         val p = e.player
 
+        if (p.hasPermission("mre.sign_color")){
+            e.setLine(0,e.lines[0].replace("&","§"))
+            e.setLine(1,e.lines[1].replace("&","§"))
+            e.setLine(2,e.lines[2].replace("&","§"))
+            e.setLine(3,e.lines[3].replace("&","§"))
+        }
+
+
 
         if (lines[0].indexOf("mre:") == 0){
 
