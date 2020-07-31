@@ -91,11 +91,11 @@ class InventoryMenu {
         }
 
         if (page!=0){
-            val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ")
+            val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ")
             customInventory.setData(next,"type","previous")
             customInventory.setData(next,"page","$page")
 
-            for (i in 51..53){
+            for (i in 45..47){
                 inventory.setItem(i,next)
             }
 
@@ -155,11 +155,11 @@ class InventoryMenu {
         }
 
         if (page!=0){
-            val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ")
+            val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ")
             customInventory.setData(next,"type","previous")
             customInventory.setData(next,"page","$page")
 
-            for (i in 51..53){
+            for (i in 45..47){
                 inventory.setItem(i,next)
             }
 
@@ -343,12 +343,12 @@ class InventoryMenu {
             }
 
             if (page!=0){
-                val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l次のページ")
+                val next = customInventory.IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE,"§6§l前のページ")
                 customInventory.setData(next,"type","previous")
                 customInventory.setData(next,"page","$page")
                 customInventory.setData(next,"id","$id")
 
-                for (i in 51..53){
+                for (i in 45..47){
                     inventory.setItem(i,next)
                 }
             }
