@@ -12,7 +12,6 @@ import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
 import red.man10.realestate.menu.InventoryMenu.Companion.cache
-import red.man10.realestate.region.User
 import red.man10.realestate.region.User.Companion.Permission.*
 import java.util.*
 
@@ -229,7 +228,16 @@ class InventoryListener : Listener{
                         Utility.sendSuggest(p,"§a§l賃料を設定する","mre setrent $id" +
                                 " ${Bukkit.getOfflinePlayer(uuid).name} ")
                     }
-                    15->p.performCommand("mre removeuser $id ${Bukkit.getOfflinePlayer(uuid).name}")
+                    15->{
+                        val user1 = Bukkit.getOfflinePlayer(uuid)
+                        if (user1.isOnline){
+                            p.performCommand("mre removeuser $id ${user1.name}")
+                        }else{
+                            user.remove(user1.uniqueId,id)
+                            Utility.sendMessage(p,"§a§l住人を削除しました!")
+                            return
+                        }
+                    }
 
                 }
 

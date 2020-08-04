@@ -78,6 +78,12 @@ class User(private val pl :Plugin) {
 
     }
 
+    fun remove(uuid:UUID,id:Int){
+
+        mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$id' AND `uuid`='${uuid}';")
+
+    }
+
     /**
      * 指定idの全住人データを削除
      */
