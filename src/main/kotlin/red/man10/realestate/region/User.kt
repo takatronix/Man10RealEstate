@@ -8,10 +8,8 @@ import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
-import red.man10.realestate.Plugin.Companion.taxTimer
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
@@ -398,25 +396,16 @@ class User(private val pl :Plugin) {
         rs.close()
         mysql.close()
 
-        val time = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+        val day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
-        if (time == 1&& taxTimer){
+        if (day == 1){
             pl.logger.info("税金の徴収開始")
             for (rg in region.map()){
                 val uuid = rg.value.ownerUUID?:continue
                 city.payingTax(uuid,rg.key)
             }
             pl.logger.info("税金の徴収完了！")
-
-            taxTimer = false
-            pl.config.set("taxTimer", taxTimer)
-            pl.saveConfig()
-        }else if (time != 1&& !taxTimer){
-            taxTimer = true
-            pl.config.set("taxTimer", taxTimer)
-            pl.saveConfig()
         }
-
     }
 
 
