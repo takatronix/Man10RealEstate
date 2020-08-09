@@ -398,6 +398,21 @@ class User(private val pl :Plugin) {
 
         val day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
+        if (day==25){
+            for (rg in region.map()){
+                val uuid = rg.value.ownerUUID?:continue
+
+                val tax = city.getTax(city.where(rg.value.teleport),rg.key)
+                if (tax == 0.0)continue
+
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
+                        "mmail send-tag Man10RealEstate ${Bukkit.getOfflinePlayer(uuid).name} &4&l[重要]土地の税金について 5 " +
+                                "&6&l税額:$tax;" +
+                                "&e&l土地ID:${rg.key};;" +
+                                "&6&e来月お支払いお願いします")
+            }
+        }
+
         if (day == 1){
             pl.logger.info("税金の徴収開始")
             for (rg in region.map()){
