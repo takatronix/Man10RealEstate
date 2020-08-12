@@ -376,15 +376,15 @@ class Event(private val pl :Plugin) :Listener{
                 if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world)){
 
                     if (rg.status == "Lock")return false
+                    if (rg.status == "Danger")return true
                     if (rg.ownerUUID == p.uniqueId)return true
 
                     val data = user.get(p,id)?:return false
 
                     if (data.status == "Lock")return false
-                    if (data.status == "Danger")return true
                     if (data.allowAll)return true
 
-                    if (perm != BLOCK &&data.status == "Free")return true
+                    if (perm != BLOCK &&rg.status == "Free")return true
 
                     when(perm){
 
