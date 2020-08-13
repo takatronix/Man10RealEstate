@@ -2,6 +2,7 @@ package red.man10.realestate.storage
 
 import org.bukkit.*
 import org.bukkit.block.Barrel
+import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -20,10 +21,10 @@ import java.io.IOException
 class Barrel {
 
     companion object{
-        val title = "${prefix}§e§l特殊樽"
+        val title = "§e§l特殊樽"
     }
 
-    fun setStorageItem(inv:Inventory):String{
+    fun setStorageItem(inv:Inventory,block:Block){
 
         val list = mutableListOf<ItemStack>()
 
@@ -36,8 +37,15 @@ class Barrel {
             list.add(item)
         }
 
-        return itemStackArrayToBase64(list.toTypedArray())
+        Bukkit.getLogger().info("set storage")
 
+
+        val state = block.state
+        if (state !is Barrel)return
+
+        state.persistentDataContainer.set(NamespacedKey(plugin,"storage"), PersistentDataType.STRING,itemStackArrayToBase64(list.toTypedArray()))
+
+        state.update()
     }
 
     fun openStorage(barrel:Barrel, p:Player){
