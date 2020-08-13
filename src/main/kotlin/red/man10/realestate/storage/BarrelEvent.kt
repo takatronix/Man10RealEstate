@@ -94,7 +94,6 @@ class BarrelEvent:Listener {
 
         Plugin.barrel.dropStorage(state)
 
-        p.sendMessage("${title}を破壊しました！")
     }
 
 }
