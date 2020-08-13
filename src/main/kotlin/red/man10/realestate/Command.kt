@@ -17,11 +17,13 @@ import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.numbers
 import red.man10.realestate.Plugin.Companion.plugin
+import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility.Companion.sendHoverText
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.menu.InventoryMenu
+import red.man10.realestate.storage.Barrel.Companion.title
 import java.util.*
 
 class Command:CommandExecutor {
@@ -690,6 +692,15 @@ class Command:CommandExecutor {
 //                        city.payingTax(uuid,rg.key)
 //                    }
 //                }
+
+                "getbarrel" ->{
+                    val barrel = ItemStack(Material.BARREL)
+                    val meta = barrel.itemMeta
+                    meta.setDisplayName(title)
+                    barrel.itemMeta = meta
+                    sender.inventory.addItem(barrel)
+                    return true
+                }
 
                 else ->{
 

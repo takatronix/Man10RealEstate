@@ -13,6 +13,8 @@ import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
+import red.man10.realestate.storage.Barrel
+import red.man10.realestate.storage.BarrelEvent
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.*
@@ -34,6 +36,8 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var region : Region
         lateinit var user : User
         lateinit var city : City
+
+        lateinit var barrel : Barrel
 
         lateinit var fly: Fly
 
@@ -74,6 +78,8 @@ class Plugin : JavaPlugin(), Listener {
         user = User(this)
         city = City(this)
 
+        barrel = Barrel()
+
         fly = Fly()
 
         customInventory = CustomInventory(this)
@@ -89,6 +95,7 @@ class Plugin : JavaPlugin(), Listener {
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(Event(this), this)
         server.pluginManager.registerEvents(InventoryListener(),this)
+        server.pluginManager.registerEvents(BarrelEvent(),this)
 
         getCommand("mre")!!.setExecutor(Command())
         getCommand("mreop")!!.setExecutor(Command())
