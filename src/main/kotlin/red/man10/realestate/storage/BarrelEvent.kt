@@ -10,6 +10,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
+import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Plugin
@@ -51,9 +52,6 @@ class BarrelEvent:Listener {
 
         blockMap[p] = block
 
-
-        Bukkit.getLogger().info("open barrel")
-
     }
 
     @EventHandler
@@ -61,7 +59,6 @@ class BarrelEvent:Listener {
 
         if (e.view.title != title)return
 
-        Bukkit.getLogger().info("close barrel")
 
         val p = e.player
 
@@ -71,6 +68,33 @@ class BarrelEvent:Listener {
 
         isOpen.remove(Triple(loc.blockX,loc.blockY,loc.blockZ))
         blockMap.remove(p)
+    }
+
+    @EventHandler
+    fun breakBarrel(e:BlockBreakEvent){
+
+        val block = e.block
+
+        if (block.type != Material.BARREL)return
+
+        val state = block.state
+        if (state !is Barrel)return
+
+        if ((state.customName?:return) != title)return
+
+        val loc = block.location
+
+        val p = e.player
+
+        if (isOpen.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))){
+            p.sendMessage("§c§l現在他のプレイヤーが開いています！")
+            e.isCancelled = true
+            return
+        }
+
+        Plugin.barrel.dropStorage(state)
+
+        p.sendMessage("${title}を破壊しました！")
     }
 
 }

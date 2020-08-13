@@ -37,9 +37,6 @@ class Barrel {
             list.add(item)
         }
 
-        Bukkit.getLogger().info("set storage")
-
-
         val state = block.state
         if (state !is Barrel)return
 
@@ -69,6 +66,13 @@ class Barrel {
 
     }
 
+    fun dropStorage(barrel: Barrel){
+        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return
+
+        val items = itemStackArrayFromBase64(storage)
+
+        items.forEach { if (it.type != Material.AIR) {barrel.world.dropItem(barrel.location, it) }}
+    }
 
     fun hasPermission(p:Player,barrel: Barrel):Boolean{
 
