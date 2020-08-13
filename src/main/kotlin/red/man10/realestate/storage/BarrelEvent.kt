@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Plugin
@@ -20,6 +21,19 @@ class BarrelEvent:Listener {
 
     val blockMap = HashMap<Player,Block>()
     val isOpen = mutableListOf<Triple<Int,Int,Int>>()
+
+    @EventHandler
+    fun setBarrelEvent(e:BlockPlaceEvent){
+
+        val block = e.block
+
+        if (block.type != Material.BARREL)return
+
+        val barrelState = block.state
+        if (barrelState !is Barrel)return
+
+        Plugin.barrel.addPermission(e.player,barrelState)
+    }
 
     @EventHandler
     fun openBarrelEvent(e:PlayerInteractEvent){
@@ -38,6 +52,11 @@ class BarrelEvent:Listener {
         e.isCancelled = true
 
         val p = e.player
+
+        if (!Plugin.barrel.hasPermission(p,barrelState)){
+            p.sendMessage("§c§lあなたはこの樽を開く権限がありません！")
+            return
+        }
 
         val loc = block.location
 

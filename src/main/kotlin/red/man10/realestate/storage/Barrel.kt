@@ -86,7 +86,16 @@ class Barrel {
 
     }
 
+    fun addPermission(p:Player,barrel: Barrel){
 
+        var owners = barrel.persistentDataContainer[NamespacedKey(plugin,"owners"), PersistentDataType.STRING]?:""
+        owners += "${p.uniqueId};"
+
+        barrel.persistentDataContainer.set(NamespacedKey(plugin,"owners"), PersistentDataType.STRING,owners)
+
+        barrel.update()
+
+    }
 
 
     ////////////////////////////////////////
