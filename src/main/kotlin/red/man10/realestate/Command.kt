@@ -702,6 +702,20 @@ class Command:CommandExecutor {
                     return true
                 }
 
+                "search" ->{
+
+                    val p = Bukkit.getPlayer(args[1])?.uniqueId?:return false
+
+                    for (rg in region.map()){
+
+                        if (rg.value.ownerUUID == p){
+                            sendHoverText(sender,"§e§lID:${rg.key}","Teleport","mreop tp ${rg.key}")
+                        }
+
+                    }
+
+                }
+
                 else ->{
 
                     sendMessage(sender,"§c§l不明なコマンドです！")

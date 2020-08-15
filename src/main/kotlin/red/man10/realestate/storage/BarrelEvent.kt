@@ -15,6 +15,8 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.barrel
+import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.storage.Barrel.Companion.title
 
 class BarrelEvent:Listener {
@@ -32,7 +34,7 @@ class BarrelEvent:Listener {
         val barrelState = block.state
         if (barrelState !is Barrel)return
 
-        Plugin.barrel.addPermission(e.player,barrelState)
+        barrel.addPermission(e.player,barrelState)
     }
 
     @EventHandler
@@ -49,25 +51,38 @@ class BarrelEvent:Listener {
 
         if((barrelState.customName?:return) != title)return
 
-        e.isCancelled = true
-
         val p = e.player
 
-        if (!Plugin.barrel.hasPermission(p,barrelState)){
-            p.sendMessage("§c§lあなたはこの樽を開く権限がありません！")
+        if (p.isSneaking){
+            if (e.hasItem() &&e.item!!.type == Material.PAPER){
+
+                if (!barrel.hasPermission(p,barrelState))return
+
+                barrel.addPermission(p,barrelState,e.item!!)
+
+                sendMessage(p,"§e§l権限の設定に成功しました！")
+            }
+            return
+        }
+
+        e.isCancelled = true
+
+
+        if (!barrel.hasPermission(p,barrelState)){
+            sendMessage(p,"§c§lあなたはこの樽を開く権限がありません！")
             return
         }
 
         val loc = block.location
 
         if (isOpen.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))){
-            p.sendMessage("§c§l現在他のプレイヤーが開いています！")
+            sendMessage(p,"§c§l現在他のプレイヤーが開いています！")
             return
         }
 
         isOpen.add(Triple(loc.blockX,loc.blockY,loc.blockZ))
 
-        Plugin.barrel.openStorage(barrelState,p)
+        barrel.openStorage(barrelState,p)
 
         blockMap[p] = block
 
@@ -78,10 +93,9 @@ class BarrelEvent:Listener {
 
         if (e.view.title != title)return
 
-
         val p = e.player
 
-        Plugin.barrel.setStorageItem(e.inventory,blockMap[p]?:return)
+        barrel.setStorageItem(e.inventory,blockMap[p]?:return)
 
         val loc = blockMap[p]!!.location
 
@@ -105,13 +119,19 @@ class BarrelEvent:Listener {
 
         val p = e.player
 
-        if (isOpen.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))){
-            p.sendMessage("§c§l現在他のプレイヤーが開いています！")
+        if (!barrel.hasPermission(p,state)){
+            sendMessage(p,"§c§lあなたはこの樽を壊す権限がありません")
             e.isCancelled = true
             return
         }
 
-        Plugin.barrel.dropStorage(state)
+        if (isOpen.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))){
+            sendMessage(p,"§c§l現在他のプレイヤーが開いています！")
+            e.isCancelled = true
+            return
+        }
+
+        barrel.dropStorage(state)
 
     }
 

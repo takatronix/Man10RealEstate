@@ -3,6 +3,7 @@ package red.man10.realestate.storage
 import org.bukkit.*
 import org.bukkit.block.Barrel
 import org.bukkit.block.Block
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -12,8 +13,10 @@ import org.bukkit.util.io.BukkitObjectOutputStream
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.prefix
+import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.User
+import java.awt.print.Paper
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -86,6 +89,15 @@ class Barrel {
 
     }
 
+    fun removePermission(p:Player,barrel: Barrel){
+        val owners = barrel.persistentDataContainer[NamespacedKey(plugin,"owners"), PersistentDataType.STRING]?:""
+        owners.replace("${p.uniqueId};","")
+
+        barrel.persistentDataContainer.set(NamespacedKey(plugin,"owners"), PersistentDataType.STRING,owners)
+
+        barrel.update()
+    }
+
     fun addPermission(p:Player,barrel: Barrel){
 
         var owners = barrel.persistentDataContainer[NamespacedKey(plugin,"owners"), PersistentDataType.STRING]?:""
@@ -94,6 +106,32 @@ class Barrel {
         barrel.persistentDataContainer.set(NamespacedKey(plugin,"owners"), PersistentDataType.STRING,owners)
 
         barrel.update()
+
+    }
+
+    fun addPermission(owner:Player,barrel:Barrel,paper: ItemStack){
+
+        val names = paper.itemMeta.displayName.replace("§o","").split(";")
+        for (name in names){
+
+            val p = Bukkit.getPlayer(name)?:continue
+
+            if (p == owner)continue
+
+            if (hasPermission(p,barrel)){
+                removePermission(p,barrel)
+                sendMessage(p,"§c§l特殊樽の権限が削除されました")
+
+                sendMessage(owner,"§c§l${p.name}削除")
+                continue
+            }
+
+            addPermission(p,barrel)
+
+            sendMessage(p,"§e§l特殊樽の権限が追加されました！")
+
+            sendMessage(owner,"§e§l${p.name}追加")
+        }
 
     }
 
