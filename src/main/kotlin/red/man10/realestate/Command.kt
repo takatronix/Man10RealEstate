@@ -120,6 +120,11 @@ class Command:CommandExecutor {
                         return false
                     }
 
+                    if (region.getUsers(id)> city.getMaxUser(city.where(data.teleport))){
+                        sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${city.getMaxUser(city.where(data.teleport))}人)")
+                        return false
+                    }
+
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null ){
@@ -145,7 +150,7 @@ class Command:CommandExecutor {
 
                     sendMessage(p,"§e§l承諾する場合は下のチャット文をクリック、しない場合はこの文を無視してください")
 
-                    sendHoverText(p,"§e§l[住人追加に承諾する]","§a§l承諾する","mre acceptuser $id ${sender.name} $number")
+                    sendHoverText(p,"§e§l[入居に承諾する]","§a§l承諾する","mre acceptuser $id ${sender.name} $number")
 
                     sendMessage(sender,"§a§l現在承諾待ちです....")
                     return true
@@ -168,7 +173,7 @@ class Command:CommandExecutor {
 
                     sendMessage(sender,"§a§l登録完了！あなたは住人になりました！")
 
-                    sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が住人の追加に承諾しました！")
+                    sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が住人の入居に成功しました！")
 
                     return true
 
@@ -187,13 +192,13 @@ class Command:CommandExecutor {
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null){
-                        sendMessage(sender,"§c§l住人がオフラインなので削除できません！")
+                        sendMessage(sender,"§c§l住人がオフラインなので退去できません！")
                         return false
                     }
 
                     user.remove(p,id)
 
-                    sendMessage(sender,"§a§l削除完了！")
+                    sendMessage(sender,"§a§l退去完了！")
                     return true
 
                 }
@@ -631,9 +636,7 @@ class Command:CommandExecutor {
                     val id = args[1].toInt()
                     val tax= args[2].toDouble()
 
-                    val data = city.get(id)?:return true
-                    data.tax = tax
-                    city.set(id,data)
+                    city.setTax(id,tax)
 
                     sendMessage(sender,"§a§l設定完了！")
 

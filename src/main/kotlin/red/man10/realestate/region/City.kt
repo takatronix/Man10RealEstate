@@ -267,6 +267,16 @@ class City(private val pl:Plugin) {
 
     }
 
+    fun getMaxUser(cityID: Int):Int{
+        return get(cityID)?.maxUser?:0
+    }
+
+    fun setMaxUser(cityID: Int,value:Int){
+        val data = get(cityID)?:return
+        data.maxUser = value
+        set(cityID,data)
+    }
+
     class CityData{
 
         var regionList = mutableListOf<Int>()
@@ -277,6 +287,8 @@ class City(private val pl:Plugin) {
         var server = "server"
 
         var name = "CityName"
+
+        var maxUser = 10
 
         var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
         var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)

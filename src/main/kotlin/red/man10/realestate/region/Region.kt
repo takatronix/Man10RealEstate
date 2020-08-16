@@ -329,6 +329,18 @@ class Region(private val pl:Plugin) {
 
     }
 
+    //住人の数を数える
+    fun getUsers(id:Int):Int{
+        val mysql = MySQLManager(pl,"mre")
+
+        val rs = mysql.query("select COUNT(region_id) from region_user where region_id=$id;")?:return 0
+        rs.next()
+        val users = rs.getInt(1)
+        rs.close()
+        mysql.close()
+        return users
+    }
+
     class RegionData{
 
         var name = "RegionName"
