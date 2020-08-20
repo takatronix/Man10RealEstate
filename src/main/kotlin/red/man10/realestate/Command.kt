@@ -19,7 +19,9 @@ import red.man10.realestate.Plugin.Companion.numbers
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.region
+import red.man10.realestate.Plugin.Companion.teleportPrice
 import red.man10.realestate.Plugin.Companion.user
+import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility.Companion.sendHoverText
 import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.menu.InventoryMenu
@@ -321,6 +323,30 @@ class Command:CommandExecutor {
                     if (!hasPerm(sender,"mre.fly"))return false
 
                     Plugin.fly.addFlyTime(sender,args[1].toInt())
+
+                }
+
+                "tp" ->{
+                    if (!hasPerm(sender, USER))return false
+
+                    if (args.size < 2)return false
+
+                    if (!NumberUtils.isNumber(args[1]))return false
+
+                    if (vault.getBalance(sender.uniqueId)< teleportPrice){
+                        sender.sendMessage("§a§lテレポートするための所持金が足りません！${teleportPrice}円用意してください！")
+                        return true
+                    }
+
+                    vault.withdraw(sender.uniqueId, teleportPrice)
+
+                    val id = args[1].toInt()
+
+                    val data = region.get(id)?:return true
+
+                    sender.teleport(data.teleport)
+
+                    return true
 
                 }
 

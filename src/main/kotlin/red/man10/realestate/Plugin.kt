@@ -59,6 +59,8 @@ class Plugin : JavaPlugin(), Listener {
 
         var maxBalance = 100000000.0
 
+        var teleportPrice = 1000.0
+
         var defaultPrice = 400000.0
 
         val numbers = mutableListOf<Int>()
@@ -89,6 +91,7 @@ class Plugin : JavaPlugin(), Listener {
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
         taxTimer = config.getBoolean("taxTimer",false)
+        teleportPrice = config.getDouble("teleportPrice",1000.0)
 
         saveResource("config.yml", false)
 
