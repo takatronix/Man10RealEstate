@@ -62,6 +62,7 @@ class BarrelEvent:Listener {
 
                 sendMessage(p,"§e§l権限の設定に成功しました！")
             }
+            e.isCancelled = true
             return
         }
 

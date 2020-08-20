@@ -288,7 +288,7 @@ class City(private val pl:Plugin) {
 
         var name = "CityName"
 
-        var maxUser = 10
+        var maxUser = 100
 
         var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
         var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
