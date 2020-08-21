@@ -8,6 +8,7 @@ import org.bukkit.block.Barrel
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
@@ -63,9 +64,9 @@ class BarrelEvent:Listener {
                 sendMessage(p,"§e§l権限の設定に成功しました！")
             }
 
-//            if (!e.hasItem()){
-//                e.isCancelled = true
-//            }
+            if (!e.hasItem()){
+                e.isCancelled = true
+            }
             e.isCancelled = true
             return
         }
@@ -108,7 +109,7 @@ class BarrelEvent:Listener {
         blockMap.remove(p)
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     fun breakBarrel(e:BlockBreakEvent){
 
         val block = e.block
@@ -119,6 +120,8 @@ class BarrelEvent:Listener {
         if (state !is Barrel)return
 
         if ((state.customName?:return) != title)return
+
+        if (e.isCancelled)return
 
         val loc = block.location
 
