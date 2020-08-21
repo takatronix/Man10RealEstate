@@ -67,12 +67,11 @@ class BarrelEvent:Listener {
             if (!e.hasItem()){
                 e.isCancelled = true
             }
-            e.isCancelled = true
+
             return
         }
 
         e.isCancelled = true
-
 
         if (!barrel.hasPermission(p,barrelState)){
             sendMessage(p,"§c§lあなたはこの樽を開く権限がありません！")
