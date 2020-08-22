@@ -120,8 +120,6 @@ class BarrelEvent:Listener {
 
         if ((state.customName?:return) != title)return
 
-        if (e.isCancelled)return
-
         val loc = block.location
 
         val p = e.player
@@ -138,7 +136,13 @@ class BarrelEvent:Listener {
             return
         }
 
-        barrel.dropStorage(state)
+        if(barrel.hasItem(state)){
+            sendMessage(p,"§c§l中にアイテムが入っています！")
+            e.isCancelled = true
+            return
+        }
+
+        //barrel.dropStorage(state)
 
     }
 

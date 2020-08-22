@@ -69,6 +69,17 @@ class Barrel {
 
     }
 
+    fun hasItem(barrel: Barrel):Boolean{
+        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return false
+
+        val items = itemStackArrayFromBase64(storage)
+
+        if (items.isEmpty())return false
+
+        return true
+
+    }
+
     fun dropStorage(barrel: Barrel){
         val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return
 
