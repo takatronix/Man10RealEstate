@@ -575,6 +575,7 @@ class Command:CommandExecutor {
                                 sendMessage(sender, "§e§lCityID:${c.key}")
                                 sendMessage(sender, "§7Name:${c.value.name}")
                                 sendMessage(sender, "§8Tax:${c.value.tax}")
+                                sendMessage(sender, "§7Tax:${c.value.maxUser}")
                             }
 
                         }

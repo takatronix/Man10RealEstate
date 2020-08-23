@@ -297,15 +297,19 @@ class InventoryMenu {
 
             for (d in list){
 
-                val head = ItemStack(Material.PLAYER_HEAD)
-                val meta = head.itemMeta as SkullMeta
 
                 val user = Bukkit.getOfflinePlayer(UUID.fromString(d.first))
                 val userData = d.second
 
                 if (p.uniqueId == user.uniqueId)continue
 
-                meta.owningPlayer = user
+                val head = ItemStack(Material.PLAYER_HEAD)
+                val meta = head.itemMeta as SkullMeta
+
+                if (user.isOnline){
+                    meta.owningPlayer = user
+                }
+
                 meta.setDisplayName("§6§l${user.name}")
                 meta.lore = mutableListOf(
                         if (user.isOnline){"§aOnline"}else{"§4§lOffline"},
