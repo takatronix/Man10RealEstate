@@ -32,11 +32,11 @@ class Barrel {
         val list = mutableListOf<ItemStack>()
 
         for (i in 0..53){
-            val item = inv.getItem(i)
-            if (item == null){
-                list.add(ItemStack(Material.AIR))
-                continue
-            }
+            val item = inv.getItem(i)?:continue
+//            if (item == null){
+//                //list.add(ItemStack(Material.AIR))
+//                continue
+//            }
             list.add(item)
         }
 
