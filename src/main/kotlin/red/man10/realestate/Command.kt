@@ -17,7 +17,6 @@ import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.numbers
 import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.teleportPrice
 import red.man10.realestate.Plugin.Companion.user
@@ -742,6 +741,23 @@ class Command:CommandExecutor {
                         }
 
                     }
+
+                }
+
+                "maxuser" ->{
+
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+
+                    val id = args[1].toInt()
+                    val amount= args[2].toInt()
+
+                    city.setMaxUser(id,amount)
+
+                    sendMessage(sender,"§a§l設定完了！")
+
+                    return  true
+
 
                 }
 

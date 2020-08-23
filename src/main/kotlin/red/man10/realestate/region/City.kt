@@ -117,6 +117,8 @@ class City(private val pl:Plugin) {
 
             data.tax = rs.getDouble("tax")
 
+            data.maxUser = rs.getInt("max_user")
+
             data.startPosition = Triple(
                     rs.getDouble("sx"),
                     rs.getDouble("sy"),
@@ -216,7 +218,8 @@ class City(private val pl:Plugin) {
                 "t.ex = ${data.endPosition.first}, " +
                 "t.ey = ${data.endPosition.second}, " +
                 "t.ez = ${data.endPosition.third}, " +
-                "t.tax = ${data.tax} WHERE t.id = $id")
+                "t.tax = ${data.tax}," +
+                "t.max_user = ${data.maxUser} WHERE t.id = $id")
 
     }
 
