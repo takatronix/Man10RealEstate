@@ -15,7 +15,6 @@ import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.*
 
@@ -122,7 +121,9 @@ class Plugin : JavaPlugin(), Listener {
         es.execute {
 
 
-            var ranRentTimer = false
+            var isRent = false
+            var isTax = false
+            var isTaxMail = false
 
             while (true){
 
@@ -130,14 +131,38 @@ class Plugin : JavaPlugin(), Listener {
 
                 val time = Calendar.getInstance()
 
-                if (time.get(Calendar.MINUTE) == 0 && time.get(Calendar.HOUR) == 0  && !ranRentTimer){
+                val day = time.get(Calendar.DAY_OF_MONTH)
+                val minute = time.get(Calendar.MINUTE)
+                val hour = time.get(Calendar.HOUR_OF_DAY)
 
-                    user.rentTimer()
+//                Bukkit.getLogger().info("d:$day,m:$minute,h:$hour")
 
-                    ranRentTimer = true
-                }else if(time.get(Calendar.MINUTE) != 0 || time.get(Calendar.HOUR_OF_DAY) != 0){
-                    ranRentTimer= false
+                if (minute == 0 && hour == 0  && !isRent){
+//                    Bukkit.getLogger().info("d:$day,m:$minute,h:$hour")
+
+                    Bukkit.getLogger().info("Start Rent Process")
+                    user.rent()
+                    isRent = true
+                }else if(minute != 0){
+                    isRent = false
                 }
+
+                if (minute == 0 && hour == 8 && day == 1 && !isTax){
+//                    Bukkit.getLogger().info("Start Tax Process")
+                    user.tax()
+                    isTax = true
+                }else if (minute !=0){
+                    isTax = false
+                }
+
+                if (minute == 0 && hour == 9 && day == 25 && !isTaxMail){
+//                    Bukkit.getLogger().info("Start Tax Mail Process")
+                    user.taxMail()
+                    isTaxMail = true
+                }else if (minute != 0){
+                    isTaxMail = false
+                }
+
                 Thread.sleep(10000)
 
             }
