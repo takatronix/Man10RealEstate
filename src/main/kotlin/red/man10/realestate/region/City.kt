@@ -1,16 +1,14 @@
 package red.man10.realestate.region
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.defaultPrice
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
-import red.man10.realestate.Plugin.Companion.user
-import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -247,7 +245,7 @@ class City(private val pl:Plugin) {
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
         if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
-            region.initRegion(id)
+            region.initRegion(id, defaultPrice)
 
             return false
 

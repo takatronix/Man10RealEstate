@@ -18,7 +18,6 @@ import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
 import java.util.*
 import java.util.concurrent.*
-import kotlin.math.min
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -147,7 +146,7 @@ class Plugin : JavaPlugin(), Listener {
 
                         if (!city.hasCityPermission(p,rg.key)){
                             sendMessage(p,"§c§lあなたはID:${rg.key}の土地に住むことができなくなりました")
-                            region.initRegion(rg.key)
+                            region.initRegion(rg.key,defaultPrice)
                         }
 
                     }

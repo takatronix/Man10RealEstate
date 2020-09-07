@@ -685,7 +685,9 @@ class Command:CommandExecutor {
 
                     val id = args[1].toInt()
 
-                    region.initRegion(id)
+                    val price = if (args.size == 3){ args[2].toDouble() } else Plugin.defaultPrice
+
+                    region.initRegion(id,price)
 
                     sendMessage(sender,"§a§l初期化完了")
 

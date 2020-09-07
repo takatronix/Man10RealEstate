@@ -325,10 +325,10 @@ class Region(private val pl:Plugin) {
         }
     }
 
-    fun initRegion(id:Int){
+    fun initRegion(id: Int, price: Double){
 
         setOwner(id,null)
-        setPrice(id,Plugin.defaultPrice)
+        setPrice(id,price)
         setStatus(id,"OnSale")
         user.removeAll(id)
 
