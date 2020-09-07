@@ -158,6 +158,13 @@ class User(private val pl :Plugin) {
                 sendMessage(p,"§4§lID:$id はロックされた土地です")
             }
 
+            if (!city.hasCityPermission(p,id)){
+                sendMessage(p,"§c§lあなたはこの都市には住めなくなりました")
+                remove(p,id)
+                return
+            }
+
+
             if (data.allowAll){
                 ownerList.add(id)
             }

@@ -6,6 +6,7 @@ import org.bukkit.Particle
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10offlinebank.BankAPI
+import red.man10.realestate.Utility.Companion.sendMessage
 import red.man10.realestate.fly.Fly
 import red.man10.realestate.menu.CustomInventory
 import red.man10.realestate.menu.InventoryListener
@@ -17,6 +18,7 @@ import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
 import java.util.*
 import java.util.concurrent.*
+import kotlin.math.min
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -124,6 +126,7 @@ class Plugin : JavaPlugin(), Listener {
             var isRent = false
             var isTax = false
             var isTaxMail = false
+            var isCheckPermission = false
 
             while (true){
 
@@ -135,28 +138,44 @@ class Plugin : JavaPlugin(), Listener {
                 val minute = time.get(Calendar.MINUTE)
                 val hour = time.get(Calendar.HOUR_OF_DAY)
 
-//                Bukkit.getLogger().info("d:$day,m:$minute,h:$hour")
+                //権限チェック
+                if (minute == 0 && !isCheckPermission){
 
+                    for (rg in region.map()){
+
+                        val p = Bukkit.getPlayer(rg.value.ownerUUID?:continue)?:continue
+
+                        if (!city.hasCityPermission(p,rg.key)){
+                            sendMessage(p,"§c§lあなたはID:${rg.key}の土地に住むことができなくなりました")
+                            region.initRegion(rg.key)
+                        }
+
+                    }
+
+                    isCheckPermission = true
+                }else if (minute!=0){
+                    isCheckPermission = false
+                }
+
+                //賃料
                 if (minute == 0 && hour == 0  && !isRent){
-//                    Bukkit.getLogger().info("d:$day,m:$minute,h:$hour")
 
-                    Bukkit.getLogger().info("Start Rent Process")
                     user.rent()
                     isRent = true
                 }else if(minute != 0){
                     isRent = false
                 }
 
+                //税金
                 if (minute == 0 && hour == 8 && day == 1 && !isTax){
-//                    Bukkit.getLogger().info("Start Tax Process")
                     user.tax()
                     isTax = true
                 }else if (minute !=0){
                     isTax = false
                 }
 
+                //税金メール
                 if (minute == 0 && hour == 9 && day == 25 && !isTaxMail){
-//                    Bukkit.getLogger().info("Start Tax Mail Process")
                     user.taxMail()
                     isTaxMail = true
                 }else if (minute != 0){

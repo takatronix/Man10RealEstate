@@ -293,6 +293,11 @@ class Region(private val pl:Plugin) {
             return
         }
 
+        if (!city.hasCityPermission(p,id)){
+            sendMessage(p,"§c§lあなたはこの街に住むことができません！")
+            return
+        }
+
         vault.withdraw(p.uniqueId,data.price)
 
         if (data.ownerUUID != null){
