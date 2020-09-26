@@ -774,6 +774,8 @@ class Command:CommandExecutor {
 
                             if (city.whereRegion(rg.key) !=cityID)continue
 
+                            if (rg.value.ownerUUID == null)continue
+
                             tax += city.getTax(cityID,rg.key)
 
                         }
