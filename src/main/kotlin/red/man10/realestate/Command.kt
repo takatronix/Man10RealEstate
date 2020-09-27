@@ -48,7 +48,6 @@ class Command:CommandExecutor {
                 return true
 
             }
-            //TODO:Intを少数にしたときの処理修正
 
             when(args[0]){
 
@@ -375,6 +374,15 @@ class Command:CommandExecutor {
                 sendMessage(sender,"§e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します")
                 sendMessage(sender,"§e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します")
                 sendMessage(sender,"§e§l/mreop tax <id> <tax>: 指定都市の税額を変更します")
+                sendMessage(sender,"§e§l/mreop tp <id> : リソース無しでテレポートする")
+                sendMessage(sender,"§e§l/mreop init <id> <price> : 指定リージョンを初期化する")
+                sendMessage(sender,"§e§l/mreop checkfly <user> : 指定ユーザーがmreのフライを使っているかチェックする")
+                sendMessage(sender,"§e§l/mreop taxmail : 手動で税金の通知メールを送る")
+                sendMessage(sender,"§e§l/mreop starttax : 手動で税金を徴収する")
+                sendMessage(sender,"§e§l/mreop getbarrel : 特殊たるを手に入れる")
+                sendMessage(sender,"§e§l/mreop search : 指定ユーザーの持っている土地を確認する")
+                sendMessage(sender,"§e§l/mreop maxuser <id>: 都市の住める上限を設定する")
+                sendMessage(sender,"§e§l/mreop calctax <id> : 指定都市で徴収できる税額を計算する")
 
                 return true
             }
@@ -732,16 +740,41 @@ class Command:CommandExecutor {
 
                 "search" ->{
 
-                    val p = Bukkit.getPlayer(args[1])?.uniqueId?:return false
+                    val uuid = Bukkit.getPlayer(args[1])?.uniqueId
 
+                    sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
+
+                    if (uuid==null){
+
+                        Thread{
+
+                            val mysql = MySQLManager(plugin,"mre")
+
+                            val rs = mysql.query("select id from region where owner_name = '${args[1]}';")?:return@Thread
+
+                            while (rs.next()){
+                                val id = rs.getInt("id")
+                                sendHoverText(sender,"§e§lID:$id","Teleport","mreop tp $id")
+                            }
+
+                            rs.close()
+                            mysql.close()
+
+                            sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
+
+                        }.start()
+
+                        return true
+                    }
                     for (rg in region.map()){
 
-                        if (rg.value.ownerUUID == p){
+                        if (rg.value.ownerUUID == uuid){
                             sendHoverText(sender,"§e§lID:${rg.key}","Teleport","mreop tp ${rg.key}")
                         }
 
                     }
 
+                    sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
                 }
 
                 "maxuser" ->{
