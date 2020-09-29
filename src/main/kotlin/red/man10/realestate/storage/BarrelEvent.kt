@@ -1,9 +1,6 @@
 package red.man10.realestate.storage
 
-import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.block.Barrel
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -15,9 +12,8 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.barrel
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.storage.Barrel.Companion.title
 
 class BarrelEvent:Listener {

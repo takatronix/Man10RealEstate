@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import red.man10.realestate.Plugin
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.User
 import java.util.*

@@ -28,8 +28,8 @@ import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
-import red.man10.realestate.Utility.Companion.sendHoverText
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendHoverText
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
 
 class Event(private val pl :Plugin) :Listener{

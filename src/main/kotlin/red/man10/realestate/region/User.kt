@@ -8,7 +8,7 @@ import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.region
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap

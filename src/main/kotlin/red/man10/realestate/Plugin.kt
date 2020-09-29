@@ -6,7 +6,7 @@ import org.bukkit.Particle
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10offlinebank.BankAPI
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.fly.Fly
 import red.man10.realestate.menu.CustomInventory
 import red.man10.realestate.menu.InventoryListener
@@ -65,8 +65,6 @@ class Plugin : JavaPlugin(), Listener {
 
         val numbers = mutableListOf<Int>()
 
-        var taxTimer = false
-
     }
 
     override fun onEnable() { // Plugin startup logic
@@ -90,7 +88,6 @@ class Plugin : JavaPlugin(), Listener {
 
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
-        taxTimer = config.getBoolean("taxTimer",false)
         teleportPrice = config.getDouble("teleportPrice",1000.0)
 
         saveResource("config.yml", false)

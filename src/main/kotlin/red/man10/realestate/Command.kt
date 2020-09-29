@@ -21,8 +21,8 @@ import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.teleportPrice
 import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Plugin.Companion.vault
-import red.man10.realestate.Utility.Companion.sendHoverText
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendHoverText
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.storage.Barrel.Companion.title
 import java.util.*

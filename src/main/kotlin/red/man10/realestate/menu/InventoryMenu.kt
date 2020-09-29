@@ -8,11 +8,9 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import red.man10.realestate.Plugin.Companion.customInventory
-import red.man10.realestate.Plugin.Companion.es
-import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.user
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
 import red.man10.realestate.region.User
 import java.util.*

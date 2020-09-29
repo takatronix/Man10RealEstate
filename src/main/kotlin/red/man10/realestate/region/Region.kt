@@ -11,7 +11,7 @@ import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
