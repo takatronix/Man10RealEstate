@@ -93,8 +93,6 @@ class Event(private val pl :Plugin) :Listener{
 
         sendMessage(p,"§e§lSet Start:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
 
-        pl.wandStartLocation = loc.clone()
-
         wand.lore = lore
 
         e.isCancelled = true
@@ -130,8 +128,6 @@ class Event(private val pl :Plugin) :Listener{
             lore.add("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
         }
         sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
-
-        pl.wandEndLocation = loc.clone()
 
         wand.lore = lore
 
