@@ -5,8 +5,9 @@ api-version: 1.16
 prefix: Man10Builder
 authors: [takatronix,forest611]
 description: Man10 Real Estate Plugin
-depend:
+softdepend:
   - Man10CommonLibs
+depend:
   - Vault
   - Man10OfflineBank
 commands:

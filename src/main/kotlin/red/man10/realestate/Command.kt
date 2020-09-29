@@ -27,7 +27,7 @@ import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.storage.Barrel.Companion.title
 import java.util.*
 
-class Command:CommandExecutor {
+object Command:CommandExecutor {
 
     val USER = "mre.user"
     val GUEST = "mre.guest"

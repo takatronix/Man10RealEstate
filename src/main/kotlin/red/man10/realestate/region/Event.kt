@@ -1,7 +1,5 @@
 package red.man10.realestate.region
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Sign
@@ -14,13 +12,10 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.inventory.EquipmentSlot
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
@@ -32,7 +27,7 @@ import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
 
-class Event(private val pl :Plugin) :Listener{
+class Event :Listener{
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){

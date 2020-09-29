@@ -98,12 +98,12 @@ class Plugin : JavaPlugin(), Listener {
         saveResource("config.yml", false)
 
         server.pluginManager.registerEvents(this, this)
-        server.pluginManager.registerEvents(Event(this), this)
+        server.pluginManager.registerEvents(Event(), this)
         server.pluginManager.registerEvents(InventoryListener(),this)
         server.pluginManager.registerEvents(BarrelEvent(),this)
 
-        getCommand("mre")!!.setExecutor(Command())
-        getCommand("mreop")!!.setExecutor(Command())
+        getCommand("mre")!!.setExecutor(Command)
+        getCommand("mreop")!!.setExecutor(Command)
 
 //        Bukkit.getScheduler().runTaskTimer(this, Runnable {
 //            if(wandStartLocation != null && wandEndLocation != null){
