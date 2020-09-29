@@ -16,6 +16,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
@@ -27,7 +28,7 @@ import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.User.Companion.Permission.*
 
-class Event :Listener{
+object Event :Listener{
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
@@ -59,7 +60,7 @@ class Event :Listener{
     fun setFirstPosition(e: PlayerInteractEvent){
         val p = e.player
 
-        if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
+        if (!p.hasPermission(Command.OP))return
 
         val wand = e.item?:return
         if (wand.type != Material.STICK)return
@@ -136,14 +137,13 @@ class Event :Listener{
         val lines = e.lines
         val p = e.player
 
+        //間版でカラコを使うためのおまけ機能
         if (p.hasPermission("mre.sign_color")){
             e.setLine(0,e.lines[0].replace("&","§"))
             e.setLine(1,e.lines[1].replace("&","§"))
             e.setLine(2,e.lines[2].replace("&","§"))
             e.setLine(3,e.lines[3].replace("&","§"))
         }
-
-
 
         if (lines[0].indexOf("mre:") == 0){
 
@@ -203,14 +203,15 @@ class Event :Listener{
             return
         }
 
-        sendMessage(p,"§a§l==========${data.name}§a§lの情報==========")
+        sendMessage(p,"§a==========${data.name}§a§lの情報==========")
 
         sendMessage(p,"§a土地名:${data.name}")
-        sendMessage(p,"§a現在のステータス:${data.status}")
-        sendMessage(p,"§a現在のオーナー:${region.getOwner(data)}")
+        sendMessage(p,"§aID:$id")
+        sendMessage(p,"§aステータス:${data.status}")
+        sendMessage(p,"§aオーナー:${region.getOwner(data)}")
         sendMessage(p,"§a値段:${String.format("%,.1f",data.price)}")
 
-        sendMessage(p,"§a§l==========================================")
+        sendMessage(p,"§a==========================================")
 
         sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
 
@@ -243,7 +244,7 @@ class Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location, BLOCK)){
-            sendMessage(p,"§4§lあなたにはこの場所でブロックを破壊する権限がありません！")
+            sendMessage(p,"§cあなたにはこの場所でブロックを破壊する権限がありません！")
             e.isCancelled = true
         }
     }
@@ -253,13 +254,13 @@ class Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location,BLOCK)){
-            sendMessage(p,"§4§lあなたにはこの場所でブロックを設置する権限がありません！")
+            sendMessage(p,"§cあなたにはこの場所でブロックを設置する権限がありません！")
             e.isCancelled = true
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun blockTouchEvent(e:PlayerInteractEvent){
+    fun interactEvent(e:PlayerInteractEvent){
         if (e.action != Action.RIGHT_CLICK_BLOCK)return
         if (!e.hasBlock())return
 
@@ -270,20 +271,20 @@ class Event :Listener{
         }
 
         if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
-            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
             return
         }
 
         if (invList.contains(e.clickedBlock!!.type)){
             if (!hasPermission(p,e.clickedBlock!!.location,INVENTORY)){
-                sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+                sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
                 e.isCancelled = true
                 return
             }
         }else{
             if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
-                sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません！")
+                sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
                 e.isCancelled = true
                 return
             }
@@ -297,7 +298,7 @@ class Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location,BLOCK)){
-            sendMessage(p,"§4§lあなたにはこの場所で看板を設置する権限がありません")
+            sendMessage(p,"§cあなたにはこの場所で看板を設置する権限がありません")
             e.isCancelled = true
         }
 
@@ -310,7 +311,7 @@ class Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p,e.entity.location,BLOCK)){
-            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
+            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
 
@@ -322,7 +323,7 @@ class Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, e.rightClicked.location,DOOR)){
-            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
+            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
 
@@ -336,69 +337,61 @@ class Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p, e.entity.location,DOOR)){
-            sendMessage(p,"§4§lあなたにはこの場所でブロックを触る権限がありません")
+            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません")
             e.isCancelled = true
         }
 
     }
 
-    companion object{
-        fun hasPermission(p:Player, loc: Location, perm:User.Companion.Permission):Boolean{
+    fun hasPermission(p:Player, loc: Location, perm:User.Companion.Permission):Boolean{
 
-            if (p.hasPermission("mre.op"))return true
+        if (p.hasPermission(Command.OP))return true
 
-            if (disableWorld.contains(loc.world.name)){
-                return true
-            }
-
-            val cityID = city.where(loc)
-
-            if (cityID == -1){
-                if (disableWorld.contains(loc.world.name)){
-                    return true
-                }
-                return false
-            }
-
-            for (id in city.get(cityID)!!.regionList){
-
-                val rg = region.get(id)?:continue
-
-                if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world)){
-
-                    if (rg.status == "Lock")return false
-                    if (rg.status == "Danger")return true
-                    if (rg.ownerUUID == p.uniqueId)return true
-
-                    val data = user.get(p,id)?:return false
-
-                    if (data.status == "Lock")return false
-                    if (data.allowAll)return true
-
-                    if (perm != BLOCK &&rg.status == "Free")return true
-
-                    when(perm){
-
-                        BLOCK ->{
-                            if (data.allowBlock)return true
-                        }
-                        INVENTORY ->{
-                            if (data.allowInv)return true
-                        }
-                        DOOR ->{
-                            if (data.allowDoor)return true
-                        }
-                        else->return false
-
-                    }
-
-                    return false
-                }
-            }
-
-            return false
+        if (disableWorld.contains(loc.world.name)){
+            return true
         }
 
+        val cityID = city.where(loc)
+
+        if (cityID == -1)return false
+
+        for (id in city.get(cityID)!!.regionList){
+
+            val rg = region.get(id)?:continue
+
+            if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world)){
+
+                if (rg.status == "Lock")return false
+                if (rg.status == "Danger")return true
+                if (rg.ownerUUID == p.uniqueId)return true
+
+                val data = user.get(p,id)?:return false
+
+                if (data.status == "Lock")return false
+                if (data.allowAll)return true
+
+                if (perm != BLOCK &&rg.status == "Free")return true
+
+                when(perm){
+
+                    BLOCK ->{
+                        if (data.allowBlock)return true
+                    }
+                    INVENTORY ->{
+                        if (data.allowInv)return true
+                    }
+                    DOOR ->{
+                        if (data.allowDoor)return true
+                    }
+                    else->return false
+
+                }
+
+                return false
+            }
+        }
+
+        return false
     }
 
 }

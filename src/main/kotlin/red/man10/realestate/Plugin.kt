@@ -98,7 +98,7 @@ class Plugin : JavaPlugin(), Listener {
         saveResource("config.yml", false)
 
         server.pluginManager.registerEvents(this, this)
-        server.pluginManager.registerEvents(Event(), this)
+        server.pluginManager.registerEvents(Event, this)
         server.pluginManager.registerEvents(InventoryListener(),this)
         server.pluginManager.registerEvents(BarrelEvent(),this)
 
