@@ -4,17 +4,17 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class Region(private val pl:Plugin) {
+object Region {
 
     //idとリージョンデータの辞書
     val regionData = ConcurrentHashMap<Int,RegionData>()
@@ -76,7 +76,7 @@ class Region(private val pl:Plugin) {
                 "${pos2.second}, " +
                 "${pos2.third}); "
 
-        val mysql = MySQLManager(pl,"Man10RealEstate CreateRegion")
+        val mysql = MySQLManager(plugin,"Man10RealEstate CreateRegion")
 
         mysql.execute(query)
 
@@ -222,7 +222,7 @@ class Region(private val pl:Plugin) {
     fun load(){
         regionData.clear()
 
-        val sql = MySQLManager(pl,"Man10RealEstate Loading")
+        val sql = MySQLManager(plugin,"Man10RealEstate Loading")
 
         val rs = sql.query("SELECT * FROM region;")?:return
 
@@ -335,7 +335,7 @@ class Region(private val pl:Plugin) {
 
     //住人の数を数える
     fun getUsers(id:Int):Int{
-        val mysql = MySQLManager(pl,"mre")
+        val mysql = MySQLManager(plugin,"mre")
 
         val rs = mysql.query("select COUNT(region_id) from region_user where region_id=$id;")?:return 0
         rs.next()

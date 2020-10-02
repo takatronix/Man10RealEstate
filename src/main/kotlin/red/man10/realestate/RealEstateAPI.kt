@@ -3,6 +3,7 @@ package red.man10.realestate
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.region.Event
+import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import java.util.*
 
@@ -32,7 +33,7 @@ class RealEstateAPI {
      * 土地を所有しているかどうか
      */
     fun hasRegion(uuid: UUID):Boolean{
-        for (rg in Plugin.region.map().values){
+        for (rg in Region.map().values){
             if (rg.ownerUUID == uuid)return true
         }
         return false

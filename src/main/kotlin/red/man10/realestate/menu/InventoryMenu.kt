@@ -8,9 +8,9 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import red.man10.realestate.Plugin.Companion.customInventory
-import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
+import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import java.util.*
 import kotlin.collections.HashMap
@@ -55,11 +55,11 @@ class InventoryMenu {
 
             val id = list[i]
 
-            val rg = region.get(id)?:continue
+            val rg = Region.get(id)?:continue
 
             val icon = customInventory.IS(Material.PAPER,rg.name, mutableListOf(
                     "§e§lID:$id",
-                    "§b§lOWNER:${region.getOwner(rg)}",
+                    "§b§lOWNER:${Region.getOwner(rg)}",
                     "§a§lStatus:${rg.status}",
                     "§fX:${rg.teleport.blockX}",
                     "§fY:${rg.teleport.blockY}",
@@ -122,7 +122,7 @@ class InventoryMenu {
 
             if (list.size<=i)break
 
-            val rg = region.get(list[i])?:continue
+            val rg = Region.get(list[i])?:continue
 
             val icon = customInventory.IS(Material.PAPER,rg.name, mutableListOf(
                     "§e§lID:${list[i]}",
@@ -172,7 +172,7 @@ class InventoryMenu {
      */
     fun regionMenu(p:Player,id:Int){
 
-        val data = region.get(id)?:return
+        val data = Region.get(id)?:return
 
         val inventory = customInventory.createInventory(27,"§a§l土地の設定")
 
@@ -202,7 +202,7 @@ class InventoryMenu {
 
         val inventory = customInventory.createInventory(54,"§6§l土地の詳細設定")
 
-        val rg = region.get(id)?:return
+        val rg = Region.get(id)?:return
 
         val backBtn = back.clone()
         customInventory.setData(backBtn,"id","$id")

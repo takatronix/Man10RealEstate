@@ -7,7 +7,6 @@ import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -189,7 +188,7 @@ object User{
         mysql.close()
 
         //オーナーリストに追加
-        for (rg in region.map()){
+        for (rg in Region.map()){
             if (rg.value.ownerUUID == p.uniqueId)ownerList.add(rg.key)
         }
         this.ownerList[p] = ownerList
@@ -269,7 +268,7 @@ object User{
      */
     fun setLike(p:Player,id:Int){
 
-        val rg = region.get(id)?:return
+        val rg = Region.get(id)?:return
 
         if (rg.ownerUUID == p.uniqueId){
             sendMessage(p,"§3§lあなたはオーナーなのでいいね出来ません！")
@@ -360,7 +359,7 @@ object User{
      */
     fun payingRent(p:UUID,id:Int,rent:Double):Boolean{
 
-        val rg = region.get(id)?:return false
+        val rg = Region.get(id)?:return false
         val owner = rg.ownerUUID
 
         if (!offlineBank.withdraw(p,rent,"Man10RealEstate Rent")){
@@ -390,7 +389,7 @@ object User{
 
             val different = (Date().time - rs.getDate("paid_date").time)/1000/3600/24
 
-            val rg = region.get(id)?:continue
+            val rg = Region.get(id)?:continue
 
             if (rg.span == 0 && different < 30)continue
             if (rg.span == 1 && different < 7)continue
@@ -405,7 +404,7 @@ object User{
     }
 
     fun taxMail(){
-        for (rg in region.map()){
+        for (rg in Region.map()){
             val uuid = rg.value.ownerUUID?:continue
 
             val tax = city.getTax(city.where(rg.value.teleport),rg.key)
@@ -425,7 +424,7 @@ object User{
 
     fun tax(){
         Bukkit.getLogger().info("税金の徴収開始")
-        for (rg in region.map()){
+        for (rg in Region.map()){
             val uuid = rg.value.ownerUUID?:continue
             city.payingTax(uuid,rg.key)
         }

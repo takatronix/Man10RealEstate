@@ -21,7 +21,6 @@ import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
-import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
@@ -41,11 +40,11 @@ object Event :Listener{
      */
     fun updateSign(sign: Sign, id:Int){
 
-        val data = region.get(id)?:return
+        val data = Region.get(id)?:return
 
         sign.setLine(0,"§eID:$id")
         sign.setLine(1,data.name)
-        sign.setLine(2,"§d§l${region.getOwner(data)}")
+        sign.setLine(2,"§d§l${Region.getOwner(data)}")
         sign.setLine(3,"§b§l${data.status}")
 
         sign.update()
@@ -155,11 +154,11 @@ object Event :Listener{
                 return
             }
 
-            val data = region.get(id)?:return
+            val data = Region.get(id)?:return
 
             e.setLine(0,"§eID:$id")
             e.setLine(1,data.name)
-            e.setLine(2,"§d§l${region.getOwner(data)}")
+            e.setLine(2,"§d§l${Region.getOwner(data)}")
             e.setLine(3,"§b§l${data.status}")
 
             sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
@@ -191,7 +190,7 @@ object Event :Listener{
             return
         }
 
-        val data = region.get(id)?:return
+        val data = Region.get(id)?:return
 
         val p = e.player
 
@@ -207,7 +206,7 @@ object Event :Listener{
         sendMessage(p,"§a土地名:${data.name}")
         sendMessage(p,"§aID:$id")
         sendMessage(p,"§aステータス:${data.status}")
-        sendMessage(p,"§aオーナー:${region.getOwner(data)}")
+        sendMessage(p,"§aオーナー:${Region.getOwner(data)}")
         sendMessage(p,"§a値段:${String.format("%,.1f",data.price)}")
 
         sendMessage(p,"§a==========================================")
@@ -356,7 +355,7 @@ object Event :Listener{
 
         for (id in city.get(cityID)!!.regionList){
 
-            val rg = region.get(id)?:continue
+            val rg = Region.get(id)?:continue
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world)){
 

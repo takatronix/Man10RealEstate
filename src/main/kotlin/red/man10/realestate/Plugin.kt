@@ -6,8 +6,6 @@
 package red.man10.realestate
 
 import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Particle
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10offlinebank.BankAPI
@@ -38,7 +36,6 @@ class Plugin : JavaPlugin(), Listener {
 
         lateinit var es : ExecutorService
 
-        lateinit var region : Region
         lateinit var city : City
 
         lateinit var barrel : Barrel
@@ -76,7 +73,6 @@ class Plugin : JavaPlugin(), Listener {
         es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
         vault = VaultManager(this)
         offlineBank = BankAPI(this)
-        region = Region(this)
         city = City(this)
 
         barrel = Barrel()
@@ -112,7 +108,7 @@ class Plugin : JavaPlugin(), Listener {
 
         mysqlQueue()
 
-        region.load()
+        Region.load()
         city.load()
 
 
@@ -138,13 +134,13 @@ class Plugin : JavaPlugin(), Listener {
                 //権限チェック(1時間に一度)
                 if (minute == 0 && !isCheckPermission){
 
-                    for (rg in region.map()){
+                    for (rg in Region.map()){
 
                         val p = Bukkit.getPlayer(rg.value.ownerUUID?:continue)?:continue
 
                         if (!city.hasCityPermission(p,rg.key)){
                             sendMessage(p,"§c§lあなたはID:${rg.key}の土地に住むことができなくなりました")
-                            region.initRegion(rg.key,defaultPrice)
+                            Region.initRegion(rg.key,defaultPrice)
                         }
 
                     }

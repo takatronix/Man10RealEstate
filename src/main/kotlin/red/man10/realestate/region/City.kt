@@ -8,7 +8,6 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.defaultPrice
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
-import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -163,7 +162,7 @@ class City(private val pl:Plugin) {
 
         val list = mutableListOf<Int>()
 
-        for (rg in region.map()){
+        for (rg in Region.map()){
             if (Utility.isWithinRange(rg.value.teleport,pos1,pos2,world)){
                 list.add(rg.key)
             }
@@ -231,7 +230,7 @@ class City(private val pl:Plugin) {
      */
     fun payingTax(p:UUID,id:Int):Boolean{
 
-        val rg = region.get(id)?:return false
+        val rg = Region.get(id)?:return false
         val cityID = where(rg.teleport)
 
         if (cityID == -1)return false
@@ -245,7 +244,7 @@ class City(private val pl:Plugin) {
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
         if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
-            region.initRegion(id, defaultPrice)
+            Region.initRegion(id, defaultPrice)
 
             return false
 
@@ -262,7 +261,7 @@ class City(private val pl:Plugin) {
     fun getTax(cityID:Int,rgID:Int):Double{
 
         val city = get(cityID)?:return 0.0
-        val rg = region.get(rgID)?:return 0.0
+        val rg = Region.get(rgID)?:return 0.0
 
         val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
         val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
@@ -283,7 +282,7 @@ class City(private val pl:Plugin) {
 
     //リージョンのidから都市を返す
     fun whereRegion(id:Int):Int{
-        return Plugin.city.where(region.get(id)!!.teleport)
+        return Plugin.city.where(Region.get(id)!!.teleport)
     }
 
     //指定リージョンに住む権限があるかどうか

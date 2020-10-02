@@ -16,12 +16,12 @@ import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.teleportPrice
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
+import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel.Companion.title
 import java.util.*
@@ -59,14 +59,14 @@ object Command:CommandExecutor {
 
                     val id = parse(args[1])?:return false
 
-                    val data = region.get(id)?:return false
+                    val data = Region.get(id)?:return false
 
                     if (data.status != "OnSale"){
                         sendMessage(sender,"§4§lこの土地は販売されていません！")
                         return false
                     }
 
-                    region.buy(sender,id)
+                    Region.buy(sender,id)
 
                     return true
                 }
@@ -79,7 +79,7 @@ object Command:CommandExecutor {
 
                     val id = parse(args[1])?:return false
 
-                    val data = region.get(id)?:return false
+                    val data = Region.get(id)?:return false
 
                     if (data.status != "OnSale"){
                         sendMessage(sender,"§4§lこの土地は販売されていません！")
@@ -87,7 +87,7 @@ object Command:CommandExecutor {
                     }
 
                     sendMessage(sender,"§c§l料金：${data.price} ID：${id}" +
-                            " §a§l現在のオーナー：${region.getOwner(data)}")
+                            " §a§l現在のオーナー：${Region.getOwner(data)}")
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
                     sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy $id")
 
@@ -118,7 +118,7 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id))return false
 
-                    val data = region.get(id)
+                    val data = Region.get(id)
 
                     if (data == null){
                         sendMessage(sender,"§c§l存在しない土地です！")
@@ -127,7 +127,7 @@ object Command:CommandExecutor {
 
                     val maxUser = city.getMaxUser(city.where(data.teleport))
 
-                    if (region.getUsers(id)> maxUser){
+                    if (Region.getUsers(id)> maxUser){
                         sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${maxUser}人)")
                         return false
                     }
@@ -220,7 +220,7 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id))return false
 
-                    region.setSpan(id,span)
+                    Region.setSpan(id,span)
 
                 }
 
@@ -231,7 +231,7 @@ object Command:CommandExecutor {
 
                     val id = parse(args[1])?:return false
 
-                    if ((sender.uniqueId != region.get(id)!!.ownerUUID) && !sender.hasPermission(OP))return false
+                    if ((sender.uniqueId != Region.get(id)!!.ownerUUID) && !sender.hasPermission(OP))return false
 
 
                     val p = Bukkit.getPlayer(args[2])
@@ -241,7 +241,7 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    region.setOwner(id,p)
+                    Region.setOwner(id,p)
 
                     sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
 
@@ -294,7 +294,7 @@ object Command:CommandExecutor {
 
                     if (!hasPerm(sender,OP) && args[2]=="Lock"){ return true }
 
-                    region.setStatus(id,args[2])
+                    Region.setStatus(id,args[2])
 
                     sendMessage(sender,"§a§l${args[1]}のステータスを${args[2]}に変更しました")
 
@@ -317,7 +317,7 @@ object Command:CommandExecutor {
 
                     if (price <0.0 || price> maxBalance)return false
 
-                    region.setPrice(id,price)
+                    Region.setPrice(id,price)
 
                     sendMessage(sender,"§a§l${id}の金額を${args[2]}に変更しました")
 
@@ -347,7 +347,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toInt()
 
-                    val data = region.get(id)?:return true
+                    val data = Region.get(id)?:return true
 
                     sender.teleport(data.teleport)
 
@@ -447,7 +447,7 @@ object Command:CommandExecutor {
                             id = city.create(startPosition,endPosition,args[2],amount,sender.location)
 
                         }else if (args[1] == "rg"){
-                            id = region.create(startPosition,endPosition,args[2],amount,sender.location)
+                            id = Region.create(startPosition,endPosition,args[2],amount,sender.location)
                         }
 
                         if (id == -1){
@@ -479,13 +479,13 @@ object Command:CommandExecutor {
                     val isRg = args[1] == "rg"
 
                     if (isRg){
-                        if (region.get(id) == null){
+                        if (Region.get(id) == null){
                             sendMessage(sender,"§c§l存在しない土地です！")
                             return true
 
                         }
 
-                        region.delete(id)
+                        Region.delete(id)
                         sendMessage(sender,"§a§l削除完了！")
 
                         return true
@@ -515,7 +515,7 @@ object Command:CommandExecutor {
                 "reload" ->{
 
                     es.execute {
-                        region.load()
+                        Region.load()
                         city.load()
 
                         for (p in Bukkit.getOnlinePlayers()){
@@ -569,7 +569,7 @@ object Command:CommandExecutor {
                     GlobalScope.launch {
                         sendMessage(sender, "§e§l=====================================")
 
-                        for (rg in region.map()) {
+                        for (rg in Region.map()) {
 
                             val data = rg.value
 
@@ -577,7 +577,7 @@ object Command:CommandExecutor {
                                 sendMessage(sender, "§e§lRegionID:${rg.key}")
                                 sendMessage(sender, "§7Name:${rg.value.name}")
                                 sendMessage(sender, "§8Price:${rg.value.price}")
-                                sendMessage(sender, "§7Owner:${region.getOwner(rg.value)}")
+                                sendMessage(sender, "§7Owner:${Region.getOwner(rg.value)}")
 
                             }
                         }
@@ -639,7 +639,7 @@ object Command:CommandExecutor {
 
 
                     if (isRg){
-                        val data = region.get(id)
+                        val data = Region.get(id)
 
                         if (data == null){
                             sendMessage(sender,"§c§l存在しない土地です！")
@@ -649,7 +649,7 @@ object Command:CommandExecutor {
                         data.startPosition = startPosition
                         data.endPosition = endPosition
 
-                        region.set(id,data)
+                        Region.set(id,data)
 
                         sendMessage(sender,"§a§l再設定完了！")
                         return true
@@ -689,7 +689,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toInt()
 
-                    val data = region.get(id)?:return true
+                    val data = Region.get(id)?:return true
 
                     sender.teleport(data.teleport)
 
@@ -703,7 +703,7 @@ object Command:CommandExecutor {
 
                     val price = if (args.size == 3){ args[2].toDouble() } else Plugin.defaultPrice
 
-                    region.initRegion(id,price)
+                    Region.initRegion(id,price)
 
                     sendMessage(sender,"§a§l初期化完了")
 
@@ -774,7 +774,7 @@ object Command:CommandExecutor {
 
                         return true
                     }
-                    for (rg in region.map()){
+                    for (rg in Region.map()){
 
                         if (rg.value.ownerUUID == uuid){
                             sendHoverText(sender,"§e§lID:${rg.key}","Teleport","mreop tp ${rg.key}")
@@ -811,7 +811,7 @@ object Command:CommandExecutor {
                     var tax = 0.0
 
                     Thread {
-                        for (rg in region.map()){
+                        for (rg in Region.map()){
 
                             if (city.whereRegion(rg.key) !=cityID)continue
 
@@ -872,7 +872,7 @@ object Command:CommandExecutor {
 
         if (p.hasPermission(OP))return true
 
-        val data = region.get(id)?:return false
+        val data = Region.get(id)?:return false
 
         if (data.status == "Lock")return false
 
