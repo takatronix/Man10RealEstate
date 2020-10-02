@@ -8,11 +8,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import red.man10.realestate.Plugin.Companion.customInventory
-import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
 import red.man10.realestate.menu.InventoryMenu.Companion.cache
-import red.man10.realestate.region.User.Companion.Permission.*
+import red.man10.realestate.region.User
 import java.util.*
 
 class InventoryListener : Listener{
@@ -233,7 +232,7 @@ class InventoryListener : Listener{
                         if (user1.isOnline){
                             p.performCommand("mre removeuser $id ${user1.name}")
                         }else{
-                            user.remove(user1.uniqueId,id)
+                            User.remove(user1.uniqueId,id)
                             Utility.sendMessage(p,"§a§l住人を削除しました!")
                             return
                         }
@@ -261,22 +260,22 @@ class InventoryListener : Listener{
 
                     13 ->{
                         cacheData.allowAll = value
-                        user.setPermission(uuid,id, ALL,value)
+                        User.setPermission(uuid,id, User.Permission.ALL,value)
                     }
 
                     22 ->{
                         cacheData.allowBlock = value
-                        user.setPermission(uuid,id, BLOCK,value)
+                        User.setPermission(uuid,id, User.Permission.BLOCK,value)
                     }
 
                     31 ->{
                         cacheData.allowInv = value
-                        user.setPermission(uuid,id, INVENTORY,value)
+                        User.setPermission(uuid,id, User.Permission.INVENTORY,value)
                     }
 
                     40 ->{
                         cacheData.allowDoor = value
-                        user.setPermission(uuid,id, DOOR,value)
+                        User.setPermission(uuid,id, User.Permission.DOOR,value)
                     }
 
                 }

@@ -3,25 +3,24 @@ package red.man10.realestate.region
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Utility.sendMessage
-import red.man10.realestate.region.User.Companion.Permission.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 
-class User(private val pl :Plugin) {
+object User{
 
     val userData = ConcurrentHashMap<Player,HashMap<Int,UserData>>()
     val likeData = ConcurrentHashMap<Player,MutableList<Int>>()
 
     val ownerList = ConcurrentHashMap<Player,MutableList<Int>>()
 
-    val mysql = MySQLManager(pl,"Man10RealEstate")
+    val mysql = MySQLManager(plugin,"Man10RealEstate")
 
     fun set(p:Player,id:Int,data:UserData){
         (userData[p]?: HashMap())[id] = data
@@ -319,7 +318,7 @@ class User(private val pl :Plugin) {
 
     }
 
-    fun setPermission(uuid:UUID,id:Int,perm:Permission,value:Boolean){
+    fun setPermission(uuid:UUID, id:Int, perm: Permission, value:Boolean){
 
         val p = Bukkit.getOfflinePlayer(uuid)
 
@@ -330,10 +329,10 @@ class User(private val pl :Plugin) {
             val data = get(player,id)?:return
 
             when(perm){
-                ALL-> data.allowAll = value
-                BLOCK-> data.allowBlock = value
-                DOOR-> data.allowDoor = value
-                INVENTORY-> data.allowInv = value
+                Permission.ALL-> data.allowAll = value
+                Permission.BLOCK -> data.allowBlock = value
+                Permission.DOOR -> data.allowDoor = value
+                Permission.INVENTORY -> data.allowInv = value
             }
 
             set(player,id,data)
@@ -342,10 +341,10 @@ class User(private val pl :Plugin) {
         }
 
         when(perm){
-            ALL -> mysqlQueue.add("UPDATE region_user SET allow_all='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
-            BLOCK -> mysqlQueue.add("UPDATE region_user SET allow_block='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
-            DOOR-> mysqlQueue.add("UPDATE region_user SET allow_door='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
-            INVENTORY -> mysqlQueue.add("UPDATE region_user SET allow_inv='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+            Permission.ALL -> mysqlQueue.add("UPDATE region_user SET allow_all='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+            Permission.BLOCK -> mysqlQueue.add("UPDATE region_user SET allow_block='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+            Permission.DOOR -> mysqlQueue.add("UPDATE region_user SET allow_door='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
+            Permission.INVENTORY -> mysqlQueue.add("UPDATE region_user SET allow_inv='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
         }
     }
 
@@ -412,7 +411,7 @@ class User(private val pl :Plugin) {
             val tax = city.getTax(city.where(rg.value.teleport),rg.key)
             if (tax == 0.0)continue
 
-            Bukkit.getScheduler().runTask(pl, Runnable {
+            Bukkit.getScheduler().runTask(plugin, Runnable {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                         "mmail send-tag Man10RealEstate ${Bukkit.getOfflinePlayer(uuid).name} &4&l[重要]土地の税金について 5 " +
                                 "&6&l税額:$tax;" +
@@ -425,12 +424,12 @@ class User(private val pl :Plugin) {
     }
 
     fun tax(){
-        pl.logger.info("税金の徴収開始")
+        Bukkit.getLogger().info("税金の徴収開始")
         for (rg in region.map()){
             val uuid = rg.value.ownerUUID?:continue
             city.payingTax(uuid,rg.key)
         }
-        pl.logger.info("税金の徴収完了！")
+        Bukkit.getLogger().info("税金の徴収完了！")
 
     }
 
@@ -448,13 +447,11 @@ class User(private val pl :Plugin) {
 
     }
 
-    companion object{
-        enum class Permission{
-            ALL,
-            BLOCK,
-            INVENTORY,
-            DOOR
-        }
+    enum class Permission{
+        ALL,
+        BLOCK,
+        INVENTORY,
+        DOOR
     }
 
 }

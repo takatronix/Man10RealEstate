@@ -39,7 +39,6 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var es : ExecutorService
 
         lateinit var region : Region
-        lateinit var user : User
         lateinit var city : City
 
         lateinit var barrel : Barrel
@@ -78,7 +77,6 @@ class Plugin : JavaPlugin(), Listener {
         vault = VaultManager(this)
         offlineBank = BankAPI(this)
         region = Region(this)
-        user = User(this)
         city = City(this)
 
         barrel = Barrel()
@@ -159,7 +157,7 @@ class Plugin : JavaPlugin(), Listener {
                 //賃料(一日一回)
                 if (minute == 0 && hour == 0  && !isRent){
 
-                    user.rent()
+                    User.rent()
                     isRent = true
                 }else if(minute != 0){
                     isRent = false
@@ -167,7 +165,7 @@ class Plugin : JavaPlugin(), Listener {
 
                 //税金(月イチ8時)
                 if (minute == 0 && hour == 8 && day == 1 && !isTax){
-                    user.tax()
+                    User.tax()
                     isTax = true
                 }else if (minute !=0){
                     isTax = false
@@ -175,7 +173,7 @@ class Plugin : JavaPlugin(), Listener {
 
                 //税金メール(25日9時)
                 if (minute == 0 && hour == 9 && day == 25 && !isTaxMail){
-                    user.taxMail()
+                    User.taxMail()
                     isTaxMail = true
                 }else if (minute != 0){
                     isTaxMail = false

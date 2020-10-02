@@ -18,11 +18,11 @@ import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.teleportPrice
-import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
+import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel.Companion.title
 import java.util.*
 
@@ -100,7 +100,7 @@ object Command:CommandExecutor {
 
                     if (!hasPerm(sender,GUEST))return false
 
-                    user.setLike(sender,args[1].toInt())
+                    User.setLike(sender,args[1].toInt())
 
                     return true
                 }
@@ -139,7 +139,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    if (user.get(p,id) != null){
+                    if (User.get(p,id) != null){
                         sendMessage(sender,"§c§lこのユーザーは既に住人です！")
                         return false
                     }
@@ -176,7 +176,7 @@ object Command:CommandExecutor {
 
                     numbers.remove(num)
 
-                    user.create(sender,args[1].toInt())
+                    User.create(sender,args[1].toInt())
 
                     sendMessage(sender,"§a§l登録完了！あなたは住人になりました！")
 
@@ -203,7 +203,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    user.remove(p,id)
+                    User.remove(p,id)
 
                     sendMessage(sender,"§a§l退去完了！")
                     return true
@@ -274,7 +274,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    user.setRentPrice(p,id,rent)
+                    User.setRentPrice(p,id,rent)
 
                     sendMessage(sender,"§a§l設定完了！")
                     sendMessage(p,"§a§lID:$id　の賃料が変更されました！！ 賃料:$rent")
@@ -519,7 +519,7 @@ object Command:CommandExecutor {
                         city.load()
 
                         for (p in Bukkit.getOnlinePlayers()){
-                            user.load(p)
+                            User.load(p)
                         }
 
                         plugin.reloadConfig()
@@ -722,7 +722,7 @@ object Command:CommandExecutor {
 
                     Thread {
 
-                        user.taxMail()
+                        User.taxMail()
 
                     }.start()
                 }
@@ -731,7 +731,7 @@ object Command:CommandExecutor {
                     Thread{
                         sender.sendMessage("税金の徴収開始")
 
-                        user.tax()
+                        User.tax()
                         sender.sendMessage("税金の徴収完了")
                     }.start()
                 }
@@ -878,7 +878,7 @@ object Command:CommandExecutor {
 
         if (data.ownerUUID == p.uniqueId)return true
 
-        val userData = user.get(p,id)?:return false
+        val userData = User.get(p,id)?:return false
 
         if (userData.allowAll && userData.status == "Share")return true
 

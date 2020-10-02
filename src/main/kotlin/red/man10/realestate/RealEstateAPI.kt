@@ -3,7 +3,7 @@ package red.man10.realestate
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.region.Event
-import red.man10.realestate.region.User.Companion.Permission
+import red.man10.realestate.region.User
 import java.util.*
 
 class RealEstateAPI {
@@ -11,7 +11,7 @@ class RealEstateAPI {
     /**
      * 権限があるかどうか
      */
-    fun hasPermission(p:Player, loc: Location, perm: Permission): Boolean {
+    fun hasPermission(p:Player, loc: Location, perm: User.Permission): Boolean {
         return Event.hasPermission(p,loc,perm)
     }
 
@@ -20,7 +20,7 @@ class RealEstateAPI {
      */
     fun isLiving(p:Player):Boolean{
 
-        val data = Plugin.user.userData[p]?:return false
+        val data = User.userData[p]?:return false
 
         if (data.isEmpty())return false
 

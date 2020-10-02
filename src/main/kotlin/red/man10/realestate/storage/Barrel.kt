@@ -89,7 +89,7 @@ class Barrel {
 
     fun hasPermission(p:Player,barrel: Barrel):Boolean{
 
-        if (Event.hasPermission(p,barrel.location,User.Companion.Permission.ALL))return true
+        if (Event.hasPermission(p,barrel.location,User.Permission.ALL))return true
 
         val owners = barrel.persistentDataContainer[NamespacedKey(plugin,"owners"), PersistentDataType.STRING]?.split(";")?:return false
 

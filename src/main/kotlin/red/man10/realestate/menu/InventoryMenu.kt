@@ -9,7 +9,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import red.man10.realestate.Plugin.Companion.customInventory
 import red.man10.realestate.Plugin.Companion.region
-import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.Companion.InventoryID.*
 import red.man10.realestate.region.User
@@ -48,7 +47,7 @@ class InventoryMenu {
 
         val inventory = customInventory.createInventory(54,"§a§lいいねしたリスト")
 
-        val list = user.likeData[p]?:return
+        val list = User.likeData[p]?:return
 
         for (i in page*45 .. (page+1)*45){
 
@@ -111,7 +110,7 @@ class InventoryMenu {
 
         val inventory = customInventory.createInventory(54,"§a§l土地のリスト")
 
-        val list = user.ownerList[p]
+        val list = User.ownerList[p]
 
         if (list.isNullOrEmpty()){
             sendMessage(p,"§c§lあなたは自分の土地を持っていません")
@@ -283,7 +282,7 @@ class InventoryMenu {
         inventory.setItem(22,loadItem)
 
         GlobalScope.launch {
-            val list = user.loadUsers(id,page)
+            val list = User.loadUsers(id,page)
 
             if (list == null){
                 sendMessage(p,"§c§lこの土地には住人がいないようです")
@@ -387,7 +386,7 @@ class InventoryMenu {
         inventory.setItem(22,loadItem)
 
         GlobalScope.launch {
-            val data = cache[Pair(uuid,id)]?:user.get(uuid,id)!!
+            val data = cache[Pair(uuid,id)]?:User.get(uuid,id)!!
 
             val backBtn = back.clone()
             customInventory.setData(backBtn,"id","$id")

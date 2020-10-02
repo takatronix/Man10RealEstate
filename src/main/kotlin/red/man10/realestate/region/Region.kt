@@ -8,7 +8,6 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
-import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendMessage
@@ -38,7 +37,7 @@ class Region(private val pl:Plugin) {
 
         mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
 
-        user.removeAll(id)
+        User.removeAll(id)
     }
 
 
@@ -140,17 +139,17 @@ class Region(private val pl:Plugin) {
             val old = Bukkit.getPlayer(data.ownerUUID!!)
 
             if (old !=null){
-                val list = user.ownerList[old]!!
+                val list = User.ownerList[old]!!
                 list.remove(id)
-                user.ownerList[old] = list
+                User.ownerList[old] = list
             }
         }
 
         if (p != null){
             data.ownerUUID = p.uniqueId
-            val list = user.ownerList[p]?: mutableListOf()
+            val list = User.ownerList[p]?: mutableListOf()
             list.add(id)
-            user.ownerList[p] = list
+            User.ownerList[p] = list
         }else{
             data.ownerUUID = p
         }
@@ -330,7 +329,7 @@ class Region(private val pl:Plugin) {
         setOwner(id,null)
         setPrice(id,price)
         setStatus(id,"OnSale")
-        user.removeAll(id)
+        User.removeAll(id)
 
     }
 

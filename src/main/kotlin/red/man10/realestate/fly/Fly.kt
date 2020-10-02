@@ -53,7 +53,7 @@ class Fly {
 
         sendMessage(p,"§b§lflyモードをオンにしました！")
 
-        if (Event.hasPermission(p,p.location,User.Companion.Permission.ALL)){
+        if (Event.hasPermission(p,p.location, User.Permission.ALL)){
             flyOn(p)
         }
 
@@ -79,7 +79,7 @@ class Fly {
                 continue
             }
 
-            if (Event.hasPermission(p,p.location,User.Companion.Permission.ALL)){
+            if (Event.hasPermission(p,p.location, User.Permission.ALL)){
                 flyOn(p)
                 continue
             }

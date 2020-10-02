@@ -22,18 +22,17 @@ import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.region
-import red.man10.realestate.Plugin.Companion.user
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
-import red.man10.realestate.region.User.Companion.Permission.*
+import red.man10.realestate.region.User.Permission.*
 
 object Event :Listener{
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
         es.execute {
-            user.load(e.player)
+            User.load(e.player)
         }
     }
 
@@ -270,14 +269,14 @@ object Event :Listener{
             return
         }
 
-        if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
+        if (!hasPermission(p,e.clickedBlock!!.location, DOOR)){
             sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
             e.isCancelled = true
             return
         }
 
         if (invList.contains(e.clickedBlock!!.type)){
-            if (!hasPermission(p,e.clickedBlock!!.location,INVENTORY)){
+            if (!hasPermission(p,e.clickedBlock!!.location, INVENTORY)){
                 sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
                 e.isCancelled = true
                 return
@@ -343,7 +342,7 @@ object Event :Listener{
 
     }
 
-    fun hasPermission(p:Player, loc: Location, perm:User.Companion.Permission):Boolean{
+    fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
 
         if (p.hasPermission(Command.OP))return true
 
@@ -365,7 +364,7 @@ object Event :Listener{
                 if (rg.status == "Danger")return true
                 if (rg.ownerUUID == p.uniqueId)return true
 
-                val data = user.get(p,id)?:return false
+                val data = User.get(p,id)?:return false
 
                 if (data.status == "Lock")return false
                 if (data.allowAll)return true
