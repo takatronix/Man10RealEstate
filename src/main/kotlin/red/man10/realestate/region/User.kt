@@ -3,7 +3,6 @@ package red.man10.realestate.region
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
@@ -156,7 +155,7 @@ object User{
                 sendMessage(p,"§4§lID:$id はロックされた土地です")
             }
 
-            if (!city.hasCityPermission(p,id)){
+            if (!City.hasCityPermission(p,id)){
                 sendMessage(p,"§c§lあなたはこの都市には住めなくなりました")
                 remove(p,id)
                 return
@@ -407,7 +406,7 @@ object User{
         for (rg in Region.map()){
             val uuid = rg.value.ownerUUID?:continue
 
-            val tax = city.getTax(city.where(rg.value.teleport),rg.key)
+            val tax = City.getTax(City.where(rg.value.teleport),rg.key)
             if (tax == 0.0)continue
 
             Bukkit.getScheduler().runTask(plugin, Runnable {
@@ -426,7 +425,7 @@ object User{
         Bukkit.getLogger().info("税金の徴収開始")
         for (rg in Region.map()){
             val uuid = rg.value.ownerUUID?:continue
-            city.payingTax(uuid,rg.key)
+            City.payingTax(uuid,rg.key)
         }
         Bukkit.getLogger().info("税金の徴収完了！")
 

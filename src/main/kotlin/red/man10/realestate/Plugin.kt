@@ -36,8 +36,6 @@ class Plugin : JavaPlugin(), Listener {
 
         lateinit var es : ExecutorService
 
-        lateinit var city : City
-
         lateinit var barrel : Barrel
 
         lateinit var fly: Fly
@@ -73,13 +71,10 @@ class Plugin : JavaPlugin(), Listener {
         es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
         vault = VaultManager(this)
         offlineBank = BankAPI(this)
-        city = City(this)
 
         barrel = Barrel()
 
         fly = Fly()
-
-        customInventory = CustomInventory(this)
 
         plugin = this
 
@@ -91,8 +86,8 @@ class Plugin : JavaPlugin(), Listener {
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(Event, this)
-        server.pluginManager.registerEvents(InventoryListener(),this)
-        server.pluginManager.registerEvents(BarrelEvent(),this)
+        server.pluginManager.registerEvents(InventoryListener,this)
+        server.pluginManager.registerEvents(BarrelEvent,this)
 
         getCommand("mre")!!.setExecutor(Command)
         getCommand("mreop")!!.setExecutor(Command)
@@ -109,7 +104,7 @@ class Plugin : JavaPlugin(), Listener {
         mysqlQueue()
 
         Region.load()
-        city.load()
+        City.load()
 
 
         //賃料スレッド
@@ -138,7 +133,7 @@ class Plugin : JavaPlugin(), Listener {
 
                         val p = Bukkit.getPlayer(rg.value.ownerUUID?:continue)?:continue
 
-                        if (!city.hasCityPermission(p,rg.key)){
+                        if (!City.hasCityPermission(p,rg.key)){
                             sendMessage(p,"§c§lあなたはID:${rg.key}の土地に住むことができなくなりました")
                             Region.initRegion(rg.key,defaultPrice)
                         }

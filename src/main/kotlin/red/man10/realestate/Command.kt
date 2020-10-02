@@ -11,7 +11,6 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import red.man10.realestate.Plugin.Companion.WAND_NAME
-import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.maxBalance
@@ -21,6 +20,7 @@ import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
+import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel.Companion.title
@@ -44,7 +44,7 @@ object Command:CommandExecutor {
 
                 if (!hasPerm(sender,GUEST))return false
 
-                InventoryMenu().mainMenu(sender)
+                InventoryMenu.mainMenu(sender)
                 return true
 
             }
@@ -125,7 +125,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    val maxUser = city.getMaxUser(city.where(data.teleport))
+                    val maxUser = City.getMaxUser(City.where(data.teleport))
 
                     if (Region.getUsers(id)> maxUser){
                         sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${maxUser}人)")
@@ -444,7 +444,7 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            id = city.create(startPosition,endPosition,args[2],amount,sender.location)
+                            id = City.create(startPosition,endPosition,args[2],amount,sender.location)
 
                         }else if (args[1] == "rg"){
                             id = Region.create(startPosition,endPosition,args[2],amount,sender.location)
@@ -492,12 +492,12 @@ object Command:CommandExecutor {
 
                     }
 
-                    if (city.get(id) == null){
+                    if (City.get(id) == null){
                         sendMessage(sender,"§c§l存在しない都市です！")
                         return true
 
                     }
-                    city.delete(id)
+                    City.delete(id)
                     sendMessage(sender,"§a§l削除完了！")
 
                 }
@@ -516,7 +516,7 @@ object Command:CommandExecutor {
 
                     es.execute {
                         Region.load()
-                        city.load()
+                        City.load()
 
                         for (p in Bukkit.getOnlinePlayers()){
                             User.load(p)
@@ -582,7 +582,7 @@ object Command:CommandExecutor {
                             }
                         }
 
-                        for (c in city.map()){
+                        for (c in City.map()){
 
                             val data = c.value
 
@@ -655,7 +655,7 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    val data = city.get(id)
+                    val data = City.get(id)
 
                     if (data == null){
                         sendMessage(sender,"§c§l存在しない土地です！")
@@ -665,7 +665,7 @@ object Command:CommandExecutor {
                     data.startPosition = startPosition
                     data.endPosition = endPosition
 
-                    city.set(id, data)
+                    City.set(id, data)
 
                     sendMessage(sender,"§a§l再設定完了！")
                 }
@@ -678,7 +678,7 @@ object Command:CommandExecutor {
                     val id = args[1].toInt()
                     val tax= args[2].toDouble()
 
-                    city.setTax(id,tax)
+                    City.setTax(id,tax)
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -793,7 +793,7 @@ object Command:CommandExecutor {
                     val id = args[1].toInt()
                     val amount= args[2].toInt()
 
-                    city.setMaxUser(id,amount)
+                    City.setMaxUser(id,amount)
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -813,11 +813,11 @@ object Command:CommandExecutor {
                     Thread {
                         for (rg in Region.map()){
 
-                            if (city.whereRegion(rg.key) !=cityID)continue
+                            if (City.whereRegion(rg.key) !=cityID)continue
 
                             if (rg.value.ownerUUID == null)continue
 
-                            tax += city.getTax(cityID,rg.key)
+                            tax += City.getTax(cityID,rg.key)
 
                         }
 

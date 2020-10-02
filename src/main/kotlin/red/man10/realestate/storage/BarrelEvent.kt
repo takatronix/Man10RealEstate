@@ -16,7 +16,7 @@ import red.man10.realestate.Plugin.Companion.barrel
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.storage.Barrel.Companion.title
 
-class BarrelEvent:Listener {
+object BarrelEvent:Listener {
 
     val blockMap = HashMap<Player,Block>()
     val isOpen = mutableListOf<Triple<Int,Int,Int>>()

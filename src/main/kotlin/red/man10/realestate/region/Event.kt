@@ -18,7 +18,6 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
-import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Utility
@@ -349,11 +348,11 @@ object Event :Listener{
             return true
         }
 
-        val cityID = city.where(loc)
+        val cityID = City.where(loc)
 
         if (cityID == -1)return false
 
-        for (id in city.get(cityID)!!.regionList){
+        for (id in City.get(cityID)!!.regionList){
 
             val rg = Region.get(id)?:continue
 

@@ -23,7 +23,7 @@ import java.io.IOException
 class Barrel {
 
     companion object{
-        val title = "§e§l特殊樽"
+        const val title = "§e§l特殊樽"
     }
 
     fun setStorageItem(inv:Inventory,block:Block){
@@ -78,14 +78,14 @@ class Barrel {
         return true
 
     }
-
-    fun dropStorage(barrel: Barrel){
-        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return
-
-        val items = itemStackArrayFromBase64(storage)
-
-        items.forEach { if (it.type != Material.AIR) {barrel.world.dropItem(barrel.location, it) }}
-    }
+//
+//    fun dropStorage(barrel: Barrel){
+//        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return
+//
+//        val items = itemStackArrayFromBase64(storage)
+//
+//        items.forEach { if (it.type != Material.AIR) {barrel.world.dropItem(barrel.location, it) }}
+//    }
 
     fun hasPermission(p:Player,barrel: Barrel):Boolean{
 

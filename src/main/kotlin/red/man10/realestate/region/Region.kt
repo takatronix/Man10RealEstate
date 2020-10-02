@@ -4,7 +4,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
@@ -102,9 +101,9 @@ object Region {
 
         set(id,data)
 
-        val cID = city.where(data.teleport)
+        val cID = City.where(data.teleport)
         if (cID != -1){
-            city.updateRegion(cID)
+            City.updateRegion(cID)
         }
 
         return id
@@ -292,7 +291,7 @@ object Region {
             return
         }
 
-        if (!city.hasCityPermission(p,id)){
+        if (!City.hasCityPermission(p,id)){
             sendMessage(p,"§c§lあなたはこの街に住むことができません！")
             return
         }

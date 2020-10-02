@@ -8,11 +8,12 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.defaultPrice
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class City(private val pl:Plugin) {
+object City {
 
     val cityData = ConcurrentHashMap<Int,CityData>()
 
@@ -62,7 +63,7 @@ class City(private val pl:Plugin) {
                 "${pos2.third}, " +
                 "$tax);"
 
-        val mysql = MySQLManager(pl,"Man10RealEstate City")
+        val mysql = MySQLManager(plugin,"Man10RealEstate City")
 
         mysql.execute(sql)
 
@@ -101,7 +102,7 @@ class City(private val pl:Plugin) {
     fun load(){
         cityData.clear()
 
-        val sql = MySQLManager(pl,"Man10RealEstate Loading")
+        val sql = MySQLManager(plugin,"Man10RealEstate Loading")
 
         val rs = sql.query("SELECT * FROM city;")?:return
 
@@ -282,7 +283,7 @@ class City(private val pl:Plugin) {
 
     //リージョンのidから都市を返す
     fun whereRegion(id:Int):Int{
-        return Plugin.city.where(Region.get(id)!!.teleport)
+        return where(Region.get(id)!!.teleport)
     }
 
     //指定リージョンに住む権限があるかどうか
