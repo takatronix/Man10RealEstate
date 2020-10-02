@@ -68,8 +68,6 @@ class Plugin : JavaPlugin(), Listener {
 
         var defaultPrice = 400000.0
 
-        val numbers = mutableListOf<Int>()
-
     }
 
     override fun onEnable() { // Plugin startup logic

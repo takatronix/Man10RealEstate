@@ -15,7 +15,6 @@ import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.maxBalance
-import red.man10.realestate.Plugin.Companion.numbers
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.region
 import red.man10.realestate.Plugin.Companion.teleportPrice
@@ -29,10 +28,11 @@ import java.util.*
 
 object Command:CommandExecutor {
 
-    val USER = "mre.user"
-    val GUEST = "mre.guest"
-    val OP = "mre.op"
+    const val USER = "mre.user"
+    const val GUEST = "mre.guest"
+    const val OP = "mre.op"
 
+    val numbers = mutableListOf<Int>()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -55,16 +55,18 @@ object Command:CommandExecutor {
 
                     if (!hasPerm(sender,USER))return false
 
-                    if (args.size != 2 || !NumberUtils.isNumber(args[1]))return false
+                    if (args.size != 2)return false
 
-                    val data = region.get(args[1].toInt())?:return false
+                    val id = parse(args[1])?:return false
+
+                    val data = region.get(id)?:return false
 
                     if (data.status != "OnSale"){
                         sendMessage(sender,"§4§lこの土地は販売されていません！")
                         return false
                     }
 
-                    region.buy(sender,args[1].toInt())
+                    region.buy(sender,id)
 
                     return true
                 }
@@ -73,19 +75,21 @@ object Command:CommandExecutor {
 
                     if (!hasPerm(sender,USER))return false
 
-                    if (args.size != 2 || !NumberUtils.isNumber(args[1]))return false
+                    if (args.size != 2)return false
 
-                    val data = region.get(args[1].toInt())?:return false
+                    val id = parse(args[1])?:return false
+
+                    val data = region.get(id)?:return false
 
                     if (data.status != "OnSale"){
                         sendMessage(sender,"§4§lこの土地は販売されていません！")
                         return false
                     }
 
-                    sendMessage(sender,"§3§l料金：${data.price} 名前：${data.name}" +
-                            " §a§l現在のオーナー名：${region.getOwner(data)}")
+                    sendMessage(sender,"§c§l料金：${data.price} ID：${id}" +
+                            " §a§l現在のオーナー：${region.getOwner(data)}")
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
-                    sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy ${args[1]}")
+                    sendHoverText(sender,"§a§l[購入する]","§6§l${data.price}","mre buy $id")
 
                     return true
                 }
@@ -107,6 +111,7 @@ object Command:CommandExecutor {
 
                     if (args.size != 3){
                         sendMessage(sender,"§c§l入力方法に問題があります！")
+                        sendMessage(sender,"§c§l/mre adduser <ID> <ユーザー名>")
                         return false
                     }
                     val id = parse(args[1])?:return false
@@ -120,8 +125,10 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    if (region.getUsers(id)> city.getMaxUser(city.where(data.teleport))){
-                        sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${city.getMaxUser(city.where(data.teleport))}人)")
+                    val maxUser = city.getMaxUser(city.where(data.teleport))
+
+                    if (region.getUsers(id)> maxUser){
+                        sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${maxUser}人)")
                         return false
                     }
 
@@ -144,7 +151,7 @@ object Command:CommandExecutor {
 
                     sendMessage(p,"§a§l=================土地の情報==================")
                     sendMessage(p,"§a§lオーナー：${sender.name}")
-                    sendMessage(p,"§a§l土地の名前：${data.name}")
+                    sendMessage(p,"§a§l土地のID：$id")
                     sendMessage(p,"§a§l土地のステータス：${data.status}")
                     sendMessage(p,"§a§l===========================================")
 
@@ -208,8 +215,8 @@ object Command:CommandExecutor {
 
                     if (args.size!=3)return false
 
-                    val id = args[1].toInt()
-                    val span = args[2].toInt()
+                    val id = parse(args[1])?:return false
+                    val span = parse(args[2])?:return false
 
                     if (!hasRegionPermission(sender,id))return false
 
@@ -224,7 +231,7 @@ object Command:CommandExecutor {
 
                     val id = parse(args[1])?:return false
 
-                    if (sender.uniqueId != region.get(id)!!.ownerUUID)return false
+                    if ((sender.uniqueId != region.get(id)!!.ownerUUID) && !sender.hasPermission(OP))return false
 
 
                     val p = Bukkit.getPlayer(args[2])
@@ -312,7 +319,7 @@ object Command:CommandExecutor {
 
                     region.setPrice(id,price)
 
-                    sendMessage(sender,"§a§l${args[1]}の金額を${args[2]}に変更しました")
+                    sendMessage(sender,"§a§l${id}の金額を${args[2]}に変更しました")
 
                 }
 
@@ -593,6 +600,7 @@ object Command:CommandExecutor {
                     }
                 }
 
+                //都市の範囲の再設定
                 "reset" ->{//mreop reset city id
 
                     if (args.size != 3)return false
@@ -857,6 +865,9 @@ object Command:CommandExecutor {
         return str.toInt()
     }
 
+    /**
+     * 指定リージョンの編集権限を持っているかどうか
+     */
     fun hasRegionPermission(p:Player,id:Int):Boolean{
 
         if (p.hasPermission(OP))return true
