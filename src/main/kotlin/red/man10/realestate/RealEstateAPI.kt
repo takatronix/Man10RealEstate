@@ -7,7 +7,7 @@ import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import java.util.*
 
-class RealEstateAPI {
+object RealEstateAPI {
 
     /**
      * 権限があるかどうか
@@ -21,6 +21,8 @@ class RealEstateAPI {
      */
     fun isLiving(p:Player):Boolean{
 
+        if (hasRegion(p.uniqueId))return true
+
         val data = User.userData[p]?:return false
 
         if (data.isEmpty())return false
@@ -33,9 +35,8 @@ class RealEstateAPI {
      * 土地を所有しているかどうか
      */
     fun hasRegion(uuid: UUID):Boolean{
-        for (rg in Region.map().values){
-            if (rg.ownerUUID == uuid)return true
-        }
+        if (Region.map().values.any { it.ownerUUID == uuid })return true
+
         return false
     }
 }

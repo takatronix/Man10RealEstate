@@ -774,12 +774,8 @@ object Command:CommandExecutor {
 
                         return true
                     }
-                    for (rg in Region.map()){
-
-                        if (rg.value.ownerUUID == uuid){
-                            sendHoverText(sender,"§e§lID:${rg.key}","Teleport","mreop tp ${rg.key}")
-                        }
-
+                    for (rg in Region.map().filter { it.value.ownerUUID == uuid }.keys){
+                        sendHoverText(sender,"§e§lID:${rg}","Teleport","mreop tp ${rg}")
                     }
 
                     sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
