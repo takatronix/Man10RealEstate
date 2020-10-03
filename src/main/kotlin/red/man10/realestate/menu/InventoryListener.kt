@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
-import red.man10.realestate.Plugin.Companion.customInventory
 import red.man10.realestate.Utility
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.InventoryMenu.cache
@@ -26,11 +25,11 @@ object InventoryListener : Listener{
         val slot = e.slot
         val item = e.currentItem?:return
 
-        if (customInventory.get(p) ==null)return
+        if (CustomInventory.get(p) ==null)return
 
         e.isCancelled = true
 
-        when(customInventory.get(p)){
+        when(CustomInventory.get(p)){
 
             MAIN_MENU -> {
 
@@ -47,15 +46,15 @@ object InventoryListener : Listener{
 
                 if (slot <45)return
 
-                when(customInventory.getData(item,"type")){
+                when(CustomInventory.getData(item,"type")){
                     "back" ->InventoryMenu.mainMenu(p)
                     "next" ->{
-                        val page = customInventory.getData(item,"page").toInt()
+                        val page = CustomInventory.getData(item,"page").toInt()
                         InventoryMenu.openBookmark(p,page+1)
 
                     }
                     "previous" ->{
-                        val page = customInventory.getData(item,"page").toInt()
+                        val page = CustomInventory.getData(item,"page").toInt()
                         InventoryMenu.openBookmark(p,page-1)
 
                     }
@@ -66,20 +65,20 @@ object InventoryListener : Listener{
             REGION_LIST ->{
                 if (slot <45){
 
-                    val id = customInventory.getData(item,"id").toInt()
+                    val id = CustomInventory.getData(item,"id").toInt()
                     InventoryMenu.regionMenu(p,id)
                     return
                 }
 
-                when(customInventory.getData(item,"type")){
+                when(CustomInventory.getData(item,"type")){
                     "back" ->InventoryMenu.mainMenu(p)
                     "next" ->{
-                        val page = customInventory.getData(item,"page").toInt()
+                        val page = CustomInventory.getData(item,"page").toInt()
                         InventoryMenu.openRegionList(p,page+1)
 
                     }
                     "previous" ->{
-                        val page = customInventory.getData(item,"page").toInt()
+                        val page = CustomInventory.getData(item,"page").toInt()
                         InventoryMenu.openRegionList(p,page-1)
 
                     }
@@ -94,13 +93,13 @@ object InventoryListener : Listener{
                     return
                 }
 
-                val id = customInventory.getData(item,"id").toInt()
+                val id = CustomInventory.getData(item,"id").toInt()
 
                 when(slot){
                     11 -> InventoryMenu.regionSetting(p,id)
                     13 -> InventoryMenu.userList(p,id,0)
                     15 -> {
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         Utility.sendSuggest(p,"§a§住人を追加する","mre adduser $id ")
                         return
                     }
@@ -110,20 +109,20 @@ object InventoryListener : Listener{
 
             REGION_SETTING ->{
 
-                val id = customInventory.getData(item,"id").toInt()
+                val id = CustomInventory.getData(item,"id").toInt()
 
                 when(slot){
 
                     0->InventoryMenu.regionMenu(p,id)
                     10->InventoryMenu.statusMenu(p,id)
                     13->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setprice $id ")
                     }
                     16->{}
                     38->InventoryMenu.spanMenu(p,id)
                     42->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setowner $id ")
                     }
                 }
@@ -132,24 +131,24 @@ object InventoryListener : Listener{
 
             REGION_STATUS ->{
 
-                val id = customInventory.getData(item,"id").toInt()
+                val id = CustomInventory.getData(item,"id").toInt()
 
                 when(slot){
                     0->InventoryMenu.regionSetting(p,id)
                     1->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         p.performCommand("mre setstatus $id Danger")
                     }
                     3->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         p.performCommand("mre setstatus $id Free")
                     }
                     5->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         p.performCommand("mre setstatus $id OnSale")
                     }
                     7->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         p.performCommand("mre setstatus $id Protected")
                     }
 
@@ -159,20 +158,20 @@ object InventoryListener : Listener{
 
             REGION_SPAN ->{
 
-                val id = customInventory.getData(item,"id").toInt()
+                val id = CustomInventory.getData(item,"id").toInt()
 
                 when(slot){
                     0 ->InventoryMenu.regionSetting(p,id)
                     1 ->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         p.performCommand("mre span $id 2")
                     }
                     4 -> {
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         p.performCommand("mre span $id 1")
                     }
                     7 -> {
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         p.performCommand("mre span $id 0")
                     }
                 }
@@ -181,25 +180,25 @@ object InventoryListener : Listener{
 
             USER_LIST->{
 
-                val id = customInventory.getData(item,"id").toInt()
+                val id = CustomInventory.getData(item,"id").toInt()
 
                 if (slot <45){
 
-                    val uuid = UUID.fromString(customInventory.getData(item,"uuid"))
+                    val uuid = UUID.fromString(CustomInventory.getData(item,"uuid"))
 
                     InventoryMenu.userMenu(p,id,uuid)
                     return
                 }
 
-                when(customInventory.getData(item,"type")){
+                when(CustomInventory.getData(item,"type")){
                     "back" ->InventoryMenu.regionMenu(p,id)
                     "next" ->{
-                        val page = customInventory.getData(item,"page").toInt()
+                        val page = CustomInventory.getData(item,"page").toInt()
                         InventoryMenu.userList(p,id,page+1)
 
                     }
                     "previous" ->{
-                        val page = customInventory.getData(item,"page").toInt()
+                        val page = CustomInventory.getData(item,"page").toInt()
                         InventoryMenu.userList(p,id,page-1)
                     }
                 }
@@ -207,13 +206,13 @@ object InventoryListener : Listener{
             }
 
             USER_MENU->{
-                val id = customInventory.getData(item,"id").toInt()
+                val id = CustomInventory.getData(item,"id").toInt()
                 if (slot == 0){
                     InventoryMenu.userList(p,id,0)
                     return
                 }
 
-                val uuid = UUID.fromString(customInventory.getData(item,"uuid"))
+                val uuid = UUID.fromString(CustomInventory.getData(item,"uuid"))
 
                 when(slot){
 
@@ -221,7 +220,7 @@ object InventoryListener : Listener{
 
                     11->InventoryMenu.setPermission(p,id,uuid)
                     13->{
-                        customInventory.close(p)
+                        CustomInventory.close(p)
                         Utility.sendSuggest(p,"§a§l賃料を設定する","mre setrent $id" +
                                 " ${Bukkit.getOfflinePlayer(uuid).name} ")
                     }
@@ -241,8 +240,8 @@ object InventoryListener : Listener{
             }
 
             USER_PERMISSION->{
-                val id = customInventory.getData(item,"id").toInt()
-                val uuid = UUID.fromString(customInventory.getData(item,"uuid"))
+                val id = CustomInventory.getData(item,"id").toInt()
+                val uuid = UUID.fromString(CustomInventory.getData(item,"uuid"))
 
                 val cacheData = cache[Pair(uuid,id)]!!
 
@@ -292,7 +291,7 @@ object InventoryListener : Listener{
 
         val p = e.player
         if (p !is Player)return
-        customInventory.close(p,false)
+        CustomInventory.close(p,false)
     }
 
 

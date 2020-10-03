@@ -11,7 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10offlinebank.BankAPI
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.fly.Fly
-import red.man10.realestate.menu.CustomInventory
 import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
@@ -20,7 +19,9 @@ import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -41,8 +42,6 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var fly: Fly
 
         lateinit var vault : VaultManager
-
-        lateinit var customInventory : CustomInventory
 
         lateinit var plugin: Plugin
 
