@@ -10,6 +10,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import red.man10.realestate.Plugin.Companion.barrel
@@ -87,6 +88,15 @@ object BarrelEvent:Listener {
 
         blockMap[p] = block
 
+    }
+
+    @EventHandler
+    fun clickEvent(e:InventoryClickEvent){
+        if (e.inventory != e.whoClicked.inventory){ return}
+
+        if (e.cursor?.type?:return == Material.WRITTEN_BOOK){
+            e.isCancelled = true
+        }
     }
 
     @EventHandler
