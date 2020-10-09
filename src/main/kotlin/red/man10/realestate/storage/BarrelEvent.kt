@@ -92,6 +92,9 @@ object BarrelEvent:Listener {
 
     @EventHandler
     fun clickEvent(e:InventoryClickEvent){
+
+        if (e.view.title != title)return
+
         if (e.inventory != e.whoClicked.inventory){ return}
 
         if (e.cursor?.type?:return == Material.WRITTEN_BOOK){
