@@ -36,6 +36,10 @@ class Barrel {
 //                //list.add(ItemStack(Material.AIR))
 //                continue
 //            }
+            if (item.type == Material.WRITTEN_BOOK){
+                Bukkit.getLogger().info("WRITTEN BOOK ERROR")
+                return
+            }
             list.add(item)
         }
 
