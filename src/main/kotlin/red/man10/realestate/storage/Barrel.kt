@@ -50,7 +50,7 @@ class Barrel {
 
         val base64 = itemStackArrayToBase64(list.toTypedArray())
 
-        if (base64.toByteArray(UTF_8).size> maxByteSize){
+        if (base64.toByteArray(UTF_8).size>= maxByteSize){
             Bukkit.getLogger().warning("Too many bytes error")
             return
         }
