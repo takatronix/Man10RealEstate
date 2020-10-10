@@ -825,6 +825,23 @@ object Command:CommandExecutor {
 
                 }
 
+                "remit" ->{//mreop remit <id>
+
+                    val id = parse(args[1])?:return false
+
+                    val rg = Region.get(id)?:return false
+                    rg.isRemitTax = !rg.isRemitTax
+
+                    if (rg.isRemitTax){
+                        sendMessage(sender,"§a§l$id の税金を免除するようにしました")
+                    }else{
+                        sendMessage(sender,"§a§l$id の税金を免除を解除しました")
+                    }
+
+                    Region.set(id,rg)
+
+                    return true
+                }
 
 
                 else ->{
