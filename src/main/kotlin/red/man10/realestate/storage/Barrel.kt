@@ -19,11 +19,13 @@ import red.man10.realestate.region.User
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import kotlin.text.Charsets.UTF_8
 
 class Barrel {
 
     companion object{
         const val title = "§e§l特殊樽"
+        const val maxByteSize = 65536
     }
 
     fun setStorageItem(inv:Inventory,block:Block){
@@ -37,8 +39,8 @@ class Barrel {
 //                continue
 //            }
             if (item.type == Material.WRITTEN_BOOK){
-                Bukkit.getLogger().info("WRITTEN BOOK ERROR")
-                return
+                Bukkit.getLogger().warning("WRITTEN BOOK ERROR")
+                continue
             }
             list.add(item)
         }
@@ -46,7 +48,14 @@ class Barrel {
         val state = block.state
         if (state !is Barrel)return
 
-        state.persistentDataContainer.set(NamespacedKey(plugin,"storage"), PersistentDataType.STRING,itemStackArrayToBase64(list.toTypedArray()))
+        val base64 = itemStackArrayToBase64(list.toTypedArray())
+
+        if (base64.toByteArray(UTF_8).size> maxByteSize){
+            Bukkit.getLogger().warning("Too many bytes error")
+            return
+        }
+
+        state.persistentDataContainer.set(NamespacedKey(plugin,"storage"), PersistentDataType.STRING,base64)
 
         state.update()
     }
