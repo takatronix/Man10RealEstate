@@ -234,6 +234,8 @@ object City {
         val rg = Region.get(id)?:return false
         val cityID = where(rg.teleport)
 
+        if (rg.isRemitTax)return false
+
         if (cityID == -1)return false
 
         val city = get(cityID)?:return false

@@ -210,7 +210,8 @@ object Region {
                 "t.status = '${data.status}', " +
                 "t.price = ${data.price}, " +
                 "t.profit = 0, " +
-                "t.span = ${data.span} " +
+                "t.span = ${data.span}," +
+                "t.remit_tax = ${if (data.isRemitTax) 1 else 0} " +
                 "WHERE t.id = $id")
 
     }
@@ -263,6 +264,8 @@ object Region {
                 rs.getFloat("yaw"),
                 rs.getFloat("pitch")
             )
+
+            data.isRemitTax = rs.getInt("remit_tax") == 1
 
             regionData[id] = data
 
@@ -361,6 +364,7 @@ object Region {
 
         var span = 0 //0:month 1:week 2:day
 
+        var isRemitTax = false
     }
 
 }

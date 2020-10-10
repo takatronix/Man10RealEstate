@@ -31,7 +31,8 @@ OnSale状態になったときに販売価格
 ',
     profit     double       not null default 0.0 comment '土地の利益',
 --    rent       double       not null default 0.0 comment '賃料',
-    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)'
+    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)',
+    remit_tax  tinyint      not null default 0   comment  '税金の免除をするかどうか'
 )
     comment '領域管理のためのテーブル';
 
