@@ -356,7 +356,7 @@ object Event :Listener{
 
             val rg = Region.get(id)?:continue
 
-            if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world)){
+            if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
                 if (rg.status == "Lock")return false
                 if (rg.status == "Danger")return true

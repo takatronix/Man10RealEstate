@@ -573,7 +573,7 @@ object Command:CommandExecutor {
 
                             val data = rg.value
 
-                            if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world)) {
+                            if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world,rg.value.server)) {
                                 sendMessage(sender, "§e§lRegionID:${rg.key}")
                                 sendMessage(sender, "§7Name:${rg.value.name}")
                                 sendMessage(sender, "§8Price:${rg.value.price}")
@@ -586,7 +586,7 @@ object Command:CommandExecutor {
 
                             val data = c.value
 
-                            if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world)) {
+                            if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world,data.server)) {
                                 sendMessage(sender, "§e§lCityID:${c.key}")
                                 sendMessage(sender, "§7Name:${c.value.name}")
                                 sendMessage(sender, "§8Tax:${c.value.tax}")

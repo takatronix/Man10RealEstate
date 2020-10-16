@@ -177,14 +177,14 @@ object Region {
     /**
      *
      */
-    fun where(loc:Location): Int {
-        for (rg in regionData){
-            if (Utility.isWithinRange(loc,rg.value.startPosition,rg.value.endPosition,rg.value.world)){
-                return rg.key
-            }
-        }
-        return -1
-    }
+//    fun where(loc:Location): Int {
+//        for (rg in regionData){
+//            if (Utility.isWithinRange(loc,rg.value.startPosition,rg.value.endPosition,rg.value.world)){
+//                return rg.key
+//            }
+//        }
+//        return -1
+//    }
 
 
     /**

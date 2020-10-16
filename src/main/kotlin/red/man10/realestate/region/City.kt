@@ -160,11 +160,12 @@ object City {
         val pos1 = data.startPosition
         val pos2 = data.endPosition
         val world = data.world
+        val server = plugin.server.name
 
         val list = mutableListOf<Int>()
 
         for (rg in Region.map()){
-            if (Utility.isWithinRange(rg.value.teleport,pos1,pos2,world)){
+            if (Utility.isWithinRange(rg.value.teleport,pos1,pos2,world,server)){
                 list.add(rg.key)
             }
         }
@@ -182,7 +183,7 @@ object City {
      */
     fun where(loc:Location):Int{
         for (city in cityData){
-            if (Utility.isWithinRange(loc,city.value.startPosition,city.value.endPosition,city.value.world)){
+            if (Utility.isWithinRange(loc,city.value.startPosition,city.value.endPosition,city.value.world,city.value.server)){
                 return city.key
             }
         }

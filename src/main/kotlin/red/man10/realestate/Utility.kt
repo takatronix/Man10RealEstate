@@ -5,14 +5,16 @@ import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import red.man10.realestate.Plugin.Companion.plugin
 
 object Utility {
 
     ////////////////////////////////////////////////////////////
     //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
     ////////////////////////////////////////////////////////////
-    fun isWithinRange(loc: Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>, world:String):Boolean{
+    fun isWithinRange(loc: Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>, world:String,server:String):Boolean{
 
+        if (plugin.name!=server)return false
         if (loc.world.name != world)return false
 
         val x = loc.blockX
