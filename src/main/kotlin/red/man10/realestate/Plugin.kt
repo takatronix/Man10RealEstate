@@ -129,10 +129,10 @@ class Plugin : JavaPlugin(), Listener {
 
                         val p = Bukkit.getPlayer(rg.value.ownerUUID?:continue)?:continue
 
-                        if (!City.hasCityPermission(p,rg.key)){
-                            sendMessage(p,"§c§lあなたはID:${rg.key}の土地に住むことができなくなりました")
-                            Region.initRegion(rg.key,defaultPrice)
-                        }
+//                        if (!City.hasCityPermission(p,rg.key)){
+//                            sendMessage(p,"§c§lあなたはID:${rg.key}の土地に住むことができなくなりました")
+//                            Region.initRegion(rg.key,defaultPrice)
+//                        }
 
                     }
 

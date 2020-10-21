@@ -289,12 +289,12 @@ object City {
         return where(Region.get(id)!!.teleport)
     }
 
-    //指定リージョンに住む権限があるかどうか
-    fun hasCityPermission(p:Player,id: Int):Boolean{
-        val city = get(whereRegion(id))?:return false
-        if (!p.hasPermission("mre.city.${city.name}"))return false
-        return true
-    }
+//    //指定リージョンに住む権限があるかどうか
+//    fun hasCityPermission(p:Player,id: Int):Boolean{
+//        val city = get(whereRegion(id))?:return false
+//        if (!p.hasPermission("mre.city.${city.name}"))return false
+//        return true
+//    }
 
     class CityData{
 

@@ -306,10 +306,10 @@ object Region {
             return
         }
 
-        if (!City.hasCityPermission(p,id)){
-            sendMessage(p,"§c§lあなたはこの街に住むことができません！")
-            return
-        }
+//        if (!City.hasCityPermission(p,id)){
+//            sendMessage(p,"§c§lあなたはこの街に住むことができません！")
+//            return
+//        }
 
         vault.withdraw(p.uniqueId,data.price)
 
