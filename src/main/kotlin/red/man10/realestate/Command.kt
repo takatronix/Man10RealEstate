@@ -24,6 +24,7 @@ import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel.Companion.title
+import sun.nio.ch.Util
 import java.util.*
 
 object Command:CommandExecutor {
@@ -252,12 +253,21 @@ object Command:CommandExecutor {
                 "settp" ->{
                     if (!sender.hasPermission(USER))return true
 
-                    if (!hasRegionPermission(sender,args[1].toInt()))return false
+                    val id = parse(args[1])?:return false
+
+                    if (!hasRegionPermission(sender,id))return false
 
                     val loc = sender.location
 
                     if (!vault.withdraw(sender.uniqueId,Plugin.setTPPrice)){
                         sendMessage(sender,"§c手数料が必要です")
+                        return true
+                    }
+
+                    val data = Region.get(id)?:return false
+
+                    if (!Utility.isWithinRange(loc,data.startPosition,data.endPosition,data.world,data.server)){
+                        sendMessage(sender,"§c土地の外にテレポートポイントを設定することはできません")
                         return true
                     }
 
