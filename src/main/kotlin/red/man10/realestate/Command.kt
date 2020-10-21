@@ -249,6 +249,24 @@ object Command:CommandExecutor {
 
                 }
 
+                "settp" ->{
+                    if (!sender.hasPermission(USER))return true
+
+                    if (!hasRegionPermission(sender,args[1].toInt()))return false
+
+                    val loc = sender.location
+
+                    if (!vault.withdraw(sender.uniqueId,Plugin.setTPPrice)){
+                        sendMessage(sender,"§c手数料が必要です")
+                        return true
+                    }
+
+                    Region.setRegionTeleport(args[1].toInt(), loc)
+
+                    sendMessage(sender,"§e§l登録完了！")
+                    return true
+                }
+
                 "setrent" ->{// mre setrent id p amount
 
                     if (!hasPerm(sender,USER))return false

@@ -186,6 +186,18 @@ object Region {
 //        return -1
 //    }
 
+    fun setRegionTeleport(id:Int,tp:Location){
+
+        val data = regionData[id]?:return
+
+        if (data.teleport.world.name != tp.world.name)return
+
+        data.teleport = tp.clone()
+        regionData[id] = data
+
+        save(id,data)
+
+    }
 
     /**
      * リージョンのデータをdbに保存する

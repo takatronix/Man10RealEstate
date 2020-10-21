@@ -119,7 +119,10 @@ object InventoryListener : Listener{
                         CustomInventory.close(p)
                         Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setprice $id ")
                     }
-                    16->{}
+                    16->{
+                        p.performCommand("mre settp $id")
+                        CustomInventory.close(p)
+                    }
                     38->InventoryMenu.spanMenu(p,id)
                     42->{
                         CustomInventory.close(p)

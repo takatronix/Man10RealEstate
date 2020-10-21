@@ -216,7 +216,7 @@ object InventoryMenu {
         inventory.setItem(13, CustomInventory.IS(Material.EMERALD, "§e§l料金設定",
                 mutableListOf("§e現在の料金：${String.format("%,.1f", rg.price)}"), id))
 
-        inventory.setItem(16, CustomInventory.IS(Material.ENDER_PEARL, "§a§lテレポート設定", mutableListOf("§c§l現在テレポートは使用できません"), id))
+        inventory.setItem(16, CustomInventory.IS(Material.ENDER_PEARL, "§a§lテレポート設定", mutableListOf("§a現在位置をテレポート地点にします"), id))
 
         inventory.setItem(38, CustomInventory.IS(Material.CLOCK, "§b§l賃貸スパン設定",
                 mutableListOf("§a現在設定されているスパン：${

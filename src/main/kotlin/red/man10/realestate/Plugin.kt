@@ -59,6 +59,10 @@ class Plugin : JavaPlugin(), Listener {
 
         var teleportPrice = 1000.0
 
+        var setTPPrice = 10000.0
+
+//        var setOwnerPrice = 10000.0
+
         var defaultPrice = 400000.0
 
     }
@@ -91,14 +95,7 @@ class Plugin : JavaPlugin(), Listener {
         getCommand("mre")!!.setExecutor(Command)
         getCommand("mreop")!!.setExecutor(Command)
 
-//        Bukkit.getScheduler().runTaskTimer(this, Runnable {
-//            if(wandStartLocation != null && wandEndLocation != null){
-//
-//                drawCube(wandStartLocation!!,wandEndLocation!!)
-//            }
-//            particleTime++
-//
-//        },0,10)
+
 
         mysqlQueue()
 
