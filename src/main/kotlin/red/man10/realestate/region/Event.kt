@@ -30,6 +30,7 @@ object Event :Listener{
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
         es.execute {
+            Thread.sleep(5000)
             User.load(e.player)
         }
     }

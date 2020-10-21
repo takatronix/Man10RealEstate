@@ -14,7 +14,7 @@ object Utility {
     ////////////////////////////////////////////////////////////
     fun isWithinRange(loc: Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>, world:String,server:String):Boolean{
 
-        if (plugin.name!=server)return false
+        if (plugin.server.name!=server)return false
         if (loc.world.name != world)return false
 
         val x = loc.blockX
