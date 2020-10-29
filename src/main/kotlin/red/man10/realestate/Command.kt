@@ -350,14 +350,6 @@ object Command:CommandExecutor {
 
                 }
 
-                "fly" ->{ //mre fly <time>
-
-                    if (!hasPerm(sender,"mre.fly"))return false
-
-                    Plugin.fly.addFlyTime(sender,args[1].toInt())
-
-                }
-
                 "tp" ->{
                     if (!hasPerm(sender, USER))return false
 
@@ -737,13 +729,6 @@ object Command:CommandExecutor {
                     return true
                 }
 
-                "checkfly" ->{//mreop checkfly <user>
-                    val p = Bukkit.getPlayer(args[1])?:return false
-
-                    sendMessage(sender,"§e§lフライモード:${Plugin.fly.isFlyMode(p)}")
-
-                    return true
-                }
 
                 "taxmail" ->{
 
