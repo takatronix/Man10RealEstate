@@ -9,8 +9,6 @@ import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10offlinebank.BankAPI
-import red.man10.realestate.Utility.sendMessage
-import red.man10.realestate.fly.Fly
 import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
@@ -39,7 +37,6 @@ class Plugin : JavaPlugin(), Listener {
 
         lateinit var barrel : Barrel
 
-        lateinit var fly: Fly
 
         lateinit var vault : VaultManager
 
@@ -77,8 +74,6 @@ class Plugin : JavaPlugin(), Listener {
 
         barrel = Barrel()
 
-        fly = Fly()
-
         plugin = this
 
         disableWorld = config.getStringList("disableWorld")
@@ -113,8 +108,6 @@ class Plugin : JavaPlugin(), Listener {
             var isCheckPermission = false
 
             while (true){
-
-                fly.checkFly()
 
                 val time = Calendar.getInstance()
 
