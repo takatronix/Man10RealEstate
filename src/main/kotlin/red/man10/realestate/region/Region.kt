@@ -8,7 +8,6 @@ import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.vault
-import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -306,10 +305,6 @@ object Region {
             return
         }
 
-//        if (!City.hasCityPermission(p,id)){
-//            sendMessage(p,"§c§lあなたはこの街に住むことができません！")
-//            return
-//        }
 
         vault.withdraw(p.uniqueId,data.price)
 

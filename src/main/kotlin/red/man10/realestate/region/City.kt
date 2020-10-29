@@ -267,7 +267,7 @@ object City {
         val city = get(cityID)?:return 0.0
         val rg = Region.get(rgID)?:return 0.0
 
-        if (!rg.isRemitTax)return 0.0
+        if (rg.isRemitTax)return 0.0
 
         val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
         val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)

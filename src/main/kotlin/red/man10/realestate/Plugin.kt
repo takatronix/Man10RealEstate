@@ -105,7 +105,6 @@ class Plugin : JavaPlugin(), Listener {
             var isRent = false
             var isTax = false
             var isTaxMail = false
-            var isCheckPermission = false
 
             while (true){
 
@@ -115,24 +114,6 @@ class Plugin : JavaPlugin(), Listener {
                 val minute = time.get(Calendar.MINUTE)
                 val hour = time.get(Calendar.HOUR_OF_DAY)
 
-                //権限チェック(1時間に一度)
-                if (minute == 0 && !isCheckPermission){
-
-                    for (rg in Region.map()){
-
-                        val p = Bukkit.getPlayer(rg.value.ownerUUID?:continue)?:continue
-
-//                        if (!City.hasCityPermission(p,rg.key)){
-//                            sendMessage(p,"§c§lあなたはID:${rg.key}の土地に住むことができなくなりました")
-//                            Region.initRegion(rg.key,defaultPrice)
-//                        }
-
-                    }
-
-                    isCheckPermission = true
-                }else if (minute!=0){
-                    isCheckPermission = false
-                }
 
                 //賃料(一日一回)
                 if (minute == 0 && hour == 0  && !isRent){
