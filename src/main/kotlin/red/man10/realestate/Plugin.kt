@@ -15,10 +15,12 @@ import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
+import kotlin.math.log
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -69,7 +71,14 @@ class Plugin : JavaPlugin(), Listener {
 
         es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
         vault = VaultManager(this)
-        offlineBank = BankAPI(this)
+
+        try {
+            offlineBank = BankAPI(this)
+        }catch (e:Exception){
+            logger.warning("Man10OfflineBankが入っていません")
+            logger.warning(e.message)
+        }
+
 
         barrel = Barrel()
 
