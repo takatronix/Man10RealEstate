@@ -23,7 +23,7 @@ import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
-import red.man10.realestate.storage.Barrel.Companion.title
+import red.man10.realestate.storage.Barrel.title
 import java.util.*
 
 object Command:CommandExecutor {
