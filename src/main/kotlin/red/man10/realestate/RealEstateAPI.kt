@@ -52,7 +52,16 @@ object RealEstateAPI {
      * @return 通常の樽だった場合、通常樽の中身を返す バレルじゃなかったらnullを返す
      */
     fun getSpecialBarrel(block: Block):Inventory?{
-        return red.man10.realestate.storage.Barrel.getStorage(block)
+
+        val state = block.state
+
+        if (state !is Barrel)return null
+
+        return red.man10.realestate.storage.Barrel.getStorage(state)
+    }
+
+    fun getSpecialBarrel(barrel:Barrel):Inventory?{
+        return red.man10.realestate.storage.Barrel.getStorage(barrel)
     }
 
 }

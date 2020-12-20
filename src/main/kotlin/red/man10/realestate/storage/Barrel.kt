@@ -12,7 +12,6 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.Event
@@ -61,30 +60,13 @@ object Barrel {
 
     fun openStorage(barrel:Barrel, p:Player){
 
-        val inv = Bukkit.createInventory(null,54, title)
+        val inv = getStorage(barrel)
 
-        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]
-
-        if (storage == null){
-            p.openInventory(inv)
-            return
-        }
-
-        val items = itemStackArrayFromBase64(storage)
-
-        for (item in items){
-            inv.addItem(item)
-        }
-
-        p.openInventory(inv)
+        p.openInventory(inv?:Bukkit.createInventory(null,54, title))
 
     }
 
-    fun getStorage(block:Block):Inventory?{
-
-        val state = block.state
-
-        if (state !is Barrel)return null
+    fun getStorage(state:Barrel):Inventory?{
 
         if ((state.customName?:return null) != title)return state.inventory
 
