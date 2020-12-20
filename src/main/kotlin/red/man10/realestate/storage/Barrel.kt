@@ -12,6 +12,7 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
+import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.Event
@@ -21,12 +22,10 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import kotlin.text.Charsets.UTF_8
 
-class Barrel {
+object Barrel {
 
-    companion object{
-        const val title = "§e§l特殊樽"
-        const val maxByteSize = 65536
-    }
+    const val title = "§e§l特殊樽"
+    private const val maxByteSize = 65536
 
     fun setStorageItem(inv:Inventory,block:Block){
 
@@ -79,6 +78,27 @@ class Barrel {
 
         p.openInventory(inv)
 
+    }
+
+    fun getStorage(block:Block):Inventory?{
+
+        val state = block.state
+
+        if (state !is Barrel)return null
+
+        if ((state.customName?:return null) != title)return state.inventory
+
+        val inv = Bukkit.createInventory(null,54, title)
+
+        val storage = state.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return inv
+
+        val items = itemStackArrayFromBase64(storage)
+
+        for (item in items){
+            inv.addItem(item)
+        }
+
+        return inv
     }
 
     fun hasItem(barrel: Barrel):Boolean{

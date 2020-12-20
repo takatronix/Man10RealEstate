@@ -10,17 +10,20 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import red.man10.realestate.Plugin.Companion.barrel
 import red.man10.realestate.Utility.sendMessage
-import red.man10.realestate.storage.Barrel.Companion.title
+import red.man10.realestate.storage.Barrel.addPermission
+import red.man10.realestate.storage.Barrel.hasItem
+import red.man10.realestate.storage.Barrel.hasPermission
+import red.man10.realestate.storage.Barrel.openStorage
+import red.man10.realestate.storage.Barrel.setStorageItem
+import red.man10.realestate.storage.Barrel.title
 
 object BarrelEvent:Listener {
 
-    val blockMap = HashMap<Player,Block>()
-    val isOpen = mutableListOf<Triple<Int,Int,Int>>()
+    private val blockMap = HashMap<Player,Block>()
+    private val isOpen = mutableListOf<Triple<Int,Int,Int>>()
 
     @EventHandler
     fun setBarrelEvent(e:BlockPlaceEvent){
@@ -32,7 +35,7 @@ object BarrelEvent:Listener {
         val barrelState = block.state
         if (barrelState !is Barrel)return
 
-        barrel.addPermission(e.player,barrelState)
+        addPermission(e.player,barrelState)
     }
 
     @EventHandler
@@ -54,9 +57,9 @@ object BarrelEvent:Listener {
         if (p.isSneaking){
             if (e.hasItem() &&e.item!!.type == Material.PAPER){
 
-                if (!barrel.hasPermission(p,barrelState))return
+                if (!hasPermission(p,barrelState))return
 
-                barrel.addPermission(p,barrelState,e.item!!)
+                addPermission(p,barrelState,e.item!!)
 
                 sendMessage(p,"§e§l権限の設定に成功しました！")
             }
@@ -70,7 +73,7 @@ object BarrelEvent:Listener {
 
         e.isCancelled = true
 
-        if (!barrel.hasPermission(p,barrelState)){
+        if (!hasPermission(p,barrelState)){
             sendMessage(p,"§c§lあなたはこの樽を開く権限がありません！")
             return
         }
@@ -84,7 +87,7 @@ object BarrelEvent:Listener {
 
         isOpen.add(Triple(loc.blockX,loc.blockY,loc.blockZ))
 
-        barrel.openStorage(barrelState,p)
+        openStorage(barrelState,p)
 
         blockMap[p] = block
 
@@ -97,7 +100,7 @@ object BarrelEvent:Listener {
 
         val p = e.player
 
-        barrel.setStorageItem(e.inventory,blockMap[p]?:return)
+        setStorageItem(e.inventory,blockMap[p]?:return)
 
         val loc = blockMap[p]!!.location
 
@@ -121,7 +124,7 @@ object BarrelEvent:Listener {
 
         val p = e.player
 
-        if (!barrel.hasPermission(p,state)){
+        if (hasPermission(p,state)){
             sendMessage(p,"§c§lあなたはこの樽を壊す権限がありません")
             e.isCancelled = true
             return
@@ -133,7 +136,7 @@ object BarrelEvent:Listener {
             return
         }
 
-        if(barrel.hasItem(state)){
+        if(hasItem(state)){
             sendMessage(p,"§c§l中にアイテムが入っています！")
             e.isCancelled = true
             return

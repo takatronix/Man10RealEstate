@@ -15,12 +15,10 @@ import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
-import kotlin.math.log
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -35,9 +33,6 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var offlineBank : BankAPI
 
         lateinit var es : ExecutorService
-
-        lateinit var barrel : Barrel
-
 
         lateinit var vault : VaultManager
 
@@ -79,8 +74,6 @@ class Plugin : JavaPlugin(), Listener {
             logger.warning(e.message)
         }
 
-
-        barrel = Barrel()
 
         plugin = this
 
