@@ -124,7 +124,7 @@ object BarrelEvent:Listener {
 
         val p = e.player
 
-        if (hasPermission(p,state)){
+        if (!hasPermission(p,state)){
             sendMessage(p,"§c§lあなたはこの樽を壊す権限がありません")
             e.isCancelled = true
             return
