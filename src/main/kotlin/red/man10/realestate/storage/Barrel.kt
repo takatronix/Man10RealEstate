@@ -68,7 +68,7 @@ object Barrel {
 
     fun getStorage(state:Barrel):Inventory?{
 
-        if ((state.customName?:return null) != title)return state.inventory
+        if (!isSpecialBarrel(state))return state.inventory
 
         val inv = Bukkit.createInventory(null,54, title)
 
@@ -81,6 +81,12 @@ object Barrel {
         }
 
         return inv
+    }
+
+    fun isSpecialBarrel(state:Barrel):Boolean{
+
+        if ((state.customName?:return false) != title)return true
+        return false
     }
 
     fun hasItem(barrel: Barrel):Boolean{

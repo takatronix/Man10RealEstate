@@ -11,6 +11,7 @@ import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
+import red.man10.realestate.storage.Barrel.isSpecialBarrel
 import red.man10.realestate.storage.Barrel.title
 import java.util.*
 
@@ -62,6 +63,16 @@ object RealEstateAPI {
 
     fun getSpecialBarrel(barrel:Barrel):Inventory?{
         return red.man10.realestate.storage.Barrel.getStorage(barrel)
+    }
+
+
+    /**
+     *
+     * 特殊樽ならtrueを返す
+     *
+     */
+    fun isSpecialBarrel(barrel:Barrel):Boolean{
+        return red.man10.realestate.storage.Barrel.isSpecialBarrel(barrel)
     }
 
 }

@@ -16,6 +16,7 @@ import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.storage.Barrel.addPermission
 import red.man10.realestate.storage.Barrel.hasItem
 import red.man10.realestate.storage.Barrel.hasPermission
+import red.man10.realestate.storage.Barrel.isSpecialBarrel
 import red.man10.realestate.storage.Barrel.openStorage
 import red.man10.realestate.storage.Barrel.setStorageItem
 import red.man10.realestate.storage.Barrel.title
@@ -50,7 +51,7 @@ object BarrelEvent:Listener {
         val barrelState = block.state
         if (barrelState !is Barrel)return
 
-        if((barrelState.customName?:return) != title)return
+        if(!isSpecialBarrel(barrelState))return
 
         val p = e.player
 
