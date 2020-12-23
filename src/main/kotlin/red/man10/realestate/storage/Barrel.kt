@@ -85,8 +85,8 @@ object Barrel {
 
     fun isSpecialBarrel(state:Barrel):Boolean{
 
-        if ((state.customName?:return false) != title)return true
-        return false
+        if ((state.customName?:return false) != title)return false
+        return true
     }
 
     fun hasItem(barrel: Barrel):Boolean{
