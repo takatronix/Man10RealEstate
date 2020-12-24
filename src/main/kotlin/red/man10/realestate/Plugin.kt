@@ -13,7 +13,6 @@ import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
-import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
 import java.util.*
 import java.util.concurrent.ExecutorService
