@@ -259,7 +259,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun interactEvent(e:PlayerInteractEvent){
-        if (e.action != Action.RIGHT_CLICK_BLOCK)return
+        if (e.action != Action.RIGHT_CLICK_BLOCK && e.action != Action.PHYSICAL)return
         if (!e.hasBlock())return
 
         val p = e.player
