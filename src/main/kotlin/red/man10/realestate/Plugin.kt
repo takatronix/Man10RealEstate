@@ -55,7 +55,7 @@ class Plugin : JavaPlugin(), Listener {
 
 //        var setOwnerPrice = 10000.0
 
-        var defaultPrice = 400000.0
+        var defaultPrice = 2000000.0
 
     }
 
@@ -79,6 +79,7 @@ class Plugin : JavaPlugin(), Listener {
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
         teleportPrice = config.getDouble("teleportPrice",1000.0)
+        defaultPrice = config.getDouble("defaultPrice",2000000.0)
 
         saveResource("config.yml", false)
 
