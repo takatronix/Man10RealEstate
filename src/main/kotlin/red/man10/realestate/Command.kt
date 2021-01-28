@@ -125,6 +125,10 @@ object Command:CommandExecutor {
                         return false
                     }
 
+                    if (sender.uniqueId == data.ownerUUID){
+                        return false
+                    }
+
                     val maxUser = City.getMaxUser(City.where(data.teleport))
 
                     if (Region.getUsers(id)> maxUser){
