@@ -358,7 +358,7 @@ object Command:CommandExecutor {
                     if (!NumberUtils.isNumber(args[1]))return false
 
                     if (vault.getBalance(sender.uniqueId)< teleportPrice){
-                        sender.sendMessage("§a§lテレポートするための所持金が足りません！${teleportPrice}円用意してください！")
+                        sendMessage(sender,"§a§lテレポートするための所持金が足りません！${teleportPrice}円用意してください！")
                         return true
                     }
 
@@ -371,6 +371,34 @@ object Command:CommandExecutor {
                     sender.teleport(data.teleport)
 
                     return true
+
+                }
+
+                "balance" ->{
+                    if (!hasPerm(sender, USER))return false
+
+                    val list = User.ownerList[sender]?:return false
+
+                    sendMessage(sender,"§e§l所有してる土地の数:${list.size}")
+
+                    var totalArea = 0
+                    var totalTax = 0.0
+
+                    for (id in list){
+
+                        val rg = Region.get(id)!!
+
+                        val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
+                        val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
+
+
+                        totalArea += (width*height).toInt()
+                        totalTax += City.getTax(City.whereRegion(id),id)
+
+                    }
+
+                    sendMessage(sender,"§e§l所持してる土地の総面積:${String.format("%,.1d",totalArea)}ブロック")
+                    sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
 
                 }
 
