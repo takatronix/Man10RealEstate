@@ -379,8 +379,8 @@ object Command:CommandExecutor {
 
                     val list = User.ownerList[sender]?:return false
 
-                    sendMessage(sender,"§e§l所有してる土地の数:${list.size}")
 
+                    var total = 0
                     var totalArea = 0
                     var totalTax = 0.0
 
@@ -388,15 +388,19 @@ object Command:CommandExecutor {
 
                         val rg = Region.get(id)!!
 
+                        if (sender.uniqueId != rg.ownerUUID)continue
+
                         val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
                         val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
 
 
+                        total ++
                         totalArea += (width*height).toInt()
                         totalTax += City.getTax(City.whereRegion(id),id)
 
                     }
 
+                    sendMessage(sender,"§e§l所有してる土地の数:${list.size}")
                     sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
                     sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
 
