@@ -625,6 +625,7 @@ object Command:CommandExecutor {
                                 sendMessage(sender, "§7Name:${rg.value.name}")
                                 sendMessage(sender, "§8Price:${rg.value.price}")
                                 sendMessage(sender, "§7Owner:${Region.getOwner(rg.value)}")
+                                sendMessage(sender,"§8Tax:${City.getTax(City.whereRegion(rg.key),rg.key)}")
 
                             }
                         }
