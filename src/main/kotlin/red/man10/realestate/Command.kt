@@ -397,7 +397,7 @@ object Command:CommandExecutor {
 
                     }
 
-                    sendMessage(sender,"§e§l所持してる土地の総面積:${String.format("%,.1d",totalArea)}ブロック")
+                    sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
                     sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
 
                 }
