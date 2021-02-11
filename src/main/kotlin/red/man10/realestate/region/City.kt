@@ -9,6 +9,7 @@ import red.man10.realestate.Plugin.Companion.defaultPrice
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
+import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -48,7 +49,7 @@ object City {
                 "(name, server, world, x, y, z, pitch, yaw, sx, sy, sz, ex, ey, ez, tax) " +
                 "VALUE(" +
                 "'$name', " +
-                "'${Bukkit.getServer().name}', " +
+                "'$serverName', " +
                 "'${tp.world.name}', " +
                 "${tp.x}, " +
                 "${tp.y}, " +
@@ -76,7 +77,7 @@ object City {
 
         val data = CityData()
 
-        data.server = Bukkit.getServer().name
+        data.server = serverName
         data.world = tp.world.name
 
         data.startPosition = pos1
@@ -104,7 +105,7 @@ object City {
 
         val sql = MySQLManager(plugin,"Man10RealEstate Loading")
 
-        val rs = sql.query("SELECT * FROM city;")?:return
+        val rs = sql.query("SELECT * FROM city WHERE server='$serverName';")?:return
 
         while (rs.next()){
 
@@ -114,7 +115,7 @@ object City {
 
             data.name = rs.getString("name")
             data.world = rs.getString("world")
-            data.server = rs.getString("server")
+            data.server = serverName
 
             data.tax = rs.getDouble("tax")
 
@@ -160,7 +161,7 @@ object City {
         val pos1 = data.startPosition
         val pos2 = data.endPosition
         val world = data.world
-        val server = plugin.server.name
+        val server = serverName
 
         val list = mutableListOf<Int>()
 

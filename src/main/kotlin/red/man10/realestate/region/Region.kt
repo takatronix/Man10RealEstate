@@ -4,9 +4,11 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
+import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
+import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility.sendMessage
 import java.util.*
@@ -57,7 +59,7 @@ object Region {
                 "x, y, z, pitch, yaw, " +
                 "sx, sy, sz, ex, ey, ez) " +
                 "VALUES(" +
-                "'${Bukkit.getServer().name}', " +
+                "'$serverName', " +
                 "'${tp.world.name}', " +
                 "'$name', " +
                 "'OnSale', " +
@@ -94,7 +96,7 @@ object Region {
         data.teleport = tp
 
         data.world = tp.world.name
-        data.server = Bukkit.getServer().name
+        data.server = serverName
 
         data.price = price
 
@@ -235,7 +237,7 @@ object Region {
 
         val sql = MySQLManager(plugin,"Man10RealEstate Loading")
 
-        val rs = sql.query("SELECT * FROM region;")?:return
+        val rs = sql.query("SELECT * FROM region WHERE server='$serverName';")?:return
 
         while (rs.next()){
 
@@ -245,7 +247,7 @@ object Region {
 
             data.name = rs.getString("name")
             data.world = rs.getString("world")
-            data.server = rs.getString("server")
+            data.server = serverName
             if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
                 data.ownerUUID = null
             }else{

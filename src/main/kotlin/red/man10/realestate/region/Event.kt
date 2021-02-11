@@ -17,9 +17,11 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import red.man10.realestate.Command
+import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
+import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
@@ -75,7 +77,7 @@ object Event :Listener{
 
         if (lore.size>=5){
             lore[0] = ("§aOwner:§f${p.name}")
-            lore[1] = ("§aServer:§f"+p.server.name)
+            lore[1] = ("§aServer:§f"+ serverName)
             lore[2] = ("§aWorld:§f"+p.world.name)
             lore[3] = ("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
         }else{

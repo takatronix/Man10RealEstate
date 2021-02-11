@@ -57,6 +57,8 @@ class Plugin : JavaPlugin(), Listener {
 
         var defaultPrice = 2000000.0
 
+        var serverName = "paper"
+
     }
 
     override fun onEnable() { // Plugin startup logic
@@ -80,6 +82,7 @@ class Plugin : JavaPlugin(), Listener {
         maxBalance = config.getDouble("maxBalance",100000000.0)
         teleportPrice = config.getDouble("teleportPrice",1000.0)
         defaultPrice = config.getDouble("defaultPrice",2000000.0)
+        serverName = config.getString("server","paper")!!
 
         saveResource("config.yml", false)
 
