@@ -4,18 +4,15 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin
-import red.man10.realestate.Plugin.Companion.city
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
-import red.man10.realestate.Plugin.Companion.user
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.vault
-import red.man10.realestate.Utility
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class Region(private val pl:Plugin) {
+object Region {
 
     //idとリージョンデータの辞書
     val regionData = ConcurrentHashMap<Int,RegionData>()
@@ -38,7 +35,7 @@ class Region(private val pl:Plugin) {
 
         mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
 
-        user.removeAll(id)
+        User.removeAll(id)
     }
 
 
@@ -77,7 +74,7 @@ class Region(private val pl:Plugin) {
                 "${pos2.second}, " +
                 "${pos2.third}); "
 
-        val mysql = MySQLManager(pl,"Man10RealEstate CreateRegion")
+        val mysql = MySQLManager(plugin,"Man10RealEstate CreateRegion")
 
         mysql.execute(query)
 
@@ -103,9 +100,9 @@ class Region(private val pl:Plugin) {
 
         set(id,data)
 
-        val cID = city.where(data.teleport)
+        val cID = City.where(data.teleport)
         if (cID != -1){
-            city.updateRegion(cID)
+            City.updateRegion(cID)
         }
 
         return id
@@ -140,17 +137,17 @@ class Region(private val pl:Plugin) {
             val old = Bukkit.getPlayer(data.ownerUUID!!)
 
             if (old !=null){
-                val list = user.ownerList[old]!!
+                val list = User.ownerList[old]!!
                 list.remove(id)
-                user.ownerList[old] = list
+                User.ownerList[old] = list
             }
         }
 
         if (p != null){
             data.ownerUUID = p.uniqueId
-            val list = user.ownerList[p]?: mutableListOf()
+            val list = User.ownerList[p]?: mutableListOf()
             list.add(id)
-            user.ownerList[p] = list
+            User.ownerList[p] = list
         }else{
             data.ownerUUID = p
         }
@@ -179,15 +176,27 @@ class Region(private val pl:Plugin) {
     /**
      *
      */
-    fun where(loc:Location): Int {
-        for (rg in regionData){
-            if (Utility.isWithinRange(loc,rg.value.startPosition,rg.value.endPosition,rg.value.world)){
-                return rg.key
-            }
-        }
-        return -1
-    }
+//    fun where(loc:Location): Int {
+//        for (rg in regionData){
+//            if (Utility.isWithinRange(loc,rg.value.startPosition,rg.value.endPosition,rg.value.world)){
+//                return rg.key
+//            }
+//        }
+//        return -1
+//    }
 
+    fun setRegionTeleport(id:Int,tp:Location){
+
+        val data = regionData[id]?:return
+
+        if (data.teleport.world.name != tp.world.name)return
+
+        data.teleport = tp.clone()
+        regionData[id] = data
+
+        save(id,data)
+
+    }
 
     /**
      * リージョンのデータをdbに保存する
@@ -212,7 +221,8 @@ class Region(private val pl:Plugin) {
                 "t.status = '${data.status}', " +
                 "t.price = ${data.price}, " +
                 "t.profit = 0, " +
-                "t.span = ${data.span} " +
+                "t.span = ${data.span}," +
+                "t.remit_tax = ${if (data.isRemitTax) 1 else 0} " +
                 "WHERE t.id = $id")
 
     }
@@ -223,7 +233,7 @@ class Region(private val pl:Plugin) {
     fun load(){
         regionData.clear()
 
-        val sql = MySQLManager(pl,"Man10RealEstate Loading")
+        val sql = MySQLManager(plugin,"Man10RealEstate Loading")
 
         val rs = sql.query("SELECT * FROM region;")?:return
 
@@ -266,6 +276,8 @@ class Region(private val pl:Plugin) {
                 rs.getFloat("pitch")
             )
 
+            data.isRemitTax = rs.getInt("remit_tax") == 1
+
             regionData[id] = data
 
         }
@@ -292,6 +304,7 @@ class Region(private val pl:Plugin) {
             sendMessage(p,"§c§l所持金が足りません！")
             return
         }
+
 
         vault.withdraw(p.uniqueId,data.price)
 
@@ -320,18 +333,18 @@ class Region(private val pl:Plugin) {
         }
     }
 
-    fun initRegion(id:Int){
+    fun initRegion(id: Int, price: Double){
 
         setOwner(id,null)
-        setPrice(id,Plugin.defaultPrice)
+        setPrice(id,price)
         setStatus(id,"OnSale")
-        user.removeAll(id)
+        User.removeAll(id)
 
     }
 
     //住人の数を数える
     fun getUsers(id:Int):Int{
-        val mysql = MySQLManager(pl,"mre")
+        val mysql = MySQLManager(plugin,"mre")
 
         val rs = mysql.query("select COUNT(region_id) from region_user where region_id=$id;")?:return 0
         rs.next()
@@ -358,6 +371,7 @@ class Region(private val pl:Plugin) {
 
         var span = 0 //0:month 1:week 2:day
 
+        var isRemitTax = false
     }
 
 }

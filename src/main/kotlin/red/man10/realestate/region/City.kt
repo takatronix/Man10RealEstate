@@ -2,17 +2,18 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin
+import red.man10.realestate.Plugin.Companion.defaultPrice
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
-import red.man10.realestate.Plugin.Companion.region
-import red.man10.realestate.Plugin.Companion.user
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class City(private val pl:Plugin) {
+object City {
 
     val cityData = ConcurrentHashMap<Int,CityData>()
 
@@ -62,7 +63,7 @@ class City(private val pl:Plugin) {
                 "${pos2.third}, " +
                 "$tax);"
 
-        val mysql = MySQLManager(pl,"Man10RealEstate City")
+        val mysql = MySQLManager(plugin,"Man10RealEstate City")
 
         mysql.execute(sql)
 
@@ -101,7 +102,7 @@ class City(private val pl:Plugin) {
     fun load(){
         cityData.clear()
 
-        val sql = MySQLManager(pl,"Man10RealEstate Loading")
+        val sql = MySQLManager(plugin,"Man10RealEstate Loading")
 
         val rs = sql.query("SELECT * FROM city;")?:return
 
@@ -159,11 +160,12 @@ class City(private val pl:Plugin) {
         val pos1 = data.startPosition
         val pos2 = data.endPosition
         val world = data.world
+        val server = plugin.server.name
 
         val list = mutableListOf<Int>()
 
-        for (rg in region.map()){
-            if (Utility.isWithinRange(rg.value.teleport,pos1,pos2,world)){
+        for (rg in Region.map()){
+            if (Utility.isWithinRange(rg.value.teleport,pos1,pos2,world,server)){
                 list.add(rg.key)
             }
         }
@@ -181,7 +183,7 @@ class City(private val pl:Plugin) {
      */
     fun where(loc:Location):Int{
         for (city in cityData){
-            if (Utility.isWithinRange(loc,city.value.startPosition,city.value.endPosition,city.value.world)){
+            if (Utility.isWithinRange(loc,city.value.startPosition,city.value.endPosition,city.value.world,city.value.server)){
                 return city.key
             }
         }
@@ -230,8 +232,10 @@ class City(private val pl:Plugin) {
      */
     fun payingTax(p:UUID,id:Int):Boolean{
 
-        val rg = region.get(id)?:return false
+        val rg = Region.get(id)?:return false
         val cityID = where(rg.teleport)
+
+        if (rg.isRemitTax)return false
 
         if (cityID == -1)return false
 
@@ -239,18 +243,18 @@ class City(private val pl:Plugin) {
 
         if (city.tax == 0.0)return false
 
-        Bukkit.getLogger().info("${Bukkit.getOfflinePlayer(p).name} bal:${offlineBank.getBalance(p)}")
+        //Bukkit.getLogger().info("${Bukkit.getOfflinePlayer(p).name} bal:${offlineBank.getBalance(p)}")
 
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
         if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
-            region.initRegion(id)
+            Region.initRegion(id, defaultPrice)
 
             return false
 
         }
 
-        Bukkit.getLogger().info("$id ${Bukkit.getOfflinePlayer(p).name} tax:${city.tax}")
+    //    Bukkit.getLogger().info("$id ${Bukkit.getOfflinePlayer(p).name} tax:${city.tax}")
         return true
     }
 
@@ -261,7 +265,9 @@ class City(private val pl:Plugin) {
     fun getTax(cityID:Int,rgID:Int):Double{
 
         val city = get(cityID)?:return 0.0
-        val rg = region.get(rgID)?:return 0.0
+        val rg = Region.get(rgID)?:return 0.0
+
+        if (rg.isRemitTax)return 0.0
 
         val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
         val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
@@ -279,6 +285,18 @@ class City(private val pl:Plugin) {
         data.maxUser = value
         set(cityID,data)
     }
+
+    //リージョンのidから都市を返す
+    fun whereRegion(id:Int):Int{
+        return where(Region.get(id)!!.teleport)
+    }
+
+//    //指定リージョンに住む権限があるかどうか
+//    fun hasCityPermission(p:Player,id: Int):Boolean{
+//        val city = get(whereRegion(id))?:return false
+//        if (!p.hasPermission("mre.city.${city.name}"))return false
+//        return true
+//    }
 
     class CityData{
 

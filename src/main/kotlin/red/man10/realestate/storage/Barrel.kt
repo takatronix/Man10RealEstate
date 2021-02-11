@@ -1,9 +1,10 @@
 package red.man10.realestate.storage
 
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.block.Barrel
 import org.bukkit.block.Block
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -12,20 +13,18 @@ import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
 import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Plugin.Companion.prefix
-import red.man10.realestate.Utility.Companion.sendMessage
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.User
-import java.awt.print.Paper
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import kotlin.text.Charsets.UTF_8
 
-class Barrel {
+object Barrel {
 
-    companion object{
-        val title = "§e§l特殊樽"
-    }
+    const val title = "§e§l特殊樽"
+    private const val maxByteSize = 65536
 
     fun setStorageItem(inv:Inventory,block:Block){
 
@@ -37,27 +36,43 @@ class Barrel {
 //                //list.add(ItemStack(Material.AIR))
 //                continue
 //            }
+            if (item.type == Material.WRITTEN_BOOK){
+                Bukkit.getLogger().warning("WRITTEN BOOK ERROR")
+                continue
+            }
             list.add(item)
         }
 
         val state = block.state
         if (state !is Barrel)return
 
-        state.persistentDataContainer.set(NamespacedKey(plugin,"storage"), PersistentDataType.STRING,itemStackArrayToBase64(list.toTypedArray()))
+        val base64 = itemStackArrayToBase64(list.toTypedArray())
+
+        if (base64.toByteArray(UTF_8).size>= maxByteSize){
+            Bukkit.getLogger().warning("Too many bytes error")
+            return
+        }
+
+        state.persistentDataContainer.set(NamespacedKey(plugin,"storage"), PersistentDataType.STRING,base64)
 
         state.update()
     }
 
     fun openStorage(barrel:Barrel, p:Player){
 
+        val inv = getStorage(barrel)
+
+        p.openInventory(inv?:Bukkit.createInventory(null,54, title))
+
+    }
+
+    fun getStorage(state:Barrel):Inventory?{
+
+        if (!isSpecialBarrel(state))return state.inventory
+
         val inv = Bukkit.createInventory(null,54, title)
 
-        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]
-
-        if (storage == null){
-            p.openInventory(inv)
-            return
-        }
+        val storage = state.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return inv
 
         val items = itemStackArrayFromBase64(storage)
 
@@ -65,8 +80,13 @@ class Barrel {
             inv.addItem(item)
         }
 
-        p.openInventory(inv)
+        return inv
+    }
 
+    fun isSpecialBarrel(state:Barrel):Boolean{
+
+        if ((state.customName?:return false) != title)return false
+        return true
     }
 
     fun hasItem(barrel: Barrel):Boolean{
@@ -79,18 +99,18 @@ class Barrel {
         return true
 
     }
-
-    fun dropStorage(barrel: Barrel){
-        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return
-
-        val items = itemStackArrayFromBase64(storage)
-
-        items.forEach { if (it.type != Material.AIR) {barrel.world.dropItem(barrel.location, it) }}
-    }
+//
+//    fun dropStorage(barrel: Barrel){
+//        val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return
+//
+//        val items = itemStackArrayFromBase64(storage)
+//
+//        items.forEach { if (it.type != Material.AIR) {barrel.world.dropItem(barrel.location, it) }}
+//    }
 
     fun hasPermission(p:Player,barrel: Barrel):Boolean{
 
-        if (Event.hasPermission(p,barrel.location,User.Companion.Permission.ALL))return true
+        if (Event.hasPermission(p,barrel.location,User.Permission.ALL))return true
 
         val owners = barrel.persistentDataContainer[NamespacedKey(plugin,"owners"), PersistentDataType.STRING]?.split(";")?:return false
 

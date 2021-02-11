@@ -1,30 +1,31 @@
+/*
+    Author forest611,takatronix
+ */
+
+
 package red.man10.realestate
 
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Particle
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import red.man10.man10offlinebank.BankAPI
-import red.man10.realestate.fly.Fly
-import red.man10.realestate.menu.CustomInventory
+import red.man10.man10bank.BankAPI
 import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
-import red.man10.realestate.storage.Barrel
 import red.man10.realestate.storage.BarrelEvent
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 
 
 class Plugin : JavaPlugin(), Listener {
 
 
-    var wandStartLocation: Location? = null
-    var wandEndLocation: Location? = null
-    var particleTime:Int = 0
+//    var wandStartLocation: Location? = null
+//    var wandEndLocation: Location? = null
+//    var particleTime:Int = 0
 
     companion object{
 
@@ -32,17 +33,7 @@ class Plugin : JavaPlugin(), Listener {
 
         lateinit var es : ExecutorService
 
-        lateinit var region : Region
-        lateinit var user : User
-        lateinit var city : City
-
-        lateinit var barrel : Barrel
-
-        lateinit var fly: Fly
-
         lateinit var vault : VaultManager
-
-        lateinit var customInventory : CustomInventory
 
         lateinit var plugin: Plugin
 
@@ -60,11 +51,11 @@ class Plugin : JavaPlugin(), Listener {
 
         var teleportPrice = 1000.0
 
-        var defaultPrice = 400000.0
+        var setTPPrice = 10000.0
 
-        val numbers = mutableListOf<Int>()
+//        var setOwnerPrice = 10000.0
 
-        var taxTimer = false
+        var defaultPrice = 2000000.0
 
     }
 
@@ -74,47 +65,38 @@ class Plugin : JavaPlugin(), Listener {
 
         es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
         vault = VaultManager(this)
-        offlineBank = BankAPI(this)
-        region = Region(this)
-        user = User(this)
-        city = City(this)
 
-        barrel = Barrel()
+        try {
+            offlineBank = BankAPI(this)
+        }catch (e:Exception){
+            logger.warning("Man10OfflineBankが入っていません")
+            logger.warning(e.message)
+        }
 
-        fly = Fly()
-
-        customInventory = CustomInventory(this)
 
         plugin = this
 
         disableWorld = config.getStringList("disableWorld")
         maxBalance = config.getDouble("maxBalance",100000000.0)
-        taxTimer = config.getBoolean("taxTimer",false)
         teleportPrice = config.getDouble("teleportPrice",1000.0)
+        defaultPrice = config.getDouble("defaultPrice",2000000.0)
 
         saveResource("config.yml", false)
 
         server.pluginManager.registerEvents(this, this)
-        server.pluginManager.registerEvents(Event(this), this)
-        server.pluginManager.registerEvents(InventoryListener(),this)
-        server.pluginManager.registerEvents(BarrelEvent(),this)
+        server.pluginManager.registerEvents(Event, this)
+        server.pluginManager.registerEvents(InventoryListener,this)
+        server.pluginManager.registerEvents(BarrelEvent,this)
 
-        getCommand("mre")!!.setExecutor(Command())
-        getCommand("mreop")!!.setExecutor(Command())
+        getCommand("mre")!!.setExecutor(Command)
+        getCommand("mreop")!!.setExecutor(Command)
 
-        Bukkit.getScheduler().runTaskTimer(this, Runnable {
-            if(wandStartLocation != null && wandEndLocation != null){
 
-                drawCube(wandStartLocation!!,wandEndLocation!!)
-            }
-            particleTime++
-
-        },0,10)
 
         mysqlQueue()
 
-        region.load()
-        city.load()
+        Region.load()
+        City.load()
 
 
         //賃料スレッド
@@ -127,37 +109,33 @@ class Plugin : JavaPlugin(), Listener {
 
             while (true){
 
-                fly.checkFly()
-
                 val time = Calendar.getInstance()
 
                 val day = time.get(Calendar.DAY_OF_MONTH)
                 val minute = time.get(Calendar.MINUTE)
                 val hour = time.get(Calendar.HOUR_OF_DAY)
 
-//                Bukkit.getLogger().info("d:$day,m:$minute,h:$hour")
 
+                //賃料(一日一回)
                 if (minute == 0 && hour == 0  && !isRent){
-//                    Bukkit.getLogger().info("d:$day,m:$minute,h:$hour")
 
-                    Bukkit.getLogger().info("Start Rent Process")
-                    user.rent()
+                    User.rent()
                     isRent = true
                 }else if(minute != 0){
                     isRent = false
                 }
 
+                //税金(月イチ8時)
                 if (minute == 0 && hour == 8 && day == 1 && !isTax){
-//                    Bukkit.getLogger().info("Start Tax Process")
-                    user.tax()
+                    User.tax()
                     isTax = true
                 }else if (minute !=0){
                     isTax = false
                 }
 
+                //税金メール(25日9時)
                 if (minute == 0 && hour == 9 && day == 25 && !isTaxMail){
-//                    Bukkit.getLogger().info("Start Tax Mail Process")
-                    user.taxMail()
+                    User.taxMail()
                     isTaxMail = true
                 }else if (minute != 0){
                     isTaxMail = false
@@ -182,43 +160,43 @@ class Plugin : JavaPlugin(), Listener {
 
     }
 
-    fun drawCube(pos1:Location,pos2:Location){
-        getCube(pos1,pos2)?.forEach { ele->
-            ele.world.spawnParticle(Particle.HEART, ele.getX(), ele.getY(), ele.getZ(), 1)
-        }
-
-    }
-
-    fun getCube(corner1: Location, corner2: Location): List<Location>? {
-        val result: MutableList<Location> = ArrayList()
-        val world = corner1.world
-        val minX = Math.min(corner1.x, corner2.x)
-        val minY = Math.min(corner1.y, corner2.y)
-        val minZ = Math.min(corner1.z, corner2.z)
-        val maxX = Math.max(corner1.x, corner2.x)
-        val maxY = Math.max(corner1.y, corner2.y)
-        val maxZ = Math.max(corner1.z, corner2.z)
-        var x = minX
-        while (x <= maxX) {
-            var y = minY
-            while (y <= maxY) {
-                var z = minZ
-                while (z <= maxZ) {
-                    var components = 0
-                    if (x == minX || x == maxX) components++
-                    if (y == minY || y == maxY) components++
-                    if (z == minZ || z == maxZ) components++
-                    if (components >= 2) {
-                        result.add(Location(world, x, y, z))
-                    }
-                    z++
-                }
-                y++
-            }
-            x++
-        }
-        return result
-    }
+//    fun drawCube(pos1:Location,pos2:Location){
+//        getCube(pos1,pos2)?.forEach { ele->
+//            ele.world.spawnParticle(Particle.HEART, ele.getX(), ele.getY(), ele.getZ(), 1)
+//        }
+//
+//    }
+//
+//    fun getCube(corner1: Location, corner2: Location): List<Location>? {
+//        val result: MutableList<Location> = ArrayList()
+//        val world = corner1.world
+//        val minX = Math.min(corner1.x, corner2.x)
+//        val minY = Math.min(corner1.y, corner2.y)
+//        val minZ = Math.min(corner1.z, corner2.z)
+//        val maxX = Math.max(corner1.x, corner2.x)
+//        val maxY = Math.max(corner1.y, corner2.y)
+//        val maxZ = Math.max(corner1.z, corner2.z)
+//        var x = minX
+//        while (x <= maxX) {
+//            var y = minY
+//            while (y <= maxY) {
+//                var z = minZ
+//                while (z <= maxZ) {
+//                    var components = 0
+//                    if (x == minX || x == maxX) components++
+//                    if (y == minY || y == maxY) components++
+//                    if (z == minZ || z == maxZ) components++
+//                    if (components >= 2) {
+//                        result.add(Location(world, x, y, z))
+//                    }
+//                    z++
+//                }
+//                y++
+//            }
+//            x++
+//        }
+//        return result
+//    }
 
 
     ////////////////////////

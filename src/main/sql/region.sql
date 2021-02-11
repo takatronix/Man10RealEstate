@@ -19,19 +19,12 @@ create table region
     ez         double       null comment '終点',
     name       varchar(128) null comment '名称',
     created    datetime     not null default now() comment '作成日',
-    status     varchar(16)  not null DEFAULT "OnSale" comment 'OnSale' 販売中 ：保護あり（admin,ownerのみ）
-"Free" 保護なし だれでもいじられるエリア
-"Protected" 保護あり :　admin,owner,userのみ
-"Lock" 違法などでロック中：　admin以外いじれない
-
-',
+    status     varchar(16)  not null DEFAULT 'OnSale',
     price      double       null comment '販売金額
 OnSale状態になったときに販売価格
 売り上げ金額は、売上テーブルに登録しオフラインでも売買できるとする
 ',
     profit     double       not null default 0.0 comment '土地の利益',
---    rent       double       not null default 0.0 comment '賃料',
-    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)'
-)
-    comment '領域管理のためのテーブル';
-
+    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)',
+    remit_tax  tinyint      not null default 0   comment  '税金の免除をするかどうか'
+);
