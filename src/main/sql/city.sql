@@ -16,6 +16,7 @@ create table city
 	ey int default 0 null,
 	ez int default 0 null,
 	tax double default 0.0 null,
+	max_user int default 0 null,
 	constraint city_pk
 		primary key (id)
 );
