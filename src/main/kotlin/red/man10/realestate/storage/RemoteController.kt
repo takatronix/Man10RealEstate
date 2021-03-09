@@ -147,6 +147,9 @@ object RemoteController : Listener{
         val page = pageMap[p]!!.first
         val controller = pageMap[p]!!.second
 
+        //コントローラーはさわれないようにする
+        if (isController(e.currentItem?:return)){ e.isCancelled = true}
+
         if (e.hotbarButton == 0){
 
             e.isCancelled = true
@@ -191,11 +194,6 @@ object RemoteController : Listener{
 
         }
 
-        //コントローラーはさわれないようにする
-        if (isController(e.currentItem?:return)){
-            e.isCancelled = true
-            return
-        }
     }
 
     @EventHandler
