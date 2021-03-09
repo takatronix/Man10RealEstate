@@ -82,7 +82,7 @@ object RemoteController : Listener{
 
         return ret
     }
-//
+
     fun getStringLocationList(controller: ItemStack):List<String>{
 
         if (!isController(controller))return emptyList()
@@ -95,8 +95,6 @@ object RemoteController : Listener{
     fun setStringLocationList(controller: ItemStack, locList:List<String>){
 
         if (!isController(controller))return
-
-        Bukkit.getLogger().info(gson.toJson(locList))
 
         val meta = controller.itemMeta
         meta.persistentDataContainer.set(NamespacedKey(plugin,"location"), PersistentDataType.STRING, gson.toJson(locList))
@@ -123,7 +121,7 @@ object RemoteController : Listener{
 
         if(!Barrel.isSpecialBarrel(barrelState))return
 
-        Bukkit.getLogger().info("3")
+        Barrel.openStorage(barrelState,p)
 
         pageMap[p] = Pair(page,controller)
 
@@ -148,6 +146,9 @@ object RemoteController : Listener{
 
             if ((page-1)<0)return
 
+            val block = Utility.jsonToLocation(getStringLocationList(controller)[page]).block
+            Barrel.setStorageItem(e.inventory,block)
+
             openInventory(controller,p, (page-1))
 
         }
@@ -156,7 +157,10 @@ object RemoteController : Listener{
 
             e.isCancelled = true
 
-            if (getStringLocationList(controller).size<=(page+1))return
+            if (getStringLocationList(controller).size==(page+1))return
+
+            val block = Utility.jsonToLocation(getStringLocationList(controller)[page]).block
+            Barrel.setStorageItem(e.inventory,block)
 
             openInventory(controller,p, (page+1))
 
