@@ -5,7 +5,9 @@
 
 package red.man10.realestate
 
+import org.bukkit.Material
 import org.bukkit.event.Listener
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.menu.InventoryListener
@@ -37,6 +39,8 @@ class Plugin : JavaPlugin(), Listener {
         lateinit var vault : VaultManager
 
         lateinit var plugin: Plugin
+
+        lateinit var votingDiamond : ItemStack
 
         const val WAND_NAME = "範囲指定ワンド"
 
@@ -84,6 +88,7 @@ class Plugin : JavaPlugin(), Listener {
         teleportPrice = config.getDouble("teleportPrice",1000.0)
         defaultPrice = config.getDouble("defaultPrice",2000000.0)
         serverName = config.getString("server","paper")!!
+        votingDiamond = config.getItemStack("votingDiamond")?:ItemStack(Material.DIAMOND)
 
         saveResource("config.yml", false)
 

@@ -17,6 +17,7 @@ import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.teleportPrice
 import red.man10.realestate.Plugin.Companion.vault
+import red.man10.realestate.Plugin.Companion.votingDiamond
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
@@ -898,6 +899,12 @@ object Command:CommandExecutor {
                     sender.inventory.addItem(RemoteController.getController())
                     return true
 
+                }
+
+                "setvd" ->{
+                    votingDiamond = sender.inventory.itemInMainHand
+                    plugin.config.set("votingDiamond",sender.inventory.itemInMainHand)
+                    plugin.saveConfig()
                 }
 
 

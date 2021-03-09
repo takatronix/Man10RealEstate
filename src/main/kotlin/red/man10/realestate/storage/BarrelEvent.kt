@@ -76,13 +76,14 @@ object BarrelEvent:Listener {
 
                 if (RemoteController.isController(item)){
 
-                    val ret = RemoteController.editLocation(item,block.location)
+                    val ret = RemoteController.editLocation(item,block.location,p)
 
                     sendMessage(p,when(ret){
 
                         0 -> "端末を持っていなかった"
                         1 -> "端末から特殊樽を削除した！"
                         2 -> "端末に特殊樽を登録した！"
+                        3 -> "投票ダイヤを持っていなかった！"
 
 
                         else -> "不明エラー $ret"

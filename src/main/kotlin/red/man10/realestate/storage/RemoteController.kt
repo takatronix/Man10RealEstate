@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Plugin.Companion.plugin
+import red.man10.realestate.Plugin.Companion.votingDiamond
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendMessage
 
@@ -60,7 +61,7 @@ object RemoteController : Listener{
         return false
     }
 
-    fun editLocation(controller:ItemStack,loc:Location):Int{
+    fun editLocation(controller:ItemStack,loc:Location,p:Player):Int{
 
         var ret = 0
 
@@ -70,13 +71,31 @@ object RemoteController : Listener{
 
         val list = getStringLocationList(controller).toMutableList()
 
-        ret = if (list.contains(jsonLoc)){
+
+        if (list.contains(jsonLoc)){
             list.remove(jsonLoc)
-            1
+            ret = 1
         }else{
-            list.add(jsonLoc)
-            2
+
+            var removed = false
+
+            for (item in p.inventory){
+                if (item == null|| item.type == Material.AIR)continue
+
+                if (item.isSimilar(votingDiamond)){
+                    removed = true
+                    item.amount = item.amount -1
+                    break
+                }
+            }
+
+            ret = if (removed){
+                list.add(jsonLoc)
+                2
+            }else{ 3 }
+
         }
+
 
         setStringLocationList(controller,list)
 
