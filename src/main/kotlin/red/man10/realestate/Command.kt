@@ -24,6 +24,7 @@ import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.Barrel.title
+import red.man10.realestate.storage.RemoteController
 import java.util.*
 
 object Command:CommandExecutor {
@@ -890,6 +891,13 @@ object Command:CommandExecutor {
                     Region.set(id,rg)
 
                     return true
+                }
+
+                "getremote"->{
+
+                    sender.inventory.addItem(RemoteController.getController())
+                    return true
+
                 }
 
 

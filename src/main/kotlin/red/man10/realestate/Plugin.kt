@@ -14,6 +14,7 @@ import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import red.man10.realestate.storage.BarrelEvent
+import red.man10.realestate.storage.RemoteController
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -90,6 +91,7 @@ class Plugin : JavaPlugin(), Listener {
         server.pluginManager.registerEvents(Event, this)
         server.pluginManager.registerEvents(InventoryListener,this)
         server.pluginManager.registerEvents(BarrelEvent,this)
+        server.pluginManager.registerEvents(RemoteController,this)
 
         getCommand("mre")!!.setExecutor(Command)
         getCommand("mreop")!!.setExecutor(Command)

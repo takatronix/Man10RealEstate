@@ -56,13 +56,39 @@ object BarrelEvent:Listener {
         val p = e.player
 
         if (p.isSneaking){
-            if (e.hasItem() &&e.item!!.type == Material.PAPER){
+            if (e.hasItem()){
 
-                if (!hasPermission(p,barrelState))return
+                val item = e.item!!
 
-                addPermission(p,barrelState,e.item!!)
+                if ( item.type == Material.PAPER){
+                    if (!hasPermission(p,barrelState))return
 
-                sendMessage(p,"§e§l権限の設定に成功しました！")
+                    addPermission(p,barrelState,e.item!!)
+
+                    sendMessage(p,"§e§l権限の設定に成功しました！")
+
+                    e.isCancelled = true
+                    return
+                }
+
+                if (RemoteController.isController(item)){
+
+                    val ret = RemoteController.editLocation(item,block.location)
+
+                    p.sendMessage(when(ret){
+
+                        0 -> "端末を持っていなかった"
+                        1 -> "端末から特殊樽を削除した！"
+                        2 -> "端末に特殊樽を登録した！"
+
+
+                        else -> "不明エラー $ret"
+                    })
+
+                    e.isCancelled = true
+                    return
+                }
+
             }
 
             if (!e.hasItem()){

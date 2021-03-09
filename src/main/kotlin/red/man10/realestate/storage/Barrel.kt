@@ -89,6 +89,20 @@ object Barrel {
         return true
     }
 
+//    fun isSpecialBarrel(block:Block):Boolean{
+//
+//
+//        if (block.type != Material.BARREL)return false
+//
+//        val barrelState = block.state
+//        if (barrelState !is Barrel)return false
+//
+//        if(!isSpecialBarrel(barrelState))return false
+//
+//        if ((barrelState.customName?:return false) != title)return false
+//        return true
+//    }
+//
     fun hasItem(barrel: Barrel):Boolean{
         val storage = barrel.persistentDataContainer[NamespacedKey(plugin,"storage"), PersistentDataType.STRING]?:return false
 
