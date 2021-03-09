@@ -42,6 +42,8 @@ object RemoteController : Listener{
         meta.setDisplayName(controllerName)
         meta.isUnbreakable = true
 
+        meta.lore = mutableListOf("§f[1]ボタンで前のページ [2]ボタンで次のページ")
+
         meta.persistentDataContainer.set(NamespacedKey(plugin,"controller"), PersistentDataType.STRING,key)
 
         controller.itemMeta = meta
@@ -121,6 +123,11 @@ object RemoteController : Listener{
 
         if(!Barrel.isSpecialBarrel(barrelState))return
 
+        if (Barrel.isOpen(loc)){
+            Utility.sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
+            return
+        }
+
         Barrel.openStorage(barrelState,p)
 
         pageMap[p] = Pair(page,controller)
@@ -146,8 +153,17 @@ object RemoteController : Listener{
 
             if ((page-1)<0)return
 
-            val block = Utility.jsonToLocation(getStringLocationList(controller)[page]).block
+            val list = getStringLocationList(controller)
+
+            val block = Utility.jsonToLocation(list[page]).block
             Barrel.setStorageItem(e.inventory,block)
+
+            if (Barrel.isOpen(Utility.jsonToLocation(list[page-1]).block.location)){
+                Utility.sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
+                return
+            }
+
+            Barrel.removeMap(block.location)
 
             openInventory(controller,p, (page-1))
 
@@ -159,8 +175,17 @@ object RemoteController : Listener{
 
             if (getStringLocationList(controller).size==(page+1))return
 
-            val block = Utility.jsonToLocation(getStringLocationList(controller)[page]).block
+            val list = getStringLocationList(controller)
+
+            val block = Utility.jsonToLocation(list[page]).block
             Barrel.setStorageItem(e.inventory,block)
+
+            if (Barrel.isOpen(Utility.jsonToLocation(list[page+1]).block.location)){
+                Utility.sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
+                return
+            }
+
+            Barrel.removeMap(block.location)
 
             openInventory(controller,p, (page+1))
 
@@ -186,7 +211,6 @@ object RemoteController : Listener{
 
         openInventory(item,p,0)
 
-        p.sendMessage("[1]ボタンで前のページ [2]ボタンで次のページ")
     }
 
     @EventHandler

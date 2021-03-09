@@ -16,8 +16,11 @@ import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.storage.Barrel.addPermission
 import red.man10.realestate.storage.Barrel.hasItem
 import red.man10.realestate.storage.Barrel.hasPermission
+import red.man10.realestate.storage.Barrel.isOpen
 import red.man10.realestate.storage.Barrel.isSpecialBarrel
 import red.man10.realestate.storage.Barrel.openStorage
+import red.man10.realestate.storage.Barrel.opened
+import red.man10.realestate.storage.Barrel.removeMap
 import red.man10.realestate.storage.Barrel.setStorageItem
 import red.man10.realestate.storage.Barrel.title
 
@@ -107,12 +110,10 @@ object BarrelEvent:Listener {
 
         val loc = block.location
 
-        if (isOpen.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))){
+        if (isOpen(loc)){
             sendMessage(p,"§c§l現在他のプレイヤーが開いています！")
             return
         }
-
-        isOpen.add(Triple(loc.blockX,loc.blockY,loc.blockZ))
 
         openStorage(barrelState,p)
 
@@ -131,7 +132,7 @@ object BarrelEvent:Listener {
 
         val loc = blockMap[p]!!.location
 
-        isOpen.remove(Triple(loc.blockX,loc.blockY,loc.blockZ))
+        removeMap(loc)
         blockMap.remove(p)
     }
 

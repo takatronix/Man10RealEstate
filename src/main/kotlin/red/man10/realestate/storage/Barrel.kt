@@ -1,6 +1,7 @@
 package red.man10.realestate.storage
 
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Barrel
@@ -25,6 +26,8 @@ object Barrel {
 
     const val title = "§e§l特殊樽"
     private const val maxByteSize = 65536
+
+    val opened = mutableListOf<Triple<Int,Int,Int>>()
 
     fun setStorageItem(inv:Inventory,block:Block){
 
@@ -63,6 +66,9 @@ object Barrel {
         val inv = getStorage(barrel)
 
         p.openInventory(inv?:Bukkit.createInventory(null,54, title))
+
+        val loc = barrel.location
+        opened.add(Triple(loc.blockX,loc.blockY,loc.blockZ))
 
     }
 
@@ -178,6 +184,14 @@ object Barrel {
             sendMessage(owner,"§e§l${p.name}追加")
         }
 
+    }
+
+    fun isOpen(loc:Location):Boolean{
+        return opened.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))
+    }
+
+    fun removeMap(loc: Location){
+        opened.remove(Triple(loc.blockX,loc.blockY,loc.blockZ))
     }
 
 
