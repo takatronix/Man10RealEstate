@@ -13,6 +13,7 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
+import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -256,6 +257,21 @@ object Event :Listener{
         if (!hasPermission(p,e.block.location,BLOCK)){
             sendMessage(p,"§cあなたにはこの場所でブロックを設置する権限がありません！")
             e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerBucketEmpty(e: PlayerBucketEmptyEvent) {
+        val p = e.player
+        val bucket = e.bucket
+
+        if (!hasPermission(p, p.location, BLOCK)) {
+
+            if (bucket.toString().contains("WATER") || bucket.toString().contains("LAVA")) {
+                sendMessage(p,"§cあなたにはこの場所でブロックを設置する権限がありません！")
+                e.isCancelled = true
+            }
+
         }
     }
 
