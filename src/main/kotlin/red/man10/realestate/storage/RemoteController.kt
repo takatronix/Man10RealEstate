@@ -1,10 +1,7 @@
 package red.man10.realestate.storage
 
 import com.google.gson.Gson
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,6 +14,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility
+import red.man10.realestate.Utility.sendMessage
 
 object RemoteController : Listener{
 
@@ -124,7 +122,7 @@ object RemoteController : Listener{
         if(!Barrel.isSpecialBarrel(barrelState))return
 
         if (Barrel.isOpen(loc)){
-            Utility.sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
+            sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
             return
         }
 
@@ -148,50 +146,59 @@ object RemoteController : Listener{
         val controller = pageMap[p]!!.second
 
         //コントローラーはさわれないようにする
-        if (isController(e.currentItem?:return)){ e.isCancelled = true}
+        if (e.currentItem != null && isController(e.currentItem!!)){ e.isCancelled = true}
 
-        if (e.hotbarButton == 0){
+        when(e.hotbarButton){
+            0 ->{
+                e.isCancelled = true
 
-            e.isCancelled = true
+                if ((page-1)<0)return
 
-            if ((page-1)<0)return
+                val list = getStringLocationList(controller)
 
-            val list = getStringLocationList(controller)
+                val block = Utility.jsonToLocation(list[page]).block
+                Barrel.setStorageItem(e.inventory,block)
 
-            val block = Utility.jsonToLocation(list[page]).block
-            Barrel.setStorageItem(e.inventory,block)
+                if (Barrel.isOpen(Utility.jsonToLocation(list[page-1]).block.location)){
+                    sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
+                    return
+                }
 
-            if (Barrel.isOpen(Utility.jsonToLocation(list[page-1]).block.location)){
-                Utility.sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
-                return
+                Barrel.removeMap(block.location)
+
+                p.playSound(p.location, Sound.UI_BUTTON_CLICK,0.3F,1.0F)
+
+                openInventory(controller,p, (page-1))
+
             }
 
-            Barrel.removeMap(block.location)
+            1 ->{
+                e.isCancelled = true
 
-            openInventory(controller,p, (page-1))
+                if (getStringLocationList(controller).size==(page+1))return
 
-        }
+                val list = getStringLocationList(controller)
 
-        if (e.hotbarButton == 1){
+                val block = Utility.jsonToLocation(list[page]).block
+                Barrel.setStorageItem(e.inventory,block)
 
-            e.isCancelled = true
+                if (Barrel.isOpen(Utility.jsonToLocation(list[page+1]).block.location)){
+                    sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
+                    return
+                }
 
-            if (getStringLocationList(controller).size==(page+1))return
+                Barrel.removeMap(block.location)
 
-            val list = getStringLocationList(controller)
+                p.playSound(p.location, Sound.UI_BUTTON_CLICK,0.3F,1.0F)
 
-            val block = Utility.jsonToLocation(list[page]).block
-            Barrel.setStorageItem(e.inventory,block)
+                openInventory(controller,p, (page+1))
 
-            if (Barrel.isOpen(Utility.jsonToLocation(list[page+1]).block.location)){
-                Utility.sendMessage(p, "§c§l現在他のプレイヤーが開いています！")
-                return
             }
 
-            Barrel.removeMap(block.location)
-
-            openInventory(controller,p, (page+1))
-
+            2 ->{
+                sendMessage(p,"現在のページ:$page")
+                return
+            }
         }
 
     }
@@ -226,6 +233,7 @@ object RemoteController : Listener{
         val block = Utility.jsonToLocation(getStringLocationList(controller)[page]).block
         Barrel.setStorageItem(e.inventory,block)
 
+        Barrel.removeMap(block.location)
         pageMap.remove(p)
 
     }
