@@ -24,9 +24,10 @@ object RemoteController : Listener{
 
     val key = "Ver.1.0"
 
-    val pageMap = HashMap<Player,Pair<Int,ItemStack>>()
+    private val pageMap = HashMap<Player,Pair<Int,ItemStack>>()
+    private val checkingMap = HashMap<Player,String>()
 
-    val gson = Gson()
+    private val gson = Gson()
 
     fun getController():ItemStack{
 
@@ -73,8 +74,15 @@ object RemoteController : Listener{
 
 
         if (list.contains(jsonLoc)){
-            list.remove(jsonLoc)
-            ret = 1
+
+            ret = 4
+
+            //確認画面を出す
+            if (checkingRemove(p,jsonLoc)){
+                list.remove(jsonLoc)
+                ret = 1
+            }
+
         }else{
 
             var removed = false
@@ -100,6 +108,16 @@ object RemoteController : Listener{
         setStringLocationList(controller,list)
 
         return ret
+    }
+
+    fun checkingRemove(p:Player,loc:String):Boolean{
+
+        if (checkingMap[p]==null || checkingMap[p] != loc){
+            checkingMap[p] = loc
+            return false
+        }
+        checkingMap.remove(p)
+        return true
     }
 
     fun getStringLocationList(controller: ItemStack):List<String>{
@@ -152,6 +170,7 @@ object RemoteController : Listener{
     }
 
 
+
     @EventHandler
     fun changePageEvent(e:InventoryClickEvent){
 
@@ -165,12 +184,10 @@ object RemoteController : Listener{
         val controller = pageMap[p]!!.second
 
         //コントローラーはさわれないようにする
-        if (e.currentItem != null && isController(e.currentItem!!)){ e.isCancelled = true}
+        if (e.hotbarButton >= 0){ e.isCancelled = true}
 
         when(e.hotbarButton){
             0 ->{
-                e.isCancelled = true
-
                 if ((page-1)<0)return
 
                 val list = getStringLocationList(controller)
@@ -192,7 +209,6 @@ object RemoteController : Listener{
             }
 
             1 ->{
-                e.isCancelled = true
 
                 if (getStringLocationList(controller).size==(page+1))return
 
