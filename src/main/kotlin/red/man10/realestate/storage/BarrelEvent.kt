@@ -76,6 +76,11 @@ object BarrelEvent:Listener {
 
                 if (RemoteController.isController(item)){
 
+                    if (!hasPermission(p,barrelState)){
+                        sendMessage(p,"§c§lあなたはこの樽を登録する権限がありません！")
+                        return
+                    }
+
                     val ret = RemoteController.editLocation(item,block.location,p)
 
                     sendMessage(p,when(ret){
