@@ -97,6 +97,7 @@ class Plugin : JavaPlugin(), Listener {
         server.pluginManager.registerEvents(InventoryListener,this)
         server.pluginManager.registerEvents(BarrelEvent,this)
         server.pluginManager.registerEvents(RemoteController,this)
+        server.pluginManager.registerEvents(RemoteController.password,this)
 
         getCommand("mre")!!.setExecutor(Command)
         getCommand("mreop")!!.setExecutor(Command)

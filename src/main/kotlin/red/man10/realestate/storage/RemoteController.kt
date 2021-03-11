@@ -16,6 +16,7 @@ import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.votingDiamond
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendMessage
+import red.man10.realestate.storage.upgrade.PasswordUpgrade
 
 object RemoteController : Listener{
 
@@ -28,6 +29,8 @@ object RemoteController : Listener{
     private val checkingMap = HashMap<Player,String>()
 
     private val gson = Gson()
+
+    val password = PasswordUpgrade()
 
     fun getController():ItemStack{
 
@@ -236,6 +239,10 @@ object RemoteController : Listener{
                 return
             }
 
+            3 ->{
+
+            }
+
             8 ->{//デバッグメニュー
                 sendMessage(p, "pages:${getStringLocationList(controller).size}")
 //                sendMessage(p,"")
@@ -254,6 +261,12 @@ object RemoteController : Listener{
         if (!isController(item))return
 
         val p = e.player
+
+        //パスワードの確認処理追加
+        if (password.hasPassword(item)){
+            password.openCheckingPassword(p,item)
+            return
+        }
 
         openInventory(item,p,0)
 

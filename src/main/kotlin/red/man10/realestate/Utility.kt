@@ -11,6 +11,8 @@ import red.man10.realestate.Plugin.Companion.plugin
 
 object Utility {
 
+    val gson = Gson()
+
     ////////////////////////////////////////////////////////////
     //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
     ////////////////////////////////////////////////////////////
@@ -66,7 +68,7 @@ object Utility {
     //Jsonデータからロケーション値に変換
     fun jsonToLocation(string: String): Location {
 
-        val jsonObj = Gson().fromJson(string, LocationProperty::class.java)
+        val jsonObj = gson.fromJson(string, LocationProperty::class.java)
 
         return Location(Bukkit.getWorld(jsonObj.world), jsonObj.x, jsonObj.y, jsonObj.z,jsonObj.yaw,jsonObj.pitch)
     }
@@ -74,7 +76,6 @@ object Utility {
     //現在のロケーションをJsonデータに変換
     fun locationToJson(location: Location):String{
 
-        val gson = Gson()
         val property = LocationProperty()
 
         property.world = location.world.name
