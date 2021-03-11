@@ -1,4 +1,4 @@
-package red.man10.realestate.storage
+package red.man10.realestate.storage.upgrade
 
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -18,6 +18,13 @@ class PasswordUpgrade : Upgrade() ,Listener{
     private val numbers = mutableListOf<ItemStack>()
     private val slots = arrayOf(12,13,14,21,22,13,30,31,32,40)
     private val cmd = 567
+
+    private val numericPadMap = HashMap<Player, Data>()
+
+    class Data{
+        lateinit var controller : ItemStack
+        var numbers = ""
+    }
 
     init {
 
@@ -44,9 +51,11 @@ class PasswordUpgrade : Upgrade() ,Listener{
 
     }
 
-    fun openNumericPad(p:Player,nowNumber:String,maxDigit:Int,title:String):String{
+    fun openNumericPad(p:Player,maxDigit:Int,title:String){
 
-        if (nowNumber.length>=maxDigit) return "null"
+        val data = numericPadMap[p]?: Data()
+
+        if (data.numbers.length>=maxDigit) return
 
         val inv = Bukkit.createInventory(null,54,title)
 
@@ -54,20 +63,19 @@ class PasswordUpgrade : Upgrade() ,Listener{
             inv.setItem(slots[i],numbers[i])
         }
 
-        val numberList = nowNumber.toMutableList()
+        val numberList = data.numbers.toMutableList()
 
-        for (i in nowNumber.indices){
+        for (i in data.numbers.indices){
             inv.setItem(8-i,numbers[numberList[i].toInt()])
         }
 
         p.openInventory
 
-        return nowNumber
     }
 
     fun setPassword(p:Player,controller:ItemStack){
 
-        openNumericPad(p,"",4,"パスワードを設定する")
+        openNumericPad(p,4,"パスワードを設定する")
 
     }
 
@@ -77,6 +85,7 @@ class PasswordUpgrade : Upgrade() ,Listener{
 
     @EventHandler
     fun clickNumericPad(e:InventoryClickEvent){
+
 
 
     }

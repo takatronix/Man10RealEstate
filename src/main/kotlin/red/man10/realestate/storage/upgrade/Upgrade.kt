@@ -1,4 +1,4 @@
-package red.man10.realestate.storage
+package red.man10.realestate.storage.upgrade
 
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack

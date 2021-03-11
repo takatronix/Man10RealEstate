@@ -169,35 +169,7 @@ object RemoteController : Listener{
 
     }
 
-    fun setUpgrade(controller: ItemStack,item: ItemStack,p:Player){
 
-        if (!isController(controller))return
-
-        val upgrade = Upgrade.itemToUpgradeName(item)?:return
-
-        when(upgrade){
-            "password" ->{
-
-                controller.itemMeta!!.persistentDataContainer.set(NamespacedKey(plugin,"password"), PersistentDataType.STRING,"0000")
-
-                item.amount = item.amount-1
-
-            }
-
-            "search" ->{
-
-                controller.itemMeta!!.persistentDataContainer.set(NamespacedKey(plugin,"search"), PersistentDataType.STRING,"true")
-
-                item.amount = item.amount-1
-
-                Bukkit.getLogger().info("added $upgrade")
-
-            }
-        }
-
-        Bukkit.getLogger().info("added $upgrade")
-
-    }
 
     @EventHandler
     fun changePageEvent(e:InventoryClickEvent){
@@ -212,6 +184,7 @@ object RemoteController : Listener{
         val controller = pageMap[p]!!.second
 
         //コントローラーはさわれないようにする
+        if (e.currentItem?.isSimilar(controller) == true)e.isCancelled = true
         if (e.hotbarButton >= 0){ e.isCancelled = true}
 
         when(e.hotbarButton){
@@ -261,6 +234,11 @@ object RemoteController : Listener{
             2 ->{//現在のページ確認
                 sendMessage(p,"現在のページ:$page")
                 return
+            }
+
+            8 ->{//デバッグメニュー
+                sendMessage(p, "pages:${getStringLocationList(controller).size}")
+//                sendMessage(p,"")
             }
         }
 
