@@ -17,6 +17,7 @@ import red.man10.realestate.Plugin.Companion.votingDiamond
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.storage.upgrade.PasswordUpgrade
+import red.man10.realestate.storage.upgrade.SearchUpgrade
 
 object RemoteController : Listener{
 
@@ -31,6 +32,7 @@ object RemoteController : Listener{
     private val gson = Gson()
 
     val password = PasswordUpgrade()
+    val search = SearchUpgrade()
 
     fun getController():ItemStack{
 

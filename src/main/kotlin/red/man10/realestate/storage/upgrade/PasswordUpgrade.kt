@@ -3,10 +3,12 @@ package red.man10.realestate.storage.upgrade
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Plugin.Companion.plugin
@@ -56,6 +58,9 @@ class PasswordUpgrade : Upgrade() ,Listener{
         val meta = item.itemMeta
         meta.persistentDataContainer.set(NamespacedKey(plugin,"name"), PersistentDataType.STRING,upgradeName)
         meta.setDisplayName("§ePasswordApp")
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+        meta.addEnchant(Enchantment.LUCK,1,false)
+
         meta.lore = mutableListOf("端末に4桁のパスワードを設定することができるようになります","パスワードを「0000」にするとパスワードをオフにできます")
 
         item.itemMeta = meta
