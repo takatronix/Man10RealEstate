@@ -27,13 +27,20 @@ object RemoteController : Listener{
 
     const val key = "Ver.1.0"
 
-    private val pageMap = HashMap<Player,Pair<Int,ItemStack>>()
     private val checkingMap = HashMap<Player,String>()
+
+    private val invMap = HashMap<Player,InvMap>()
 
     private val gson = Gson()
 
     val password = PasswordUpgrade()
     val search = SearchUpgrade()
+
+    class InvMap{
+        var locationList = mutableListOf<String>()
+        var nowPage = 0
+        lateinit var controller : ItemStack
+    }
 
     fun getController():ItemStack{
 
@@ -145,11 +152,9 @@ object RemoteController : Listener{
 
     }
 
-    fun openInventory(controller:ItemStack,p:Player,page:Int){
+    fun openInventory(controller:ItemStack,p:Player,page:Int,locList: List<String>){
 
         if (!isController(controller))return
-
-        val locList = getStringLocationList(controller)
 
         if (locList.isNullOrEmpty())return
 
@@ -171,7 +176,13 @@ object RemoteController : Listener{
 
         Barrel.openStorage(barrelState,p)
 
-        pageMap[p] = Pair(page,controller)
+        val data = InvMap()
+
+        data.controller = controller
+        data.locationList = locList.toMutableList()
+        data.nowPage = page
+
+        invMap[p] = data
 
     }
 
@@ -184,10 +195,9 @@ object RemoteController : Listener{
 
         val p = e.whoClicked as Player
 
-        if (!pageMap.containsKey(p))return
-
-        val page = pageMap[p]!!.first
-        val controller = pageMap[p]!!.second
+        val map = invMap[p]?:return
+        val page = map.nowPage
+        val controller = map.controller
 
         //コントローラーはさわれないようにする
         if (e.hotbarButton >= 0){ e.isCancelled = true}
@@ -210,12 +220,11 @@ object RemoteController : Listener{
 
         }
 
-
         when(e.hotbarButton){
             0 ->{//ページ戻る
                 if ((page-1)<0)return
 
-                val list = getStringLocationList(controller)
+                val list = map.locationList
 
                 val block = Utility.jsonToLocation(list[page]).block
                 Barrel.setStorageItem(e.inventory,block)
@@ -229,15 +238,15 @@ object RemoteController : Listener{
 
                 p.playSound(p.location, Sound.UI_BUTTON_CLICK,0.3F,1.0F)
 
-                openInventory(controller,p, (page-1))
+                openInventory(controller,p, (page-1),list)
 
             }
 
             1 ->{//ページ進む
 
-                if (getStringLocationList(controller).size==(page+1))return
+                val list = map.locationList
 
-                val list = getStringLocationList(controller)
+                if (list.size==(page+1))return
 
                 val block = Utility.jsonToLocation(list[page]).block
                 Barrel.setStorageItem(e.inventory,block)
@@ -251,7 +260,7 @@ object RemoteController : Listener{
 
                 p.playSound(p.location, Sound.UI_BUTTON_CLICK,0.3F,1.0F)
 
-                openInventory(controller,p, (page+1))
+                openInventory(controller,p, (page+1),list)
 
             }
 
@@ -264,6 +273,14 @@ object RemoteController : Listener{
 
                 if (Upgrade.getAllUpgrades(controller).contains("password")){
                     password.openPasswordSetting(p,controller)
+                    return
+                }
+            }
+
+            4 ->{
+
+                if (Upgrade.getAllUpgrades(controller).contains("search")){
+                    search.startSearch(p,controller)
                     return
                 }
             }
@@ -293,7 +310,7 @@ object RemoteController : Listener{
             return
         }
 
-        openInventory(item,p,0)
+        openInventory(item,p,0, getStringLocationList(item))
 
     }
 
@@ -304,16 +321,15 @@ object RemoteController : Listener{
 
         val p = e.player
 
-        if (!pageMap.containsKey(p))return
+        val map = invMap[p]?:return
 
-        val page = pageMap[p]!!.first
-        val controller = pageMap[p]!!.second
+        val page = map.nowPage
 
-        val block = Utility.jsonToLocation(getStringLocationList(controller)[page]).block
+        val block = Utility.jsonToLocation(map.locationList[page]).block
         Barrel.setStorageItem(e.inventory,block)
 
         Barrel.removeMap(block.location)
-        pageMap.remove(p)
+        invMap.remove(p)
 
     }
 
