@@ -897,6 +897,8 @@ object Command:CommandExecutor {
                 "getremote"->{
 
                     sender.inventory.addItem(RemoteController.getController())
+                    sender.inventory.addItem(RemoteController.password.getUpgrade())
+                    sender.inventory.addItem(RemoteController.search.getUpgrade())
                     return true
 
                 }

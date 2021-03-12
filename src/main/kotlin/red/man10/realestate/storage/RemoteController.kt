@@ -18,13 +18,14 @@ import red.man10.realestate.Utility
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.storage.upgrade.PasswordUpgrade
 import red.man10.realestate.storage.upgrade.SearchUpgrade
+import red.man10.realestate.storage.upgrade.Upgrade
 
 object RemoteController : Listener{
 
-    val controllerName = "§b特殊樽アクセス端末"
-    val customModel = 370
+    private const val controllerName = "§b特殊樽アクセス端末"
+    private const val customModel = 370
 
-    val key = "Ver.1.0"
+    const val key = "Ver.1.0"
 
     private val pageMap = HashMap<Player,Pair<Int,ItemStack>>()
     private val checkingMap = HashMap<Player,String>()
@@ -189,8 +190,26 @@ object RemoteController : Listener{
         val controller = pageMap[p]!!.second
 
         //コントローラーはさわれないようにする
-        if (e.currentItem?.isSimilar(controller) == true)e.isCancelled = true
         if (e.hotbarButton >= 0){ e.isCancelled = true}
+
+        val current = e.currentItem
+
+        if (current !=null){
+            if (current.isSimilar(controller))e.isCancelled = true
+
+            val upgrade = Upgrade.itemToUpgradeName(current)
+
+            if (upgrade!=null){
+                val success = Upgrade.addUpgrade(current,controller)
+                if (success){
+                    sendMessage(p,"アップグレード${upgrade}をセットしました！")
+                    return
+                }
+                sendMessage(p,"アップグレード${upgrade}のセットに失敗しました！")
+            }
+
+        }
+
 
         when(e.hotbarButton){
             0 ->{//ページ戻る
@@ -243,11 +262,15 @@ object RemoteController : Listener{
 
             3 ->{
 
+                if (Upgrade.getAllUpgrades(controller).contains("password")){
+                    password.openPasswordSetting(p,controller)
+                    return
+                }
             }
 
             8 ->{//デバッグメニュー
                 sendMessage(p, "pages:${getStringLocationList(controller).size}")
-//                sendMessage(p,"")
+                sendMessage(p,"upgrades:${Upgrade.getAllUpgrades(controller)}")
             }
         }
 

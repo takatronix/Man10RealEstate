@@ -3,12 +3,11 @@ package red.man10.realestate.storage.upgrade
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.inventory.InventoryAction
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Plugin.Companion.plugin
@@ -21,7 +20,7 @@ class PasswordUpgrade : Upgrade() ,Listener{
 
     override val upgradeName = "password"
 
-    private val slots = arrayOf(12,13,14,21,22,13,30,31,32,40)
+    private val slots = arrayOf(40,12,13,14,21,22,23,30,31,32)
     private val cmd = 567
     private val numbers = HashMap<Int,Pair<Int,ItemStack>>()
 
@@ -53,19 +52,8 @@ class PasswordUpgrade : Upgrade() ,Listener{
 
     }
 
-    override fun getUpgrade(): ItemStack {
-        val item = ItemStack(Material.PAPER)
-        val meta = item.itemMeta
-        meta.persistentDataContainer.set(NamespacedKey(plugin,"name"), PersistentDataType.STRING,upgradeName)
-        meta.setDisplayName("§ePasswordApp")
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS)
-        meta.addEnchant(Enchantment.LUCK,1,false)
-
-        meta.lore = mutableListOf("端末に4桁のパスワードを設定することができるようになります","パスワードを「0000」にするとパスワードをオフにできます")
-
-        item.itemMeta = meta
-        return item
-
+    fun getUpgrade(): ItemStack {
+        return super.getUpgrade("§ePasswordApp", mutableListOf("紛失時に悪用されないように","パスワードを設定することができます"))
     }
 
     fun openNumericPad(p:Player){
@@ -77,16 +65,10 @@ class PasswordUpgrade : Upgrade() ,Listener{
         val inv = Bukkit.createInventory(null,54,data.title)
 
         for (i in 0..9){
-            inv.setItem(slots[i],numbers[i]!!.second)
+            inv.setItem(numbers[i]!!.first,numbers[i]!!.second)
         }
 
-        val numberList = data.numbers.toMutableList()
-
-        for (i in data.numbers.indices){
-            inv.setItem(8-i,numbers[numberList[i].toInt()]!!.second)
-        }
-
-        p.openInventory
+        p.openInventory(inv)
 
     }
 
@@ -130,6 +112,9 @@ class PasswordUpgrade : Upgrade() ,Listener{
         controller.itemMeta = meta
 
         sendMessage(p,"パスワードを[$pass]に設定しました")
+        if (!hasPassword(controller)){
+            sendMessage(p,"[0000]なのでパスワードは無効になっています")
+        }
     }
 
     fun getPassword(controller:ItemStack):String{
@@ -143,7 +128,7 @@ class PasswordUpgrade : Upgrade() ,Listener{
 
     private fun getClickedNumber(slot:Int):Int{
         for (i in 0..9){
-            if (slot == slots[i])return slots[i]
+            if (slot == slots[i])return i
         }
         return -1
     }
@@ -157,6 +142,8 @@ class PasswordUpgrade : Upgrade() ,Listener{
 
         e.isCancelled = true
 
+        if (e.action == InventoryAction.HOTBAR_SWAP)return
+
         if (!slots.contains(e.slot))return
 
         val num = getClickedNumber(e.slot)
@@ -164,6 +151,8 @@ class PasswordUpgrade : Upgrade() ,Listener{
         val data = numericPadMap[p]?:return
 
         data.numbers +=num
+
+        sendMessage(p,data.numbers)
 
         if (data.numbers.length >= data.maxDigit){
 
