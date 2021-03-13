@@ -49,14 +49,14 @@ class SearchUpgrade : Upgrade() ,Listener{
 
                 if (item == null || item.type == Material.AIR)continue
 
-                if (item.i18NDisplayName?.equals(keyword) == true){
+                if (item.i18NDisplayName!!.equals(keyword,true)){
                     list.add(Utility.locationToJson(loc))
                     break
                 }
 
                 val meta = item.itemMeta?:continue
 
-                if (meta.displayName == keyword){
+                if (meta.displayName.replace("§","").equals(keyword,true)){
                     list.add(Utility.locationToJson(loc))
                     break
                 }
