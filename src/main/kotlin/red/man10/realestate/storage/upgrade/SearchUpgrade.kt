@@ -30,6 +30,8 @@ class SearchUpgrade : Upgrade() ,Listener{
 
         val list = mutableListOf<String>()
 
+        sendMessage(p,"現在検索中§kX")
+
         for (str in jsonList){
 
             val loc = Utility.jsonToLocation(str)
@@ -56,7 +58,7 @@ class SearchUpgrade : Upgrade() ,Listener{
 
                 val meta = item.itemMeta?:continue
 
-                if (meta.displayName.replace("§","").equals(keyword,true)){
+                if (meta.displayName.contains(keyword,true)){
                     list.add(Utility.locationToJson(loc))
                     break
                 }
@@ -108,7 +110,6 @@ class SearchUpgrade : Upgrade() ,Listener{
             searchUser.remove(p)
 
         })
-
 
     }
 
