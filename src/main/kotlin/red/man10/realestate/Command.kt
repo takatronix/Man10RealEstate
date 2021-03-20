@@ -381,34 +381,45 @@ object Command:CommandExecutor {
                 }
 
                 "balance" ->{
+
                     if (!hasPerm(sender, USER))return false
 
-                    val list = User.ownerList[sender]?:return false
+                    val name = if (args.size >= 2 && hasPerm(sender,OP)){ args[1] }else {sender.uniqueId.toString()}
 
+                    Thread{
 
-                    var total = 0
-                    var totalArea = 0
-                    var totalTax = 0.0
+                        val db = MySQLManager(plugin,"realestate")
 
-                    for (id in list){
+                        val rs = db.query("select id from region where owner_uuid='${name}' or owner_name='${name}';")?:return@Thread
 
-                        val rg = Region.get(id)!!
+                        val list = mutableListOf<Int>()
 
-                        if (sender.uniqueId != rg.ownerUUID)continue
+                        while (rs.next()){
 
-                        val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
-                        val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
+                            list.add(rs.getInt("id"))
 
+                            var totalArea = 0
+                            var totalTax = 0.0
 
-                        total ++
-                        totalArea += (width*height).toInt()
-                        totalTax += City.getTax(City.whereRegion(id),id)
+                            for (id in list){
 
-                    }
+                                val rg = Region.get(id)!!
 
-                    sendMessage(sender,"§e§l所有してる土地の数:${list.size}")
-                    sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
-                    sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
+                                val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
+                                val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
+
+                                totalArea += (width*height).toInt()
+                                totalTax += City.getTax(City.whereRegion(id),id)
+
+                            }
+
+                            sendMessage(sender,"§e§l所有してる土地の数:${list.size}")
+                            sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
+                            sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
+
+                        }
+
+                    }.start()
 
                 }
 
@@ -928,7 +939,7 @@ object Command:CommandExecutor {
         return true
     }
 
-    fun hasPerm(p:Player,permission:String):Boolean{
+    private fun hasPerm(p:Player, permission:String):Boolean{
 
         if (p.hasPermission(permission))return true
 
@@ -937,7 +948,7 @@ object Command:CommandExecutor {
 
     }
 
-    fun parse(str:String):Int?{
+    private fun parse(str:String):Int?{
 
         if (!NumberUtils.isNumber(str) || !NumberUtils.isDigits(str))return null
 
@@ -947,7 +958,7 @@ object Command:CommandExecutor {
     /**
      * 指定リージョンの編集権限を持っているかどうか
      */
-    fun hasRegionPermission(p:Player,id:Int):Boolean{
+    private fun hasRegionPermission(p:Player,id:Int):Boolean{
 
         if (p.hasPermission(OP))return true
 
