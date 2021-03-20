@@ -392,32 +392,29 @@ object Command:CommandExecutor {
 
                         val rs = db.query("select id from region where owner_uuid='${name}' or owner_name='${name}';")?:return@Thread
 
-                        val list = mutableListOf<Int>()
+                        val total = 0
+                        var totalArea = 0
+                        var totalTax = 0.0
 
                         while (rs.next()){
 
-                            list.add(rs.getInt("id"))
+                            val id = rs.getInt("id")
 
-                            var totalArea = 0
-                            var totalTax = 0.0
+                            val rg = Region.get(id)!!
 
-                            for (id in list){
+                            val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
+                            val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
 
-                                val rg = Region.get(id)!!
-
-                                val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
-                                val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
-
-                                totalArea += (width*height).toInt()
-                                totalTax += City.getTax(City.whereRegion(id),id)
-
-                            }
-
-                            sendMessage(sender,"§e§l所有してる土地の数:${list.size}")
-                            sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
-                            sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
+                            totalArea += (width*height).toInt()
+                            totalTax += City.getTax(City.whereRegion(id),id)
+                            total.inc()
 
                         }
+
+                        sendMessage(sender,"§e§l所有してる土地の数:${total}")
+                        sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
+                        sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
+
 
                     }.start()
 
