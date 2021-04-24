@@ -18,7 +18,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import red.man10.realestate.Command
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
@@ -239,7 +238,7 @@ object Event :Listener{
             Material.SHULKER_BOX)
 
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun blockBreakEvent(e: BlockBreakEvent){
 
         val p = e.player
@@ -250,7 +249,7 @@ object Event :Listener{
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun blockPlaceEvent(e: BlockPlaceEvent){
         val p = e.player
 
@@ -260,7 +259,7 @@ object Event :Listener{
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerBucketEmpty(e: PlayerBucketEmptyEvent) {
         val p = e.player
         val bucket = e.bucket
@@ -275,7 +274,7 @@ object Event :Listener{
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun interactEvent(e:PlayerInteractEvent){
         if (e.action != Action.RIGHT_CLICK_BLOCK && e.action != Action.PHYSICAL)return
         if (!e.hasBlock())return
@@ -309,7 +308,7 @@ object Event :Listener{
 
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun signEvent(e:SignChangeEvent){
         val p = e.player
 
@@ -320,7 +319,7 @@ object Event :Listener{
 
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun breakEntity(e: HangingBreakByEntityEvent){
         val p = e.remover?:return
 
@@ -333,7 +332,7 @@ object Event :Listener{
 
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun interact(e:PlayerInteractEntityEvent){
 
         val p = e.player
@@ -345,7 +344,7 @@ object Event :Listener{
 
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun breakEntity(e:EntityDamageByEntityEvent){
 
         val p = e.damager
