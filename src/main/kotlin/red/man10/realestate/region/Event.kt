@@ -226,7 +226,7 @@ object Event :Listener{
     //保護処理
     ///////////////////////////////////////////////////////////////////////////
 
-    val invList = mutableListOf(
+    private val invList = mutableListOf(
             Material.CHEST,
             Material.ENDER_CHEST,
             Material.HOPPER,
@@ -276,14 +276,14 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun interactEvent(e:PlayerInteractEvent){
-        if (e.action != Action.RIGHT_CLICK_BLOCK && e.action != Action.PHYSICAL)return
+        if (e.action == Action.RIGHT_CLICK_AIR && e.action == Action.LEFT_CLICK_AIR)return
         if (!e.hasBlock())return
 
         val p = e.player
 
-        if (e.hasBlock()&&e.clickedBlock!!.state is Sign){
-            return
-        }
+
+
+        if (e.hasBlock()&&e.clickedBlock!!.state is Sign){ return }
 
         if (!hasPermission(p,e.clickedBlock!!.location, DOOR)){
             sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
