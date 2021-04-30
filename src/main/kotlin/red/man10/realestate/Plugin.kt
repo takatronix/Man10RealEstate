@@ -15,8 +15,6 @@ import red.man10.realestate.region.City
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
-import red.man10.realestate.storage.BarrelEvent
-import red.man10.realestate.storage.RemoteController
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -24,11 +22,6 @@ import java.util.concurrent.LinkedBlockingQueue
 
 
 class Plugin : JavaPlugin(), Listener {
-
-
-//    var wandStartLocation: Location? = null
-//    var wandEndLocation: Location? = null
-//    var particleTime:Int = 0
 
     companion object{
 
@@ -95,10 +88,6 @@ class Plugin : JavaPlugin(), Listener {
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(Event, this)
         server.pluginManager.registerEvents(InventoryListener,this)
-        server.pluginManager.registerEvents(BarrelEvent,this)
-        server.pluginManager.registerEvents(RemoteController,this)
-        server.pluginManager.registerEvents(RemoteController.password,this)
-        server.pluginManager.registerEvents(RemoteController.search,this)
 
         getCommand("mre")!!.setExecutor(Command)
         getCommand("mreop")!!.setExecutor(Command)
@@ -172,49 +161,10 @@ class Plugin : JavaPlugin(), Listener {
 
     }
 
-//    fun drawCube(pos1:Location,pos2:Location){
-//        getCube(pos1,pos2)?.forEach { ele->
-//            ele.world.spawnParticle(Particle.HEART, ele.getX(), ele.getY(), ele.getZ(), 1)
-//        }
-//
-//    }
-//
-//    fun getCube(corner1: Location, corner2: Location): List<Location>? {
-//        val result: MutableList<Location> = ArrayList()
-//        val world = corner1.world
-//        val minX = Math.min(corner1.x, corner2.x)
-//        val minY = Math.min(corner1.y, corner2.y)
-//        val minZ = Math.min(corner1.z, corner2.z)
-//        val maxX = Math.max(corner1.x, corner2.x)
-//        val maxY = Math.max(corner1.y, corner2.y)
-//        val maxZ = Math.max(corner1.z, corner2.z)
-//        var x = minX
-//        while (x <= maxX) {
-//            var y = minY
-//            while (y <= maxY) {
-//                var z = minZ
-//                while (z <= maxZ) {
-//                    var components = 0
-//                    if (x == minX || x == maxX) components++
-//                    if (y == minY || y == maxY) components++
-//                    if (z == minZ || z == maxZ) components++
-//                    if (components >= 2) {
-//                        result.add(Location(world, x, y, z))
-//                    }
-//                    z++
-//                }
-//                y++
-//            }
-//            x++
-//        }
-//        return result
-//    }
-
-
     ////////////////////////
     //dbのクエリキュー
     ////////////////////////
-    fun mysqlQueue(){
+    private fun mysqlQueue(){
 
         es.execute {
             val sql = MySQLManager(this,"man10realestate queue")

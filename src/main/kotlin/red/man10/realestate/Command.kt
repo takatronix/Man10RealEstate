@@ -17,24 +17,21 @@ import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.teleportPrice
 import red.man10.realestate.Plugin.Companion.vault
-import red.man10.realestate.Plugin.Companion.votingDiamond
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
-import red.man10.realestate.storage.Barrel.title
-import red.man10.realestate.storage.RemoteController
 import java.util.*
 
 object Command:CommandExecutor {
 
-    const val USER = "mre.user"
-    const val GUEST = "mre.guest"
+    private const val USER = "mre.user"
+    private const val GUEST = "mre.guest"
     const val OP = "mre.op"
 
-    val numbers = mutableListOf<Int>()
+    private val numbers = mutableListOf<Int>()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -451,7 +448,6 @@ object Command:CommandExecutor {
                 sendMessage(sender,"§e§l/mreop checkfly <user> : 指定ユーザーがmreのフライを使っているかチェックする")
                 sendMessage(sender,"§e§l/mreop taxmail : 手動で税金の通知メールを送る")
                 sendMessage(sender,"§e§l/mreop starttax : 手動で税金を徴収する")
-                sendMessage(sender,"§e§l/mreop getbarrel : 特殊たるを手に入れる")
                 sendMessage(sender,"§e§l/mreop search : 指定ユーザーの持っている土地を確認する")
                 sendMessage(sender,"§e§l/mreop maxuser <id>: 都市の住める上限を設定する")
                 sendMessage(sender,"§e§l/mreop calctax <id> : 指定都市で徴収できる税額を計算する")
@@ -795,16 +791,6 @@ object Command:CommandExecutor {
                     }.start()
                 }
 
-
-                "getbarrel" ->{
-                    val barrel = ItemStack(Material.BARREL)
-                    val meta = barrel.itemMeta
-                    meta.setDisplayName(title)
-                    barrel.itemMeta = meta
-                    sender.inventory.addItem(barrel)
-                    return true
-                }
-
                 "search" ->{
 
                     val uuid = Bukkit.getPlayer(args[1])?.uniqueId
@@ -901,23 +887,6 @@ object Command:CommandExecutor {
 
                     return true
                 }
-
-                "getremote"->{
-
-                    sender.inventory.addItem(RemoteController.getController())
-                    sender.inventory.addItem(RemoteController.password.getUpgrade())
-                    sender.inventory.addItem(RemoteController.search.getUpgrade())
-                    return true
-
-                }
-
-                "setvd" ->{
-                    votingDiamond = sender.inventory.itemInMainHand
-                    plugin.config.set("votingDiamond",sender.inventory.itemInMainHand)
-                    plugin.saveConfig()
-                }
-
-
                 else ->{
 
                     sendMessage(sender,"§c§l不明なコマンドです！")

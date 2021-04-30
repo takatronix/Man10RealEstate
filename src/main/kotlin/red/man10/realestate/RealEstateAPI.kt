@@ -43,31 +43,4 @@ object RealEstateAPI {
         return false
     }
 
-    /**
-     * 特殊樽を取得
-     * @return 通常の樽だった場合、通常樽の中身を返す バレルじゃなかったらnullを返す
-     */
-    fun getSpecialBarrel(block: Block):Inventory?{
-
-        val state = block.state
-
-        if (state !is Barrel)return null
-
-        return red.man10.realestate.storage.Barrel.getStorage(state)
-    }
-
-    fun getSpecialBarrel(barrel:Barrel):Inventory?{
-        return red.man10.realestate.storage.Barrel.getStorage(barrel)
-    }
-
-
-    /**
-     *
-     * 特殊樽ならtrueを返す
-     *
-     */
-    fun isSpecialBarrel(barrel:Barrel):Boolean{
-        return red.man10.realestate.storage.Barrel.isSpecialBarrel(barrel)
-    }
-
 }
