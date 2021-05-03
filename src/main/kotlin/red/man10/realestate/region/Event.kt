@@ -2,6 +2,7 @@ package red.man10.realestate.region
 
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -29,7 +30,7 @@ import red.man10.realestate.region.User.Permission.*
 
 object Event :Listener{
 
-    private const val maxAmount = 16
+    private const val maxAmount = 24
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
@@ -239,6 +240,13 @@ object Event :Listener{
             Material.BARREL,
             Material.SHULKER_BOX)
 
+    private val blockList = mutableListOf(
+            Material.CHEST,
+            Material.HOPPER,
+            Material.TRAPPED_CHEST,
+            Material.FURNACE
+    )
+
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun blockBreakEvent(e: BlockBreakEvent){
@@ -255,8 +263,15 @@ object Event :Listener{
     fun blockPlaceEvent(e: BlockPlaceEvent){
         val p = e.player
 
-        if (!hasPermission(p,e.block.location,BLOCK)){
+        val block = e.block
+
+        if (!hasPermission(p,block.location,BLOCK)){
             sendMessage(p,"§cあなたにはこの場所でブロックを設置する権限がありません！")
+            e.isCancelled = true
+        }
+
+        if (blockList.contains(block.type) && maxAmount< countChest(block)){
+            sendMessage(p,"§cこのチャンクには、これ以上このブロックは置けません！")
             e.isCancelled = true
         }
     }
@@ -409,6 +424,19 @@ object Event :Listener{
         }
 
         return false
+    }
+
+    private fun countChest(block: Block): Int {
+
+        val te = block.chunk.tileEntities
+
+        var count = 0
+
+        for (entity in te){
+            if (blockList.contains(entity.block.type))count++
+        }
+
+        return count
     }
 
 }
