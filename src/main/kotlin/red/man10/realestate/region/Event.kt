@@ -399,10 +399,10 @@ object Event :Listener{
 
                 val data = User.get(p,id)?:return false
 
+                if (perm != BLOCK &&rg.status == "Free")return true
+
                 if (data.status == "Lock")return false
                 if (data.allowAll)return true
-
-                if (perm != BLOCK &&rg.status == "Free")return true
 
                 when(perm){
 
