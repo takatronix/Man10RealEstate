@@ -282,6 +282,11 @@ object Region {
 
             regionData[id] = data
 
+            if (Bukkit.getWorld(data.world) == null){
+                delete(id)
+                Bukkit.getLogger().info("存在しない土地だったので、削除しました!")
+            }
+
         }
 
         rs.close()
