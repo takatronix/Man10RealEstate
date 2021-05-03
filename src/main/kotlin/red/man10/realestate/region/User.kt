@@ -18,7 +18,7 @@ object User{
 
     val ownerList = ConcurrentHashMap<Player,MutableList<Int>>()
 
-    val mysql = MySQLManager(plugin,"Man10RealEstate")
+    private val mysql = MySQLManager(plugin,"Man10RealEstate")
 
     fun set(p:Player,id:Int,data:UserData){
         (userData[p]?: HashMap())[id] = data

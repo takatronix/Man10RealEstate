@@ -244,8 +244,6 @@ object City {
 
         if (city.tax == 0.0)return false
 
-        //Bukkit.getLogger().info("${Bukkit.getOfflinePlayer(p).name} bal:${offlineBank.getBalance(p)}")
-
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
         if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
@@ -254,8 +252,6 @@ object City {
             return false
 
         }
-
-    //    Bukkit.getLogger().info("$id ${Bukkit.getOfflinePlayer(p).name} tax:${city.tax}")
         return true
     }
 
@@ -291,13 +287,6 @@ object City {
     fun whereRegion(id:Int):Int{
         return where(Region.get(id)!!.teleport)
     }
-
-//    //指定リージョンに住む権限があるかどうか
-//    fun hasCityPermission(p:Player,id: Int):Boolean{
-//        val city = get(whereRegion(id))?:return false
-//        if (!p.hasPermission("mre.city.${city.name}"))return false
-//        return true
-//    }
 
     class CityData{
 
