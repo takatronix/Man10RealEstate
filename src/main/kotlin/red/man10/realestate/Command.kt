@@ -65,8 +65,10 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    Region.buy(sender,id)
+                    es.execute {
+                        Region.buy(sender,id)
 
+                    }
                     return true
                 }
 
@@ -147,22 +149,33 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    val number = Random().nextInt()
 
-                    numbers.add(number)
+                    es.execute {
+                        if (!City.canLive(id,p,false)){
+                            sendMessage(sender,"ユーザーのスコアが足りません！")
+                            return@execute
+                        }
+
+                        val number = Random().nextInt()
+
+                        numbers.add(number)
 
 
-                    sendMessage(p,"§a§l=================土地の情報==================")
-                    sendMessage(p,"§a§lオーナー：${sender.name}")
-                    sendMessage(p,"§a§l土地のID：$id")
-                    sendMessage(p,"§a§l土地のステータス：${data.status}")
-                    sendMessage(p,"§a§l===========================================")
+                        sendMessage(p,"§a§l=================土地の情報==================")
+                        sendMessage(p,"§a§lオーナー：${sender.name}")
+                        sendMessage(p,"§a§l土地のID：$id")
+                        sendMessage(p,"§a§l土地のステータス：${data.status}")
+                        sendMessage(p,"§a§l===========================================")
 
-                    sendMessage(p,"§e§l承諾する場合は下のチャット文をクリック、しない場合はこの文を無視してください")
+                        sendMessage(p,"§e§l承諾する場合は下のチャット文をクリック、しない場合はこの文を無視してください")
 
-                    sendHoverText(p,"§e§l[入居に承諾する]","§a§l承諾する","mre acceptuser $id ${sender.name} $number")
+                        sendHoverText(p,"§e§l[入居に承諾する]","§a§l承諾する","mre acceptuser $id ${sender.name} $number")
 
-                    sendMessage(sender,"§a§l現在承諾待ちです....")
+                        sendMessage(sender,"§a§l現在承諾待ちです....")
+                        return@execute
+
+                    }
+
                     return true
 
                 }

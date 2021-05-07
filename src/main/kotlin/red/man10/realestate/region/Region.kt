@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 object Region {
 
     //idとリージョンデータの辞書
-    val regionData = ConcurrentHashMap<Int,RegionData>()
+    private val regionData = ConcurrentHashMap<Int,RegionData>()
 
     fun get(id:Int):RegionData?{
         return regionData[id]
@@ -293,6 +293,7 @@ object Region {
         sql.close()
     }
 
+    @Synchronized
     fun buy(p:Player,id:Int){
 
         val data = get(id)
@@ -312,6 +313,10 @@ object Region {
             return
         }
 
+        if (!City.canLive(id,p,true)){
+            sendMessage(p,"あなたにはこの土地を買うためのスコアが足りません！")
+            return
+        }
 
         vault.withdraw(p.uniqueId,data.price)
 

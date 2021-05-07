@@ -2,6 +2,8 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.entity.Player
+import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin.Companion.defaultPrice
 import red.man10.realestate.Plugin.Companion.mysqlQueue
@@ -209,6 +211,23 @@ object City {
         val data = get(id)?:return
         data.buyScore = score
         set(id,data)
+    }
+
+    fun canLive(regionId:Int,p:Player,isBuy:Boolean):Boolean{
+
+        val data = Region.get(regionId)?:return false
+
+        val id = where(data.teleport)
+
+        if (id == -1)return false
+
+        val city = get(id)?:return false
+
+        when(isBuy){
+            true -> if (city.buyScore<=ScoreDatabase.getScore(p.uniqueId))return true
+            false ->if (city.liveScore<=ScoreDatabase.getScore(p.uniqueId))return true
+        }
+        return false
     }
 
     /**
