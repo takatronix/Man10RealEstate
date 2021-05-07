@@ -2,9 +2,7 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.defaultPrice
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
@@ -16,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 object City {
 
-    val cityData = ConcurrentHashMap<Int,CityData>()
+    private val cityData = ConcurrentHashMap<Int,CityData>()
 
     fun get(id:Int):CityData?{
         return cityData[id]
@@ -141,6 +139,9 @@ object City {
                     rs.getFloat("pitch")
             )
 
+            data.buyScore = rs.getInt("buy_score")
+            data.liveScore = rs.getInt("live_score")
+
             cityData[id] = data
 
             updateRegion(id)
@@ -202,6 +203,24 @@ object City {
     }
 
     /**
+     * 買うのに必要なスコアの変更
+     */
+    fun setBuyScore(id:Int, score:Int){
+        val data = get(id)?:return
+        data.buyScore = score
+        set(id,data)
+    }
+
+    /**
+     * 買うのに必要なスコアの変更
+     */
+    fun setLiveScore(id:Int, score:Int){
+        val data = get(id)?:return
+        data.liveScore = score
+        set(id,data)
+    }
+
+    /**
      * 現在のデータを保存する
      */
     fun save(id:Int,data:CityData){
@@ -222,7 +241,10 @@ object City {
                 "t.ey = ${data.endPosition.second}, " +
                 "t.ez = ${data.endPosition.third}, " +
                 "t.tax = ${data.tax}," +
-                "t.max_user = ${data.maxUser} WHERE t.id = $id")
+                "t.max_user = ${data.maxUser}," +
+                "t.buy_score= ${data.buyScore}," +
+                "t.live_score= ${data.liveScore}" +
+                " WHERE t.id = $id")
 
     }
 
@@ -300,6 +322,9 @@ object City {
         var name = "CityName"
 
         var maxUser = 100
+
+        var buyScore = 0
+        var liveScore = 0
 
         var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
         var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)

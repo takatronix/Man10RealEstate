@@ -443,6 +443,8 @@ object Command:CommandExecutor {
                 sendMessage(sender,"§e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します")
                 sendMessage(sender,"§e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します")
                 sendMessage(sender,"§e§l/mreop tax <id> <tax>: 指定都市の税額を変更します")
+                sendMessage(sender,"§e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します")
+                sendMessage(sender,"§e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します")
                 sendMessage(sender,"§e§l/mreop tp <id> : リソース無しでテレポートする")
                 sendMessage(sender,"§e§l/mreop init <id> <price> : 指定リージョンを初期化する")
                 sendMessage(sender,"§e§l/mreop checkfly <user> : 指定ユーザーがmreのフライを使っているかチェックする")
@@ -820,7 +822,7 @@ object Command:CommandExecutor {
                         return true
                     }
                     for (rg in Region.map().filter { it.value.ownerUUID == uuid }.keys){
-                        sendHoverText(sender,"§e§lID:${rg}","Teleport","mreop tp ${rg}")
+                        sendHoverText(sender,"§e§lID:${rg}","Teleport","mreop tp $rg")
                     }
 
                     sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
@@ -887,6 +889,37 @@ object Command:CommandExecutor {
 
                     return true
                 }
+
+                "buyscore" ->{
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+
+                    val id = args[1].toInt()
+                    val score= args[2].toInt()
+
+                    City.setBuyScore(id,score)
+
+                    sendMessage(sender,"§a§l設定完了！")
+
+                    return  true
+
+                }
+
+                "livescore" ->{
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+
+                    val id = args[1].toInt()
+                    val score= args[2].toInt()
+
+                    City.setLiveScore(id,score)
+
+                    sendMessage(sender,"§a§l設定完了！")
+
+                    return  true
+
+                }
+
                 else ->{
 
                     sendMessage(sender,"§c§l不明なコマンドです！")
