@@ -396,11 +396,10 @@ object Command:CommandExecutor {
 
                     val name = if (args.size >= 2 && hasPerm(sender,OP)){ args[1] }else {sender.uniqueId.toString()}
 
-                    Thread{
-
+                    es.execute {
                         val db = MySQLManager(plugin,"realestate")
 
-                        val rs = db.query("select id from region where owner_uuid='${name}' or owner_name='${name}';")?:return@Thread
+                        val rs = db.query("select id from region where owner_uuid='${name}' or owner_name='${name}';")?:return@execute
 
                         val total = 0
                         var totalArea = 0
@@ -424,9 +423,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§e§l所有してる土地の数:${total}")
                         sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
                         sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
-
-
-                    }.start()
+                    }
 
                 }
 
@@ -446,26 +443,26 @@ object Command:CommandExecutor {
             if (!hasPerm(sender,OP))return false
 
             if (args.isEmpty()){
-                sendMessage(sender,"§e§l==============================================")
-                sendMessage(sender,"§e§l/mreop wand : 範囲指定用のワンドを取得")
-                sendMessage(sender,"§e§l/mreop create <rg/city> <リージョン名/都市名> <値段/税額> : 新規リージョンを作成します")
-                sendMessage(sender,"§e§l範囲指定済みの${WAND_NAME}§e§lを持ってコマンドを実行してください")
-                sendMessage(sender,"§e§l/mreop delete <rg/city> <id> : 指定idのリージョンを削除します")
-                sendMessage(sender,"§e§l/mreop reload : 再読み込みをします")
-                sendMessage(sender,"§e§l/mreop where : 現在地点がどのリージョンが確認します")
-                sendMessage(sender,"§e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します")
-                sendMessage(sender,"§e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します")
-                sendMessage(sender,"§e§l/mreop tax <id> <tax>: 指定都市の税額を変更します")
-                sendMessage(sender,"§e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します")
-                sendMessage(sender,"§e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します")
-                sendMessage(sender,"§e§l/mreop tp <id> : リソース無しでテレポートする")
-                sendMessage(sender,"§e§l/mreop init <id> <price> : 指定リージョンを初期化する")
-                sendMessage(sender,"§e§l/mreop checkfly <user> : 指定ユーザーがmreのフライを使っているかチェックする")
-                sendMessage(sender,"§e§l/mreop taxmail : 手動で税金の通知メールを送る")
-                sendMessage(sender,"§e§l/mreop starttax : 手動で税金を徴収する")
-                sendMessage(sender,"§e§l/mreop search : 指定ユーザーの持っている土地を確認する")
-                sendMessage(sender,"§e§l/mreop maxuser <id>: 都市の住める上限を設定する")
-                sendMessage(sender,"§e§l/mreop calctax <id> : 指定都市で徴収できる税額を計算する")
+
+                sendMessage(sender,"""
+                    §e§l/mreop wand : 範囲指定用のワンドを取得
+                    §e§l/mreop create <rg/city> <リージョン名/都市名> <値段/税額> : 新規リージョンを作成します
+                    §e§l範囲指定済みの${WAND_NAME}§e§lを持ってコマンドを実行してください
+                    §e§l/mreop delete <rg/city> <id> : 指定idのリージョンを削除します
+                    §e§l/mreop reload : 再読み込みをします
+                    §e§l/mreop where : 現在地点がどのリージョンが確認します
+                    §e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します
+                    §e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します
+                    §e§l/mreop tax <id> <tax>: 指定都市の税額を変更します
+                    §e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します
+                    §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
+                    §e§l/mreop tp <id> : リソース無しでテレポートする
+                    §e§l/mreop init <id> <price> : 指定リージョンを初期化する
+                    §e§l/mreop starttax : 手動で税金を徴収する
+                    §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
+                    §e§l/mreop maxuser <id>: 都市の住める上限を設定する
+                    §e§l/mreop calctax <id> : 指定都市で徴収できる税額を計算する
+                """.trimIndent())
 
                 return true
             }
@@ -503,16 +500,16 @@ object Command:CommandExecutor {
 
                     sendMessage(sender,"§a§l現在登録中です・・・")
 
-                    GlobalScope.launch {
+                    es.execute {
                         val c1 = lore[3].replace("§aStart:§fX:","")
-                                .replace("Y","").replace("Z","")
-                                .replace(":","").split(",")
+                            .replace("Y","").replace("Z","")
+                            .replace(":","").split(",")
 
                         val startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
 
                         val c2 = lore[4].replace("§aEnd:§fX:","")
-                                .replace("Y","").replace("Z","")
-                                .replace(":","").split(",")
+                            .replace("Y","").replace("Z","")
+                            .replace(":","").split(",")
 
                         val endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
 
@@ -528,7 +525,7 @@ object Command:CommandExecutor {
 
                         if (id == -1){
                             sendMessage(sender,"§c§l登録失敗！")
-                            return@launch
+                            return@execute
                         }
 
                         sendMessage(sender,"§a§l登録完了！")
@@ -642,7 +639,7 @@ object Command:CommandExecutor {
 
                     val loc = sender.location
 
-                    GlobalScope.launch {
+                    es.execute {
                         sendMessage(sender, "§e§l=====================================")
 
                         for (rg in Region.map()) {
@@ -787,16 +784,6 @@ object Command:CommandExecutor {
                     return true
                 }
 
-
-                "taxmail" ->{
-
-                    Thread {
-
-                        User.taxMail()
-
-                    }.start()
-                }
-
                 "starttax" ->{
                     Thread{
                         sender.sendMessage("税金の徴収開始")
@@ -814,11 +801,10 @@ object Command:CommandExecutor {
 
                     if (uuid==null){
 
-                        Thread{
-
+                        es.execute {
                             val mysql = MySQLManager(plugin,"mre")
 
-                            val rs = mysql.query("select id from region where owner_name = '${args[1]}';")?:return@Thread
+                            val rs = mysql.query("select id from region where owner_name = '${args[1]}';")?:return@execute
 
                             while (rs.next()){
                                 val id = rs.getInt("id")
@@ -830,7 +816,7 @@ object Command:CommandExecutor {
 
                             sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
 
-                        }.start()
+                        }
 
                         return true
                     }
@@ -866,7 +852,7 @@ object Command:CommandExecutor {
 
                     var tax = 0.0
 
-                    Thread {
+                    es.execute {
                         for (rg in Region.map()){
 
                             if (City.whereRegion(rg.key) !=cityID)continue
@@ -879,7 +865,7 @@ object Command:CommandExecutor {
 
                         sendMessage(sender,"ID:$cityID の回収可能税額は、$tax です。")
 
-                    }.start()
+                    }
 
                     return true
 

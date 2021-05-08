@@ -396,25 +396,6 @@ object User{
 
     }
 
-    fun taxMail(){
-        for (rg in Region.map()){
-            val uuid = rg.value.ownerUUID?:continue
-
-            val tax = City.getTax(City.where(rg.value.teleport),rg.key)
-            if (tax == 0.0)continue
-
-            Bukkit.getScheduler().runTask(plugin, Runnable {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                        "mmail send-tag Man10RealEstate ${Bukkit.getOfflinePlayer(uuid).name} &4&l[重要]土地の税金について 5 " +
-                                "&6&l税額:$tax;" +
-                                "&e&l土地ID:${rg.key};;" +
-                                "&6&e来月お支払いお願いします")
-
-            })
-        }
-
-    }
-
     fun tax(){
         Bukkit.getLogger().info("税金の徴収開始")
         for (rg in Region.map()){

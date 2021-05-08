@@ -134,14 +134,6 @@ class Plugin : JavaPlugin(), Listener {
                     isTax = false
                 }
 
-                //税金メール(25日9時)
-                if (minute == 0 && hour == 9 && day == 25 && !isTaxMail){
-                    User.taxMail()
-                    isTaxMail = true
-                }else if (minute != 0){
-                    isTaxMail = false
-                }
-
                 Thread.sleep(10000)
 
             }
