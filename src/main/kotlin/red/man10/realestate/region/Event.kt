@@ -81,7 +81,7 @@ object Event :Listener{
         if (lore.size>=5){
             lore[0] = ("§aOwner:§f${p.name}")
             lore[1] = ("§aServer:§f$serverName")
-            lore[2] = ("§aWorld:§f$p.world.name")
+            lore[2] = ("§aWorld:§f${p.world.name}")
             lore[3] = ("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
         }else{
             lore.add("§aOwner:§f${p.name}")
@@ -297,8 +297,6 @@ object Event :Listener{
         if (!e.hasBlock())return
 
         val p = e.player
-
-
 
         if (e.hasBlock()&&e.clickedBlock!!.state is Sign){ return }
 
