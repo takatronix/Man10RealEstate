@@ -1,10 +1,7 @@
 package red.man10.realestate
 
 import org.bukkit.Location
-import org.bukkit.block.Barrel
-import org.bukkit.block.Block
 import org.bukkit.entity.Player
-import org.bukkit.inventory.Inventory
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
