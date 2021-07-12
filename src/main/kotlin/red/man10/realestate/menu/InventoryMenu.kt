@@ -1,12 +1,11 @@
 package red.man10.realestate.menu
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
+import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.region.Region
@@ -286,13 +285,13 @@ object InventoryMenu {
 
         inventory.setItem(22, loadItem)
 
-        GlobalScope.launch {
+        es.execute {
             val list = User.loadUsers(id, page)
 
             if (list == null) {
                 sendMessage(p, "§c§lこの土地には住人がいないようです")
                 CustomInventory.close(p)
-                return@launch
+                return@execute
             }
 
             inventory.remove(loadItem)
@@ -314,13 +313,13 @@ object InventoryMenu {
 
                 meta.setDisplayName("§6§l${user.name}")
                 meta.lore = mutableListOf(
-                        if (user.isOnline) {
-                            "§aOnline"
-                        } else {
-                            "§4§lOffline"
-                        },
-                        "§7§lステータス:${userData.status}",
-                        "§8§l賃料:${userData.rent}"
+                    if (user.isOnline) {
+                        "§aOnline"
+                    } else {
+                        "§4§lOffline"
+                    },
+                    "§7§lステータス:${userData.status}",
+                    "§8§l賃料:${userData.rent}"
                 )
 
                 head.itemMeta = meta
@@ -394,7 +393,7 @@ object InventoryMenu {
 
         inventory.setItem(22, loadItem)
 
-        GlobalScope.launch {
+        es.execute {
             val data = cache[Pair(uuid, id)] ?: User.get(uuid, id)!!
 
             val backBtn = back.clone()
@@ -430,7 +429,6 @@ object InventoryMenu {
             if (cache[Pair(uuid, id)] == null) {
                 cache[Pair(uuid, id)] = data
             }
-
         }
 
         p.openInventory(inventory)

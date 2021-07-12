@@ -1,7 +1,5 @@
 package red.man10.realestate
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -618,19 +616,20 @@ object Command:CommandExecutor {
                     if (args[1] == "add"){
                         disableWorld.add(args[2])
 
-                        GlobalScope.launch {
+                        es.execute {
                             plugin.config.set("disableWorld", disableWorld)
                             plugin.saveConfig()
                             sendMessage(sender,"追加完了！")
-
                         }
                     }
                     if (args[1] == "remove"){
                         disableWorld.remove(args[2])
-                        GlobalScope.launch {
+
+                        es.execute {
                             plugin.config.set("disableWorld", disableWorld)
                             plugin.saveConfig()
                             sendMessage(sender,"削除完了！")
+
                         }
                     }
                 }
