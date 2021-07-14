@@ -1,5 +1,6 @@
 package red.man10.realestate.menu
 
+import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -14,7 +15,7 @@ import kotlin.collections.HashMap
 
 object CustomInventory{
 
-    val invMap = HashMap<Player,InventoryID>()
+    private val invMap = HashMap<Player,InventoryID>()
 
     fun open(p:Player,id:InventoryID){
         invMap[p] = id
@@ -42,7 +43,7 @@ object CustomInventory{
     fun IS(type:Material,name:String,lore:MutableList<String>):ItemStack{
         val item = ItemStack(type)
         val meta = item.itemMeta
-        meta.setDisplayName(name)
+        meta.displayName(text(name))
         meta.lore = lore
         item.itemMeta = meta
         return item
@@ -51,7 +52,7 @@ object CustomInventory{
     fun IS(type:Material,name:String,lore:MutableList<String>,id:Int):ItemStack{
         val item = ItemStack(type)
         val meta = item.itemMeta
-        meta.setDisplayName(name)
+        meta.displayName(text(name))
         meta.lore = lore
         item.itemMeta = meta
 
@@ -63,7 +64,7 @@ object CustomInventory{
     fun IS(type:Material,name:String,lore:MutableList<String>,uuid:UUID,id:Int):ItemStack{
         val item = ItemStack(type)
         val meta = item.itemMeta
-        meta.setDisplayName(name)
+        meta.displayName(text(name))
         meta.lore = lore
         item.itemMeta = meta
 
@@ -76,7 +77,7 @@ object CustomInventory{
     fun IS(type:Material,name:String):ItemStack{
         val item = ItemStack(type)
         val meta = item.itemMeta
-        meta.setDisplayName(name)
+        meta.displayName(text(name))
         item.itemMeta = meta
         return item
     }
@@ -105,7 +106,7 @@ object CustomInventory{
     }
 
     fun createInventory(slot:Int, title:String): Inventory {
-        return Bukkit.createInventory(null,slot, prefix + title)
+        return Bukkit.createInventory(null,slot, text(prefix + title))
     }
     enum class InventoryID{
 
