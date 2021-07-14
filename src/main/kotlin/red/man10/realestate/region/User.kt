@@ -2,9 +2,9 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import red.man10.man10bank.MySQLManager.Companion.mysqlQueue
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin.Companion.mysqlQueue
-import red.man10.realestate.Plugin.Companion.offlineBank
+import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility.sendMessage
 import java.util.*
@@ -224,7 +224,7 @@ object User{
     /**
      * ユーザーデータの保存
      */
-    fun save(p:Player,id:Int){
+    private fun save(p:Player,id:Int){
 
         val data = get(p,id)?:return
 
@@ -245,7 +245,7 @@ object User{
     /**
      * @return いいねしてるかどうか
      */
-    fun isLike(p:Player, id:Int):Boolean{
+    private fun isLike(p:Player, id:Int):Boolean{
 
         val data = likeData[p]
 
@@ -355,13 +355,13 @@ object User{
         val rg = Region.get(id)?:return false
         val owner = rg.ownerUUID
 
-        if (!offlineBank.withdraw(p,rent,"Man10RealEstate Rent")){
+        if (!bank.withdraw(p,rent,"Man10RealEstate Rent")){
             mysqlQueue.add("UPDATE `region_user` SET status='Lock' WHERE uuid='$p' AND region_id=$id;")
             return false
         }
 
         if (owner !=null){
-            offlineBank.deposit(owner,rent,"Man10RealEstate RentProfit")
+            bank.deposit(owner,rent,"Man10RealEstate RentProfit")
         }
 
         mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$p' AND region_id=$id;")

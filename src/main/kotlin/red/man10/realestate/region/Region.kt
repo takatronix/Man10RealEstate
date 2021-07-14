@@ -4,9 +4,8 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin
-import red.man10.realestate.Plugin.Companion.mysqlQueue
-import red.man10.realestate.Plugin.Companion.offlineBank
+import red.man10.realestate.MySQLManager.Companion.mysqlQueue
+import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Plugin.Companion.vault
@@ -112,15 +111,6 @@ object Region {
     }
 
     /**
-     * set teleport location
-     */
-    fun setTeleport(id:Int,tp:Location){
-        val data = get(id)?:return
-        data.teleport = tp
-        set(id,data)
-    }
-
-    /**
      * set status
      */
     fun setStatus(id:Int,status:String){
@@ -187,7 +177,7 @@ object Region {
 //        return -1
 //    }
 
-    fun setRegionTeleport(id:Int,tp:Location){
+    fun setTeleport(id:Int, tp:Location){
 
         val data = regionData[id]?:return
 
@@ -205,27 +195,27 @@ object Region {
      */
     fun save(id:Int,data:RegionData){
 
-        mysqlQueue.add("UPDATE region t SET " +
-                "t.owner_uuid = '${data.ownerUUID}', " +
-                "t.owner_name = '${if (data.ownerUUID == null)null
+        mysqlQueue.add("UPDATE region SET " +
+                "owner_uuid = '${data.ownerUUID}', " +
+                "owner_name = '${if (data.ownerUUID == null)null
                 else{Bukkit.getOfflinePlayer(data.ownerUUID!!).name}}', " +
-                "t.x = ${data.teleport.x}," +
-                " t.y = ${data.teleport.y}, " +
-                "t.z = ${data.teleport.z}, " +
-                "t.pitch = ${data.teleport.pitch}, " +
-                "t.yaw = ${data.teleport.yaw}, " +
-                "t.sx = ${data.startPosition.first}, " +
-                "t.sy = ${data.startPosition.second}, " +
-                "t.sz = ${data.startPosition.third}, " +
-                "t.ex = ${data.endPosition.first}, " +
-                "t.ey = ${data.endPosition.second}, " +
-                "t.ez = ${data.endPosition.third}, " +
-                "t.status = '${data.status}', " +
-                "t.price = ${data.price}, " +
-                "t.profit = 0, " +
-                "t.span = ${data.span}," +
-                "t.remit_tax = ${if (data.isRemitTax) 1 else 0} " +
-                "WHERE t.id = $id")
+                "x = ${data.teleport.x}," +
+                "y = ${data.teleport.y}, " +
+                "z = ${data.teleport.z}, " +
+                "pitch = ${data.teleport.pitch}, " +
+                "yaw = ${data.teleport.yaw}, " +
+                "sx = ${data.startPosition.first}, " +
+                "sy = ${data.startPosition.second}, " +
+                "sz = ${data.startPosition.third}, " +
+                "ex = ${data.endPosition.first}, " +
+                "ey = ${data.endPosition.second}, " +
+                "ez = ${data.endPosition.third}, " +
+                "status = '${data.status}', " +
+                "price = ${data.price}, " +
+                "profit = 0, " +
+                "span = ${data.span}," +
+                "remit_tax = ${if (data.isRemitTax) 1 else 0} " +
+                "WHERE id = $id")
 
     }
 
@@ -321,7 +311,7 @@ object Region {
         vault.withdraw(p.uniqueId,data.price)
 
         if (data.ownerUUID != null){
-            offlineBank.deposit(data.ownerUUID!!,data.price,"Man10RealEstate RegionProfit")
+            bank.deposit(data.ownerUUID!!,data.price,"Man10RealEstate RegionProfit")
         }
 
         setOwner(id,p)

@@ -1,5 +1,6 @@
 package red.man10.realestate.region
 
+import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -24,7 +25,8 @@ import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Utility
-import red.man10.realestate.Utility.sendHoverText
+import red.man10.realestate.Utility.format
+import red.man10.realestate.Utility.sendClickMessage
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.User.Permission.*
 
@@ -43,14 +45,14 @@ object Event :Listener{
     /**
      * 看板のアップデート
      */
-    fun updateSign(sign: Sign, id:Int){
+    private fun updateSign(sign: Sign, id:Int){
 
         val data = Region.get(id)?:return
 
-        sign.setLine(0,"§eID:$id")
-        sign.setLine(1,data.name)
-        sign.setLine(2,"§d§l${Region.getOwner(data)}")
-        sign.setLine(3,"§b§l${data.status}")
+        sign.line(0, Component.text("§eID:$id"))
+        sign.line(1, Component.text(data.name))
+        sign.line(2,Component.text("§d§l${Region.getOwner(data)}"))
+        sign.line(3,Component.text("§b§l${data.status}"))
 
         sign.update()
 
@@ -140,14 +142,6 @@ object Event :Listener{
         val lines = e.lines
         val p = e.player
 
-        //間版でカラコを使うためのおまけ機能
-        if (p.hasPermission("mre.sign_color")){
-            e.setLine(0,e.lines[0].replace("&","§"))
-            e.setLine(1,e.lines[1].replace("&","§"))
-            e.setLine(2,e.lines[2].replace("&","§"))
-            e.setLine(3,e.lines[3].replace("&","§"))
-        }
-
         if (lines[0].indexOf("mre:") == 0){
 
             val id : Int
@@ -161,10 +155,10 @@ object Event :Listener{
 
             val data = Region.get(id)?:return
 
-            e.setLine(0,"§eID:$id")
-            e.setLine(1,data.name)
-            e.setLine(2,"§d§l${Region.getOwner(data)}")
-            e.setLine(3,"§b§l${data.status}")
+            e.line(0, Component.text("§eID:$id"))
+            e.line(1, Component.text(data.name))
+            e.line(2, Component.text("§d§l${Region.getOwner(data)}"))
+            e.line(3, Component.text("§b§l${data.status}"))
 
             sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
         }
@@ -208,18 +202,18 @@ object Event :Listener{
 
         sendMessage(p,"§a==========${data.name}§a§lの情報==========")
 
-        sendMessage(p,"§a土地名:${data.name}")
+//        sendMessage(p,"§a土地名:${data.name}")
         sendMessage(p,"§aID:$id")
         sendMessage(p,"§aステータス:${data.status}")
         sendMessage(p,"§aオーナー:${Region.getOwner(data)}")
-        sendMessage(p,"§a値段:${String.format("%,.1f",data.price)}")
+        sendMessage(p,"§a値段:${format(data.price)}")
 
         sendMessage(p,"§a==========================================")
 
-        sendHoverText(p,"§d§lいいねする！＝＞[いいね！]","§d§lいいね！","mre good $id")
+        sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id")
 
         if (data.status == "OnSale"){
-            sendHoverText(p,"§a§l土地の購入など＝＞[購入について]","§a値段:${String.format("%,.1f",data.price)}","mre buycheck $id")
+            sendClickMessage(p,"§a§l土地の購入など＝＞[購入について] §a値段:${format(data.price)}","mre buycheck $id")
         }
 
         updateSign(sign,id)

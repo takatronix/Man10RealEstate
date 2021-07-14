@@ -1,15 +1,13 @@
 package red.man10.realestate
 
-import com.google.gson.Gson
-import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.ComponentBuilder
-import net.md_5.bungee.api.chat.HoverEvent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent.runCommand
+import net.kyori.adventure.text.event.ClickEvent.suggestCommand
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import red.man10.realestate.Plugin.Companion.prefix
 
 object Utility {
-
-    val gson = Gson()
 
     ////////////////////////////////////////////////////////////
     //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
@@ -32,35 +30,24 @@ object Utility {
     }
 
     //ホバーテキスト、クリックイベント
-    fun sendHoverText(p: Player, text: String, hoverText: String, command: String) {
-        //////////////////////////////////////////
-        //      ホバーテキストとイベントを作成する
-        val hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(hoverText).create())
+    fun sendClickMessage(p: Player, text: String, command: String) {
 
-        //////////////////////////////////////////
-        //   クリックイベントを作成する
-        val clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$command")
-        val message = ComponentBuilder(Plugin.prefix +text).event(hoverEvent).event(clickEvent).create()
-        p.spigot().sendMessage(*message)
+        p.sendMessage(Component.text("$prefix$text").clickEvent(runCommand(command)))
+
     }
 
     //サジェストメッセージ
-    fun sendSuggest(p: Player, text: String?, command: String?) {
-
-        //////////////////////////////////////////
-        //   クリックイベントを作成する
-        var clickEvent: ClickEvent? = null
-        if (command != null) {
-            clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/$command")
-        }
-
-        val message = ComponentBuilder("${Plugin.prefix}$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()
-        p.spigot().sendMessage(*message)
+    fun sendSuggest(p: Player, text: String?, command: String) {
+        p.sendMessage(Component.text("${prefix}text").clickEvent(suggestCommand(command)))
     }
 
     //prefix付きのメッセージ
     fun sendMessage(player: Player, message: String) {
-        player.sendMessage("${Plugin.prefix} $message")
+        player.sendMessage("$prefix$message")
+    }
+
+    fun format(double: Double):String{
+        return String.format("%,.0f",double)
     }
 
 }

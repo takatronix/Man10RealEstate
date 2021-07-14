@@ -3,11 +3,10 @@ package red.man10.realestate.region
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import red.man10.man10bank.MySQLManager.Companion.mysqlQueue
 import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.MySQLManager
-import red.man10.realestate.Plugin.Companion.defaultPrice
-import red.man10.realestate.Plugin.Companion.mysqlQueue
-import red.man10.realestate.Plugin.Companion.offlineBank
+import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Utility
@@ -286,9 +285,10 @@ object City {
         if (city.tax == 0.0)return false
 
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
-        if (!offlineBank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
+        if (!bank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
-            Region.initRegion(id, defaultPrice)
+            //TODO:初期化された時の処理を考える
+            Region.initRegion(id,10000000.0)
 
             return false
 

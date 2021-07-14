@@ -7,6 +7,7 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.logging.Level
 
 /**
@@ -194,6 +195,32 @@ class MySQLManager(private val plugin: JavaPlugin, private val conName: String) 
 
         } catch (var4: SQLException) {
         }
+
+    }
+
+    companion object{
+
+        //キューにクエリを入れる
+        val mysqlQueue = LinkedBlockingQueue<String>()
+
+        ////////////////////////
+        //dbのクエリキュー
+        ////////////////////////
+        fun mysqlQueue(plugin:JavaPlugin){
+
+            Plugin.es.execute {
+                val sql = MySQLManager(plugin,"man10RealEstate Queue")
+                try{
+                    while (true){
+                        val take = mysqlQueue.take()
+                        sql.execute(take)
+                    }
+                }catch (e:InterruptedException){
+                }
+            }
+        }
+
+
 
     }
 }
