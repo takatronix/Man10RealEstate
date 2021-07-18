@@ -5,9 +5,7 @@
 
 package red.man10.realestate
 
-import org.bukkit.Material
 import org.bukkit.event.Listener
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.menu.InventoryListener
@@ -33,7 +31,6 @@ class Plugin : JavaPlugin(), Listener {
         const val WAND_NAME = "範囲指定ワンド"
 
         var prefix = "[§5Man10RealEstate§f]"
-
 
         //保護を無効にするワールド
         var disableWorld = mutableListOf<String>()

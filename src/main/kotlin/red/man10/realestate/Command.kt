@@ -1,5 +1,6 @@
 package red.man10.realestate
 
+import net.kyori.adventure.text.Component
 import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -563,7 +564,7 @@ object Command:CommandExecutor {
                 "wand" ->{
                     val wand = ItemStack(Material.STICK)
                     val meta = wand.itemMeta
-                    meta.setDisplayName(WAND_NAME)
+                    meta.displayName(Component.text(WAND_NAME))
                     wand.itemMeta = meta
                     sender.inventory.addItem(wand)
                     return true
