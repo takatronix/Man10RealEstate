@@ -112,6 +112,7 @@ class Plugin : JavaPlugin(), Listener {
         serverName = config.getString("server","paper")!!
         lastTax.time = config.getLong("lastTax")
         lastRent.time = config.getLong("lastRent")
+        Event.containerAmount = config.getInt("containerAmount",24)
 
         saveResource("config.yml", false)
 

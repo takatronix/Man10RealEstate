@@ -32,7 +32,7 @@ import red.man10.realestate.region.User.Permission.*
 
 object Event :Listener{
 
-    private const val maxAmount = 24
+    var containerAmount = 24
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
@@ -200,20 +200,19 @@ object Event :Listener{
             return
         }
 
-        sendMessage(p,"§a==========${data.name}§a§lの情報==========")
-
-//        sendMessage(p,"§a土地名:${data.name}")
-        sendMessage(p,"§aID:$id")
-        sendMessage(p,"§aステータス:${data.status}")
-        sendMessage(p,"§aオーナー:${Region.getOwner(data)}")
-        sendMessage(p,"§a値段:${format(data.price)}")
-
-        sendMessage(p,"§a==========================================")
+        sendMessage(p,"""
+            §a==========${data.name}§a§lの情報==========
+            §aID:$id
+            §aステータス:${data.status}
+            §aオーナー:${Region.getOwner(data)}
+            §a値段:${format(data.price)}
+            §a==========================================
+        """.trimIndent())
 
         sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id")
 
         if (data.status == "OnSale"){
-            sendClickMessage(p,"§a§l土地の購入など＝＞[購入について] §a値段:${format(data.price)}","mre buycheck $id")
+            sendClickMessage(p,"§a§l§n[土地を買う！] §e§l値段:${format(data.price)}","mre buycheck $id")
         }
 
         updateSign(sign,id)
@@ -248,7 +247,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location, BLOCK)){
-            sendMessage(p,"§cあなたにはこの場所でブロックを破壊する権限がありません！")
+            sendMessage(p,"§cこのブロックは壊すことができません！")
             e.isCancelled = true
         }
     }
@@ -260,11 +259,11 @@ object Event :Listener{
         val block = e.block
 
         if (!hasPermission(p,block.location,BLOCK)){
-            sendMessage(p,"§cあなたにはこの場所でブロックを設置する権限がありません！")
+            sendMessage(p,"§cここにブロックを置くことはできません！")
             e.isCancelled = true
         }
 
-        if (blockList.contains(block.type) && maxAmount< countChest(block)){
+        if (blockList.contains(block.type) && containerAmount< countChest(block)){
             sendMessage(p,"§cこのチャンクには、これ以上このブロックは置けません！")
             e.isCancelled = true
         }
@@ -273,14 +272,11 @@ object Event :Listener{
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerBucketEmpty(e: PlayerBucketEmptyEvent) {
         val p = e.player
-        val bucket = e.bucket
 
         if (!hasPermission(p, p.location, BLOCK)) {
 
-            if (bucket.toString().contains("WATER") || bucket.toString().contains("LAVA")) {
-                sendMessage(p,"§cあなたにはこの場所でブロックを設置する権限がありません！")
-                e.isCancelled = true
-            }
+            sendMessage(p,"§cここに水などを置くことはできません！")
+            e.isCancelled = true
 
         }
     }
@@ -295,20 +291,20 @@ object Event :Listener{
         if (e.hasBlock()&&e.clickedBlock!!.state is Sign){ return }
 
         if (!hasPermission(p,e.clickedBlock!!.location, DOOR)){
-            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
+            sendMessage(p,"§cこのブロックを触ることはできません！")
             e.isCancelled = true
             return
         }
 
         if (invList.contains(e.clickedBlock!!.type)){
             if (!hasPermission(p,e.clickedBlock!!.location, INVENTORY)){
-                sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
+                sendMessage(p,"§cこのブロックを触ることはできません！")
                 e.isCancelled = true
                 return
             }
         }else{
             if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
-                sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません！")
+                sendMessage(p,"§cこのブロックを触ることはできません！")
                 e.isCancelled = true
                 return
             }
@@ -322,7 +318,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location,BLOCK)){
-            sendMessage(p,"§cあなたにはこの場所で看板を設置する権限がありません")
+            sendMessage(p,"§cここに看板を置くことができません！")
             e.isCancelled = true
         }
 
@@ -335,7 +331,7 @@ object Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p,e.entity.location,BLOCK)){
-            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません")
+            sendMessage(p,"§cこのブロックを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -347,7 +343,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, e.rightClicked.location,DOOR)){
-            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません")
+            sendMessage(p,"§cこのブロックを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -361,7 +357,7 @@ object Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p, e.entity.location,DOOR)){
-            sendMessage(p,"§cあなたにはこの場所でブロックを触る権限がありません")
+            sendMessage(p,"§cこのブロックを触ることはできません！")
             e.isCancelled = true
         }
 
