@@ -165,18 +165,6 @@ object Region {
         set(id,data)
     }
 
-    /**
-     *
-     */
-//    fun where(loc:Location): Int {
-//        for (rg in regionData){
-//            if (Utility.isWithinRange(loc,rg.value.startPosition,rg.value.endPosition,rg.value.world)){
-//                return rg.key
-//            }
-//        }
-//        return -1
-//    }
-
     fun setTeleport(id:Int, tp:Location){
 
         val data = regionData[id]?:return
@@ -293,17 +281,22 @@ object Region {
             return
         }
 
+        if (data.status != "OnSale"){
+            sendMessage(p,"§4§lこの土地は販売されていません！")
+            return
+        }
+
         if (p.uniqueId == data.ownerUUID){
             sendMessage(p,"§c§lあなたはこの土地のオーナーです！")
             return
         }
 
         if (vault.getBalance(p.uniqueId) < data.price){
-            sendMessage(p,"§c§l所持金が足りません！")
+            sendMessage(p,"§c§l電子マネーが足りません！")
             return
         }
 
-        if (!City.canLive(id,p,true)){
+        if (!City.buyScore(id,p)){
             sendMessage(p,"あなたにはこの土地を買うためのスコアが足りません！")
             return
         }
@@ -317,7 +310,7 @@ object Region {
         setOwner(id,p)
         setStatus(id,"Protected")
 
-        sendMessage(p,"§a§l土地の購入成功！土地の保護がされました！")
+        sendMessage(p,"§a§l土地の購入成功！")
 
     }
 

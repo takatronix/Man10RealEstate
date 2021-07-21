@@ -54,13 +54,6 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    val data = Region.get(id)?:return false
-
-                    if (data.status != "OnSale"){
-                        sendMessage(sender,"§4§lこの土地は販売されていません！")
-                        return false
-                    }
-
                     es.execute {
                         Region.buy(sender,id)
                     }
@@ -149,7 +142,7 @@ object Command:CommandExecutor {
 
 
                     es.execute {
-                        if (!City.canLive(id,p,false)){
+                        if (!City.liveScore(id,p)){
                             sendMessage(sender,"ユーザーのスコアが足りません！")
                             return@execute
                         }

@@ -302,7 +302,7 @@ object User{
     /**
      * 賃料を徴収するかどうか
      */
-    fun changeRent(p:Player,id:Int,isRent:Boolean){
+    private fun changeRent(p:Player,id:Int,isRent:Boolean){
 
         val data = get(p,id)?:return
         data.isRent = isRent

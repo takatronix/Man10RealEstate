@@ -203,16 +203,8 @@ object City {
         set(id,data)
     }
 
-    /**
-     * 買うのに必要なスコアの変更
-     */
-    fun setBuyScore(id:Int, score:Int){
-        val data = get(id)?:return
-        data.buyScore = score
-        set(id,data)
-    }
 
-    fun canLive(regionId:Int,p:Player,isBuy:Boolean):Boolean{
+    fun liveScore(regionId:Int, p:Player):Boolean{
 
         val data = Region.get(regionId)?:return false
 
@@ -222,15 +214,24 @@ object City {
 
         val city = get(id)?:return false
 
-        when(isBuy){
-            true -> if (city.buyScore<=ScoreDatabase.getScore(p.uniqueId))return true
-            false ->if (city.liveScore<=ScoreDatabase.getScore(p.uniqueId))return true
-        }
-        return false
+        return city.liveScore<=ScoreDatabase.getScore(p.uniqueId)
+    }
+
+    fun buyScore(regionId:Int,p:Player):Boolean{
+
+        val data = Region.get(regionId)?:return false
+
+        val id = where(data.teleport)
+
+        if (id == -1)return false
+
+        val city = get(id)?:return false
+
+        return city.buyScore<=ScoreDatabase.getScore(p.uniqueId)
     }
 
     /**
-     * 買うのに必要なスコアの変更
+     * 住むのに必要なスコアの変更
      */
     fun setLiveScore(id:Int, score:Int){
         val data = get(id)?:return
@@ -239,30 +240,38 @@ object City {
     }
 
     /**
+     * 買うのに必要なスコアの変更
+     */
+    fun setBuyScore(id:Int, score:Int){
+        val data = get(id)?:return
+        data.buyScore = score
+        set(id,data)
+    }
+    /**
      * 現在のデータを保存する
      */
-    fun save(id:Int,data:CityData){
+    private fun save(id:Int,data:CityData){
 
-        mysqlQueue.add("UPDATE city t SET " +
-                "t.name = '${data.name}', " +
-                "t.server = '${data.server}', " +
-                "t.world = '${data.world}', " +
-                "t.x = ${data.teleport.x}, " +
-                "t.y = ${data.teleport.y}, " +
-                "t.z = ${data.teleport.z}, " +
-                "t.pitch = ${data.teleport.pitch}, " +
-                "t.yaw = ${data.teleport.yaw}, " +
-                "t.sx = ${data.startPosition.first}, " +
-                "t.sy = ${data.startPosition.second}, " +
-                "t.sz = ${data.startPosition.third}, " +
-                "t.ex = ${data.endPosition.first}, " +
-                "t.ey = ${data.endPosition.second}, " +
-                "t.ez = ${data.endPosition.third}, " +
-                "t.tax = ${data.tax}," +
-                "t.max_user = ${data.maxUser}," +
-                "t.buy_score= ${data.buyScore}," +
-                "t.live_score= ${data.liveScore}" +
-                " WHERE t.id = $id")
+        mysqlQueue.add("UPDATE city SET " +
+                "name = '${data.name}', " +
+                "server = '${data.server}', " +
+                "world = '${data.world}', " +
+                "x = ${data.teleport.x}, " +
+                "y = ${data.teleport.y}, " +
+                "z = ${data.teleport.z}, " +
+                "pitch = ${data.teleport.pitch}, " +
+                "yaw = ${data.teleport.yaw}, " +
+                "sx = ${data.startPosition.first}, " +
+                "sy = ${data.startPosition.second}, " +
+                "sz = ${data.startPosition.third}, " +
+                "ex = ${data.endPosition.first}, " +
+                "ey = ${data.endPosition.second}, " +
+                "ez = ${data.endPosition.third}, " +
+                "tax = ${data.tax}," +
+                "max_user = ${data.maxUser}," +
+                "buy_score= ${data.buyScore}," +
+                "live_score= ${data.liveScore}" +
+                " WHERE id = $id")
 
     }
 
