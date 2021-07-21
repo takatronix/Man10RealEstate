@@ -382,8 +382,8 @@ object Event :Listener{
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
                 if (rg.status == "Lock")return false
-                if (rg.status == "Danger")return true
                 if (rg.ownerUUID == p.uniqueId)return true
+                if (rg.status == "Danger")return true
 
                 val data = User.get(p,id)?:return false
 

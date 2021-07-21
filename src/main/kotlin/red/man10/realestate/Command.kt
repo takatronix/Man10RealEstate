@@ -883,16 +883,29 @@ object Command:CommandExecutor {
 
                 "livescore" ->{
                     if (args.size != 3)return false
-                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
 
-                    val id = args[1].toInt()
-                    val score= args[2].toInt()
+                    val id = args[1].toIntOrNull()?:return true
+                    val score= args[2].toIntOrNull()?:return true
 
                     City.setLiveScore(id,score)
 
                     sendMessage(sender,"§a§l設定完了！")
 
                     return  true
+
+                }
+
+                "unpaid" ->{//mreop unpaid cityId <amount>
+
+                    val id = args[1].toIntOrNull()?:return true
+                    val amount = args[2].toDoubleOrNull()?:return true
+
+                    val data = City.get(id)?:return true
+                    data.defaultPrice = amount
+
+                    City.set(id,data)
+
+                    sendMessage(sender,"§a§l設定完了！")
 
                 }
 

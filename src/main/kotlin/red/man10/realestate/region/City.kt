@@ -143,6 +143,8 @@ object City {
             data.buyScore = rs.getInt("buy_score")
             data.liveScore = rs.getInt("live_score")
 
+            data.defaultPrice = rs.getDouble("default_price")
+
             cityData[id] = data
 
             updateRegion(id)
@@ -270,7 +272,8 @@ object City {
                 "tax = ${data.tax}," +
                 "max_user = ${data.maxUser}," +
                 "buy_score= ${data.buyScore}," +
-                "live_score= ${data.liveScore}" +
+                "live_score= ${data.liveScore}," +
+                "default_price= ${data.defaultPrice}" +
                 " WHERE id = $id")
 
     }
@@ -296,8 +299,14 @@ object City {
         //支払えなかった場合(リージョンのオーナーがAdminに、住人は全退去)
         if (!bank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
-            //TODO:初期化された時の処理を考える
-            Region.initRegion(id,10000000.0)
+            if (city.defaultPrice == 0.0){
+                Region.setStatus(id,"Lock")
+
+            }else{
+                Region.initRegion(id,city.defaultPrice)
+            }
+
+//            Region.initRegion(id,10000000.0)
 
             return false
 
@@ -353,6 +362,8 @@ object City {
 
         var buyScore = 0
         var liveScore = 0
+
+        var defaultPrice = 0.0
 
         var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
         var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
