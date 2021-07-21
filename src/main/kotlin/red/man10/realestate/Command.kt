@@ -86,9 +86,9 @@ object Command:CommandExecutor {
                         §c§l値段：${format(data.price)}
                         §c§lID：${id}
                         §a§l現在のオーナー：${Region.getOwner(data)}
+                        "§e§l本当に購入しますか？(購入しない場合は無視してください)"
                     """.trimIndent())
 
-                    sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
                     sendClickMessage(sender,"§a§l[購入する](§6§l電子マネー${format(data.price)}円)","mre buy $id")
 
                     return true
@@ -110,7 +110,6 @@ object Command:CommandExecutor {
                     if (!hasPermission(sender,USER))return false
 
                     if (args.size != 3){
-//                        sendMessage(sender,"§c§l入力方法に問題があります！")
                         sendMessage(sender,"§c§l/mre adduser <ID> <ユーザー名>")
                         return false
                     }
@@ -125,16 +124,16 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    val maxUser = City.getMaxUser(City.where(data.teleport))
-
-                    if (Region.getUsers(id)> maxUser){
-                        sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${maxUser}人)")
-                        return false
-                    }
+//                    val maxUser = City.getMaxUser(City.where(data.teleport))
+//
+//                    if (Region.getUsers(id)> maxUser){
+//                        sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${maxUser}人)")
+//                        return false
+//                    }
 
                     val p = Bukkit.getPlayer(args[2])
 
-                    if (p == null ){
+                    if (p == null){
                         sendMessage(sender,"§c§lユーザーがオフラインの可能性があります！")
                         return false
                     }
@@ -159,11 +158,12 @@ object Command:CommandExecutor {
 
                         numbers.add(number)
 
-
-                        sendMessage(p,"§a§l=================土地の情報==================")
-                        sendMessage(p,"§a§lオーナー：${sender.name}")
-                        sendMessage(p,"§a§l土地のID：$id")
-                        sendMessage(p,"§a§l===========================================")
+                        sendMessage(p,"""
+                            §a§l=================土地の情報==================
+                            §a§lオーナー：${sender.name}
+                            §a§l土地のID：$id
+                            §a§l===========================================
+                        """.trimIndent())
 
                         sendClickMessage(p,"§e§l住人になる場合は§nここを§e§lクリック！","mre acceptuser $id ${sender.name} $number")
 
@@ -182,11 +182,11 @@ object Command:CommandExecutor {
 
                     if (args.size != 4)return false
 
-                    val num = args[3].toIntOrNull()?:return false
+                    val number = args[3].toIntOrNull()?:return false
 
-                    if (!numbers.contains(num))return false
+                    if (!numbers.contains(number))return false
 
-                    numbers.remove(num)
+                    numbers.remove(number)
 
                     User.create(sender,args[1].toInt())
 
@@ -211,13 +211,13 @@ object Command:CommandExecutor {
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null){
-                        sendMessage(sender,"§c§l住人がオフラインなので退去できません！")
+                        sendMessage(sender,"§c§l住人がオフラインなので退去させられません！")
                         return false
                     }
 
                     User.remove(p,id)
 
-                    sendMessage(sender,"§a§l退去完了！")
+                    sendMessage(sender,"§a§l退去できました！")
                     return true
 
                 }
@@ -273,7 +273,7 @@ object Command:CommandExecutor {
                     val data = Region.get(id)?:return false
 
                     if (!Utility.isWithinRange(loc,data.startPosition,data.endPosition,data.world,data.server)){
-                        sendMessage(sender,"§c土地の外にテレポートポイントを設定することはできません")
+                        sendMessage(sender,"§c土地の外にテレポートポイントを登録することはできません")
                         return true
                     }
 
@@ -289,15 +289,13 @@ object Command:CommandExecutor {
 
                     if (args.size != 4)return false
 
-                    if (!NumberUtils.isNumber(args[3]))return false
-
                     val id = args[1].toIntOrNull()?:return false
                     val rent = args[3].toDoubleOrNull()
 
                     if (!hasRegionPermission(sender,id))return false
 
                     if (rent == null || rent< 0.0){
-                        sendMessage(sender,"賃料の設定に問題があります！")
+                        sendMessage(sender,"金額の設定に問題があります！")
                         return true
                     }
 
@@ -312,7 +310,7 @@ object Command:CommandExecutor {
 
                     sendMessage(sender,"§a§l設定完了！")
                     //TODO:賃料に関して、初心者にわかりやすく説明する
-                    sendMessage(p,"§a§lID:$id　の賃料が変更されました！  賃料:$rent")
+                    sendMessage(p,"§a§lID:$id　の賃料が変更されました！賃料:$rent")
 
                     return true
 
@@ -348,9 +346,12 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id))return false
 
-                    val price = args[2].toDouble()
+                    val price = args[2].toDoubleOrNull()
 
-                    if (price <0.0)return false
+                    if (price==null || price <0.0){
+                        sendMessage(sender,"金額の設定に問題があります！")
+                        return false
+                    }
 
                     Region.setPrice(id,price)
 
@@ -363,9 +364,7 @@ object Command:CommandExecutor {
 
                     if (args.size < 2)return false
 
-                    if (!NumberUtils.isNumber(args[1]))return false
-
-                    val id = args[1].toInt()
+                    val id = args[1].toIntOrNull()?:return true
 
                     val data = Region.get(id)?:return true
 
@@ -415,7 +414,6 @@ object Command:CommandExecutor {
 
                 else ->{
                     sendMessage(sender,"§c§l不明なコマンドです！")
-
                     return false
 
                 }
