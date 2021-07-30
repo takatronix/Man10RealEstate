@@ -61,8 +61,8 @@ object InventoryMenu {
 
             val icon = IS(Material.PAPER, rg.name, mutableListOf(
                     "§e§lID:$id",
-                    "§b§lOWNER:${Region.getOwner(rg)}",
-                    "§a§lStatus:${rg.status}",
+                    "§b§lオーナー:${Region.getOwner(rg)}",
+                    "§a§lステータス:${rg.status}",
                     "§fX:${rg.teleport.blockX}",
                     "§fY:${rg.teleport.blockY}",
                     "§fZ:${rg.teleport.blockZ}"
@@ -181,9 +181,9 @@ object InventoryMenu {
         inv.setItem(0, back)
         inv.setItem(11, IS(Material.PAPER, "§f§l土地の詳細設定", mutableListOf(
                 "§f§l現在の設定",
-                "§7§lStatus:${data.status}",
-                "§8§lPrice:${data.price}",
-                "§7§lSpan:${
+                "§7§lステータス:${data.status}",
+                "§8§l値段:${data.price}",
+                "§7§l支払いスパン:${
                     when (data.span) {
                         0 -> "一ヶ月ごと"
                         1 -> "一週間ごと"
@@ -320,9 +320,9 @@ object InventoryMenu {
                 meta.displayName(Component.text("§6§l${user.name}"))
                 meta.lore = mutableListOf(
                     if (user.isOnline) {
-                        "§aOnline"
+                        "§aオンライン"
                     } else {
-                        "§4§lOffline"
+                        "§4§lオフライン"
                     },
                     "§7§lステータス:${userData.status}",
                     "§8§l賃料:${userData.rent}"

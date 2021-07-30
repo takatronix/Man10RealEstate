@@ -32,7 +32,7 @@ object Utility {
     //ホバーテキスト、クリックイベント
     fun sendClickMessage(p: Player, text: String, command: String) {
 
-        p.sendMessage(Component.text("$prefix$text").clickEvent(runCommand(command)))
+        p.sendMessage(Component.text("$prefix$text").clickEvent(runCommand("/$command")))
 
     }
 

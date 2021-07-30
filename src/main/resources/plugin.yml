@@ -1,15 +1,15 @@
 name: Man10RealEstate
 version: 1.0
 main: red.man10.realestate.Plugin
-api-version: 1.16
-prefix: Man10Builder
+api-version: 1.17
+prefix: Man10RealEstate
 authors: [takatronix,forest611]
 description: Man10 Real Estate Plugin
 softdepend:
   - Man10CommonLibs
 depend:
   - Vault
-  - Man10OfflineBank
+  - Man10Bank
 commands:
   mre:
     default: op

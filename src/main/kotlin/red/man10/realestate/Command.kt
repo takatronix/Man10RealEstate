@@ -76,10 +76,10 @@ object Command:CommandExecutor {
                     }
 
                     sendMessage(sender,"""
-                        §c§l値段：${format(data.price)}
-                        §c§lID：${id}
-                        §a§l現在のオーナー：${Region.getOwner(data)}
-                        "§e§l本当に購入しますか？(購入しない場合は無視してください)"
+                        ${Plugin.prefix}§c§l値段：${format(data.price)}
+                        ${Plugin.prefix}§c§lID：${id}
+                        ${Plugin.prefix}§a§l現在のオーナー：${Region.getOwner(data)}
+                        ${Plugin.prefix}§e§l本当に購入しますか？(購入しない場合は無視してください)
                     """.trimIndent())
 
                     sendClickMessage(sender,"§a§l[購入する](§6§l電子マネー${format(data.price)}円)","mre buy $id")
@@ -152,10 +152,10 @@ object Command:CommandExecutor {
                         numbers.add(number)
 
                         sendMessage(p,"""
-                            §a§l=================土地の情報==================
-                            §a§lオーナー：${sender.name}
-                            §a§l土地のID：$id
-                            §a§l===========================================
+                            ${Plugin.prefix}§a§l=================土地の情報==================
+                            ${Plugin.prefix}§a§lオーナー：${sender.name}
+                            ${Plugin.prefix}§a§l土地のID：$id
+                            ${Plugin.prefix}§a§l===========================================
                         """.trimIndent())
 
                         sendClickMessage(p,"§e§l住人になる場合は§nここを§e§lクリック！","mre acceptuser $id ${sender.name} $number")

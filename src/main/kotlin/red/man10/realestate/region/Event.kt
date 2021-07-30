@@ -23,6 +23,7 @@ import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
+import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.format
@@ -200,14 +201,12 @@ object Event :Listener{
             return
         }
 
-        sendMessage(p,"""
-            §a==========${data.name}§a§lの情報==========
-            §aID:$id
-            §aステータス:${data.status}
-            §aオーナー:${Region.getOwner(data)}
-            §a値段:${format(data.price)}
-            §a==========================================
-        """.trimIndent())
+        sendMessage(p,"§a==========${data.name}§a§lの情報==========")
+        sendMessage(p,"§aID:$id")
+        sendMessage(p,"§aステータス:${data.status}")
+        sendMessage(p,"§aオーナー:${Region.getOwner(data)}")
+        sendMessage(p,"§a値段:${format(data.price)}")
+        sendMessage(p,"§a==========================================")
 
         sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id")
 
