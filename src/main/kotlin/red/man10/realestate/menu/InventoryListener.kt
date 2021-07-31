@@ -49,7 +49,7 @@ object InventoryListener : Listener{
 
             BOOKMARK ->{
 
-                if (slot <45)return
+//                if (slot <45)return
 
                 when(CustomInventory.getData(item,"type")){
                     "back" ->InventoryMenu.mainMenu(p)
@@ -64,6 +64,9 @@ object InventoryListener : Listener{
 
                     }
                 }
+
+                val id = CustomInventory.getData(item,"id").toIntOrNull()?:return
+                p.performCommand("mre tp $id")
 
             }
 
