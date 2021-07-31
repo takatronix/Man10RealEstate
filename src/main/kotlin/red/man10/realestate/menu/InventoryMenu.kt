@@ -129,7 +129,7 @@ object InventoryMenu {
 
             val icon = IS(Material.PAPER, rg.name, mutableListOf(
                     "§e§lID:${list[i]}",
-                    "§a§lStatus:${rg.status}"
+                    "§a§lStatus:${formatStatus(rg.status)}"
             ))
 
             setData(icon, "id", "${list[i]}")
