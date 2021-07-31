@@ -200,7 +200,7 @@ object Command:CommandExecutor {
                         }
                     }
 
-                    User.create(sender,data.id)
+                    User.create(sender,data.id,data.rent)
 
                     sendMessage(sender,"§a§lあなたは住人になりました！")
 

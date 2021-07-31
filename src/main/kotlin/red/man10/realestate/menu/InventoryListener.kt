@@ -8,6 +8,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import red.man10.realestate.Utility
+import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.InventoryMenu.cache
 import red.man10.realestate.region.User
@@ -38,7 +39,7 @@ object InventoryListener : Listener{
                     1 -> InventoryMenu.openRegionList(p,0)
                     4 -> InventoryMenu.openBookmark(p,0)
                     7 -> {
-                        p.closeInventory()
+                        CustomInventory.close(p)
                         p.performCommand("mre balance")
                     }
                     else ->return
@@ -104,6 +105,7 @@ object InventoryListener : Listener{
                     13 -> InventoryMenu.userList(p,id,0)
                     15 -> {
                         CustomInventory.close(p)
+                        sendMessage(p,"§a§l/mre adduser $id <住人の名前> <賃料支払う場合のみ)>")
                         Utility.sendSuggest(p,"§a§l住人を追加する","mre adduser $id ")
                         return
                     }

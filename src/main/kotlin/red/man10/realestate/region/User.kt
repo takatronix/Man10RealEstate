@@ -94,20 +94,11 @@ object User{
     /**
      * 新規住人データを作成
      */
-    fun create(p:Player,id:Int){
+    fun create(p:Player,id:Int,rent: Double){
 
-        mysqlQueue.add("INSERT INTO `region_user` " +
-                "(`region_id`," +
-                " `uuid`," +
-                " `player`," +
-                " `created_time`," +
-                " `status`)" +
-                " VALUES " +
-                "('$id'," +
-                " '${p.uniqueId}'," +
-                " '${p.name}'," +
-                " now()," +
-                " 'Share');")
+        mysqlQueue.add("INSERT INTO region_user " +
+                "(region_id, player, uuid, created_time, status, is_rent, paid_date, rent) " +
+                "VALUES ($id, '${p.name}', '${p.uniqueId}', now(), 'Share', ${if (rent>0) 1 else 0}, now(), ${rent});")
 
         val data = UserData()
 
