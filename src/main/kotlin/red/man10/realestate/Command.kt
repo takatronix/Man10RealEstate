@@ -293,7 +293,6 @@ object Command:CommandExecutor {
                     User.setRentPrice(p,id,rent)
 
                     sendMessage(sender,"§a§l設定完了！")
-                    //TODO:賃料スパンを変えれるようにするか考える
                     sendMessage(p,"§a§lID:${id}の賃料が変更されました！賃料:$rent")
 
                     return true
@@ -361,39 +360,11 @@ object Command:CommandExecutor {
 
                 "balance" ->{
 
-                    //TODO:支払う税金を確認できるようにする
-//                    if (!hasPermission(sender, USER))return false
-//
-//                    val name = if (args.size >= 2 && hasPermission(sender,OP)){ args[1] }else {sender.uniqueId.toString()}
-//
-//                    es.execute {
-//                        val db = MySQLManager(plugin,"realestate")
-//
-//                        val rs = db.query("select id from region where owner_uuid='${name}' or owner_name='${name}';")?:return@execute
-//
-//                        val total = 0
-//                        var totalArea = 0
-//                        var totalTax = 0.0
-//
-//                        while (rs.next()){
-//
-//                            val id = rs.getInt("id")
-//
-//                            val rg = Region.get(id)!!
-//
-//                            val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
-//                            val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
-//
-//                            totalArea += (width*height).toInt()
-//                            totalTax += City.getTax(City.whereRegion(id),id)
-//                            total.inc()
-//
-//                        }
-//
-//                        sendMessage(sender,"§e§l所有してる土地の数:${total}")
-//                        sendMessage(sender,"§e§l所持してる土地の総面積:${totalArea}ブロック")
-//                        sendMessage(sender,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
-//                    }
+                    if (!hasPermission(sender, USER))return false
+
+                    es.execute {
+                        Region.showTaxAndRent(sender)
+                    }
 
                 }
 
@@ -403,8 +374,6 @@ object Command:CommandExecutor {
 
                 }
             }
-
-
         }
 
         if (label == "mreop"){

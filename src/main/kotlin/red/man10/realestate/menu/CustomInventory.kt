@@ -82,6 +82,14 @@ object CustomInventory{
         return item
     }
 
+    fun IS(type:Material,name:String,cmd:Int):ItemStack{
+        val item = IS(type,name)
+        val meta =item.itemMeta
+        meta.setCustomModelData(cmd)
+        item.itemMeta = meta
+        return item
+    }
+
     /**
      * ItemStackにNBTのデータを埋め込む
      * @param key データを取得するキー

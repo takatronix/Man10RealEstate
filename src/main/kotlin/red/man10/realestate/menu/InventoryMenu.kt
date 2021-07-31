@@ -34,8 +34,8 @@ object InventoryMenu {
         val inv = CustomInventory.createInventory(9, "§a§lメインメニュー")
 
         inv.setItem(1, IS(Material.PAPER, "§f§l自分が管理できる土地の管理をする"))
-        inv.setItem(4, IS(Material.NETHER_STAR, "§f§lいいねした土地を確認する"))
-        inv.setItem(7, IS(Material.STONE, ""))
+        inv.setItem(4, IS(Material.NETHER_STAR, "§f§lいいねした土地をみる"))
+        inv.setItem(7, IS(Material.NETHERITE_INGOT, "§e§l支払う税金を見る",1))
 
         p.openInventory(inv)
         CustomInventory.open(p, MAIN_MENU)

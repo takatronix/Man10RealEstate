@@ -10,8 +10,13 @@ import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility.sendMessage
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.Map
+import kotlin.collections.mutableListOf
+import kotlin.collections.set
+import kotlin.collections.toMap
 
 object Region {
 
@@ -347,6 +352,64 @@ object Region {
         rs.close()
         mysql.close()
         return users
+    }
+
+    fun showTaxAndRent(p:Player){
+        val db = MySQLManager(plugin,"realestate")
+
+        val rs1 = db.query("select id from region where owner_uuid='${p.name}' or owner_name='${p.name}';")?:return
+
+        var total = 0
+        var totalArea = 0
+        var totalTax = 0.0
+
+        while (rs1.next()){
+
+            val id = rs1.getInt("id")
+
+            val rg = get(id)!!
+
+            val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
+            val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
+
+            totalArea += (width*height).toInt()
+            totalTax += City.getTax(City.whereRegion(id),id)
+            total++
+
+        }
+
+        rs1.close()
+        db.close()
+
+        sendMessage(p,"§e§l所有してる土地の数:${total}")
+        sendMessage(p,"§e§l所持してる土地の総面積:${totalArea}ブロック")
+        sendMessage(p,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
+
+
+        val rs2 = db.query("select id,rent,paid_date from region_user where uuid='${p.uniqueId}' and is_rent=1 and rent>0;")?:return
+
+        while (rs2.next()){
+
+            val id = rs2.getInt("id")
+            val rent = rs2.getDouble("rent")
+            val paid = Calendar.getInstance()
+            paid.time = rs2.getDate("paid_date")
+
+            val rg = get(id)!!
+
+            when(rg.span){
+                0 ->{paid.add(Calendar.DAY_OF_YEAR,30)}
+                1 ->{paid.add(Calendar.DAY_OF_YEAR,7)}
+                2 ->{paid.add(Calendar.DAY_OF_YEAR,1)}
+            }
+
+            sendMessage(p,"§e§lID:${id} 支払う賃料:$rent 支払日:${SimpleDateFormat("yyyy/MM/dd").format(paid)}")
+
+        }
+
+        rs2.close()
+        db.close()
+
     }
 
     class RegionData{

@@ -37,6 +37,10 @@ object InventoryListener : Listener{
 
                     1 -> InventoryMenu.openRegionList(p,0)
                     4 -> InventoryMenu.openBookmark(p,0)
+                    7 -> {
+                        p.closeInventory()
+                        p.performCommand("mre balance")
+                    }
                     else ->return
 
                 }
