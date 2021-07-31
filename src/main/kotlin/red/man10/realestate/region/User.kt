@@ -100,6 +100,10 @@ object User{
                 "(region_id, player, uuid, created_time, status, is_rent, paid_date, rent) " +
                 "VALUES ($id, '${p.name}', '${p.uniqueId}', now(), 'Share', ${if (rent>0) 1 else 0}, now(), ${rent});")
 
+        Bukkit.getLogger().info("INSERT INTO region_user " +
+                "(region_id, player, uuid, created_time, status, is_rent, paid_date, rent) " +
+                "VALUES ($id, '${p.name}', '${p.uniqueId}', now(), 'Share', ${if (rent>0) 1 else 0}, now(), ${rent});")
+
         val data = UserData()
 
 //        data.paid = Date()

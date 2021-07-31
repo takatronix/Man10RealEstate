@@ -127,7 +127,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    val rent = args[2].toDoubleOrNull()?:0.0
+                    val rent = args[3].toDoubleOrNull()?:0.0
                     val spanDisplay = when(data.span){
                         0 -> "一ヶ月ごと"
                         1 -> "一週間ごと"
@@ -199,6 +199,7 @@ object Command:CommandExecutor {
                             sendMessage(data.owner,"§c§l住人予定のプレイヤーが賃料を支払えませんでした")
                             return false
                         }
+                        bank.deposit(data.owner.uniqueId,data.rent,"Man10RealEstate RentProfit")
                     }
 
                     User.create(sender,data.id,data.rent)

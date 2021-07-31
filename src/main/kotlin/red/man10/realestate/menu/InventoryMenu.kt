@@ -413,25 +413,25 @@ object InventoryMenu {
                 Material.LIME_STAINED_GLASS_PANE
             } else {
                 Material.RED_STAINED_GLASS_PANE
-            }, "§3§l全権限", mutableListOf(), uuid, id))
+            }, "§3§l§n管理権限", mutableListOf(), uuid, id))
 
             inv.setItem(22, IS(if (data.allowBlock) {
                 Material.LIME_STAINED_GLASS_PANE
             } else {
                 Material.RED_STAINED_GLASS_PANE
-            }, "§3§lブロックの設置、破壊", mutableListOf(), uuid, id))
+            }, "§3ブロックの設置と破壊", mutableListOf(), uuid, id))
 
             inv.setItem(31, IS(if (data.allowInv) {
                 Material.LIME_STAINED_GLASS_PANE
             } else {
                 Material.RED_STAINED_GLASS_PANE
-            }, "§3§lチェストなどのインベントリを開く", mutableListOf(), uuid, id))
+            }, "§3チェストなどを開く", mutableListOf(), uuid, id))
 
             inv.setItem(40, IS(if (data.allowDoor) {
                 Material.LIME_STAINED_GLASS_PANE
             } else {
                 Material.RED_STAINED_GLASS_PANE
-            }, "§3§lドアなどの右クリック、左クリック(看板を除く)", mutableListOf(), uuid, id))
+            }, "§3ドアなどの右クリック", mutableListOf(), uuid, id))
 
             if (cache[Pair(uuid, id)] == null) {
                 cache[Pair(uuid, id)] = data
