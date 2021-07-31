@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import red.man10.realestate.Plugin.Companion.WAND_NAME
+import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.es
 import red.man10.realestate.Plugin.Companion.plugin
@@ -21,6 +22,16 @@ import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import java.util.*
+import kotlin.collections.HashMap
+
+
+class AddUserData{
+
+    var id = 0
+    var rent = 0.0
+    lateinit var owner : Player
+
+}
 
 object Command:CommandExecutor {
 
@@ -28,7 +39,7 @@ object Command:CommandExecutor {
     private const val GUEST = "mre.guest"
     const val OP = "mre.op"
 
-    private val numbers = mutableListOf<Int>()
+    private val userMap = HashMap<Player,AddUserData>()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -115,6 +126,13 @@ object Command:CommandExecutor {
                         return false
                     }
 
+                    val rent = args[2].toDoubleOrNull()?:0.0
+                    val spanDisplay = when(data.span){
+                        0 -> "一ヶ月ごと"
+                        1 -> "一週間ごと"
+                        2 -> "毎日"
+                        else -> "不明"
+                    }
 
                     val p = Bukkit.getPlayer(args[2])
 
@@ -132,24 +150,28 @@ object Command:CommandExecutor {
                         return false
                     }
 
-
                     es.execute {
                         if (!City.liveScore(id,p)){
                             sendMessage(sender,"ユーザーのスコアが足りません！")
                             return@execute
                         }
 
-                        val number = Random().nextInt()
-
-                        numbers.add(number)
-
-
                         sendMessage(p,"§a§l=================土地の情報==================")
                         sendMessage(p,"§a§lオーナー：${sender.name}")
                         sendMessage(p,"§a§l土地のID：$id")
+                        if (rent>0.0){
+                            sendMessage(p,"§a§l賃料：$rent スパン:${spanDisplay}")
+                            sendMessage(p,"§a§l住人になる場合、初回賃料を銀行から引き出されます！")
+                        }
                         sendMessage(p,"§a§l===========================================")
 
-                        sendClickMessage(p,"§e§l住人になる場合は§nここを§e§lクリック！","mre acceptuser $id ${sender.name} $number")
+                        val addData = AddUserData()
+                        addData.id = id
+                        addData.rent = rent
+                        addData.owner = sender
+                        userMap[p] = addData
+
+                        sendClickMessage(p,"§e§l住人になる場合は§nここを§e§lクリック！","mre acceptuser")
 
                         sendMessage(sender,"§a§l現在承諾待ちです....")
                         return@execute
@@ -164,19 +186,25 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,GUEST))return false
 
-                    if (args.size != 4)return false
+                    if (!userMap.keys.contains(sender))return false
 
-                    val number = args[3].toIntOrNull()?:return false
+                    val data = userMap[sender]?:return false
 
-                    if (!numbers.contains(number))return false
+                    userMap.remove(sender)
 
-                    numbers.remove(number)
+                    if (data.rent > 0.0){
+                        if (!bank.withdraw(sender.uniqueId,data.rent,"Man10RealEstate Rent")){
+                            sendMessage(sender,"§c§l銀行にお金がないので初回賃料を支払うことができませんでした！")
+                            sendMessage(data.owner,"§c§l住人予定のプレイヤーが賃料を支払えませんでした")
+                            return false
+                        }
+                    }
 
-                    User.create(sender,args[1].toInt())
+                    User.create(sender,data.id)
 
                     sendMessage(sender,"§a§lあなたは住人になりました！")
 
-                    sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が住人の入居に承諾しました！")
+                    sendMessage(data.owner,"§a§l${sender.name}が住人の入居に承諾しました！")
 
                     return true
 
