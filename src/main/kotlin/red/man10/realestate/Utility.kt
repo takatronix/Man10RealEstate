@@ -38,7 +38,7 @@ object Utility {
 
     //サジェストメッセージ
     fun sendSuggest(p: Player, text: String?, command: String) {
-        p.sendMessage(Component.text("${prefix}text").clickEvent(suggestCommand(command)))
+        p.sendMessage(Component.text("${prefix}$text§a§n[ここをクリック！]").clickEvent(suggestCommand("/$command")))
     }
 
     //prefix付きのメッセージ

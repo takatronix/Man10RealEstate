@@ -2,8 +2,8 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.man10bank.MySQLManager.Companion.mysqlQueue
 import red.man10.realestate.MySQLManager
+import red.man10.realestate.MySQLManager.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility.sendMessage
