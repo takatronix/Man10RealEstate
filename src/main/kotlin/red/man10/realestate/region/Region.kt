@@ -9,6 +9,7 @@ import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Plugin.Companion.vault
+import red.man10.realestate.Utility.format
 import red.man10.realestate.Utility.sendMessage
 import java.text.SimpleDateFormat
 import java.util.*
@@ -383,7 +384,7 @@ object Region {
 
         sendMessage(p,"§e§l所有してる土地の数:${total}")
         sendMessage(p,"§e§l所持してる土地の総面積:${totalArea}ブロック")
-        sendMessage(p,"§e§l翌月に支払う税額:${String.format("%,.1f",totalTax)}")
+        sendMessage(p,"§e§l翌月に支払う税額:${format(totalTax)}")
 
 
         val rs2 = db.query("select id,rent,paid_date from region_user where uuid='${p.uniqueId}' and is_rent=1 and rent>0;")?:return
@@ -403,7 +404,9 @@ object Region {
                 2 ->{paid.add(Calendar.DAY_OF_YEAR,1)}
             }
 
-            sendMessage(p,"§e§lID:${id} 支払う賃料:$rent 支払日:${SimpleDateFormat("yyyy/MM/dd").format(paid)}")
+            sendMessage(p,"§e§l=====================================================")
+
+            sendMessage(p,"§e§lID:${id} 支払う賃料:${format(rent)} 支払日:${SimpleDateFormat("yyyy/MM/dd").format(paid.time)}")
 
         }
 

@@ -105,7 +105,7 @@ object InventoryListener : Listener{
                     13 -> InventoryMenu.userList(p,id,0)
                     15 -> {
                         CustomInventory.close(p)
-                        sendMessage(p,"§a§l/mre adduser $id <住人の名前> <賃料支払う場合のみ)>")
+                        sendMessage(p,"§a§l/mre adduser $id <住人の名前> <賃料(支払う場合のみ)>")
                         Utility.sendSuggest(p,"§a§l住人を追加する","mre adduser $id ")
                         return
                     }

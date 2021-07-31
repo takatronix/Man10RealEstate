@@ -111,8 +111,8 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,USER))return false
 
-                    if (args.size != 3){
-                        sendMessage(sender,"§c§l/mre adduser <ID> <ユーザー名>")
+                    if (args.size < 3){
+                        sendMessage(sender,"§c§l/mre adduser <ID> <ユーザー名> <賃料(支払う場合のみ)>")
                         return false
                     }
                     val id = args[1].toIntOrNull()?:return false
