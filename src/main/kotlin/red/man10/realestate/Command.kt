@@ -115,12 +115,6 @@ object Command:CommandExecutor {
                         return false
                     }
 
-//                    val maxUser = City.getMaxUser(City.where(data.teleport))
-//
-//                    if (Region.getUsers(id)> maxUser){
-//                        sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${maxUser}人)")
-//                        return false
-//                    }
 
                     val p = Bukkit.getPlayer(args[2])
 
@@ -299,8 +293,8 @@ object Command:CommandExecutor {
                     User.setRentPrice(p,id,rent)
 
                     sendMessage(sender,"§a§l設定完了！")
-                    //TODO:賃料に関して、初心者にわかりやすく説明する
-                    sendMessage(p,"§a§lID:$id　の賃料が変更されました！賃料:$rent")
+                    //TODO:賃料スパンを変えれるようにするか考える
+                    sendMessage(p,"§a§lID:${id}の賃料が変更されました！賃料:$rent")
 
                     return true
 
@@ -312,14 +306,15 @@ object Command:CommandExecutor {
                     if (args.size != 3)return false
 
                     val id = args[1].toIntOrNull()?:return false
+                    val status = args[2]
 
                     if (!hasRegionPermission(sender,id))return false
 
-                    if (!hasPermission(sender,OP) && args[2]=="Lock"){ return true }
+                    if (!hasPermission(sender,OP) && status=="Lock"){ return true }
 
-                    Region.setStatus(id,args[2])
+                    Region.setStatus(id,status)
 
-                    sendMessage(sender,"§a§l${args[1]}のステータスを${args[2]}に変更しました")
+                    sendMessage(sender,"§a§l${id}のステータスを${status}に変更しました")
 
                     return true
 
@@ -771,8 +766,6 @@ object Command:CommandExecutor {
 
                     val uuid = Bukkit.getPlayer(args[1])?.uniqueId
 
-                    sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
-
                     if (uuid==null){
 
                         es.execute {
@@ -788,8 +781,6 @@ object Command:CommandExecutor {
                             rs.close()
                             mysql.close()
 
-                            sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
-
                         }
 
                         return true
@@ -798,7 +789,6 @@ object Command:CommandExecutor {
                         sendClickMessage(sender,"§e§lID:${rg}","mreop tp $rg")
                     }
 
-                    sendMessage(sender,"＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝")
                 }
 
                 "maxuser" ->{
