@@ -53,7 +53,7 @@ object Event :Listener{
         sign.line(0, Component.text("§eID:$id"))
         sign.line(1, Component.text(data.name))
         sign.line(2,Component.text("§d§l${Region.getOwner(data)}"))
-        sign.line(3,Component.text("§b§l${data.status}"))
+        sign.line(3,Component.text("§b§l${Region.formatStatus(data.status)}"))
 
         sign.update()
 
@@ -203,7 +203,7 @@ object Event :Listener{
 
         sendMessage(p,"§a==========${data.name}§a§lの情報==========")
         sendMessage(p,"§aID:$id")
-        sendMessage(p,"§aステータス:${data.status}")
+        sendMessage(p,"§aステータス:${Region.formatStatus(data.status)}")
         sendMessage(p,"§aオーナー:${Region.getOwner(data)}")
         sendMessage(p,"§a値段:${format(data.price)}")
         sendMessage(p,"§a==========================================")

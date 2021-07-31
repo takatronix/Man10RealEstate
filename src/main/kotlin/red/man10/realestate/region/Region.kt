@@ -415,6 +415,16 @@ object Region {
 
     }
 
+    fun formatStatus(status:String):String{
+        return when(status){
+            "Protected" -> "保護"
+            "OnSell" -> "販売中"
+            "Lock" -> "ロック"
+            "Free" -> "フリー"
+            else -> status
+        }
+    }
+
     class RegionData{
 
         var name = "RegionName"

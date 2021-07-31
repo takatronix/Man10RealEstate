@@ -20,6 +20,7 @@ import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
+import red.man10.realestate.region.Region.formatStatus
 import red.man10.realestate.region.User
 import java.util.*
 import kotlin.collections.HashMap
@@ -341,7 +342,7 @@ object Command:CommandExecutor {
 
                     Region.setStatus(id,status)
 
-                    sendMessage(sender,"§a§l${id}のステータスを${status}に変更しました")
+                    sendMessage(sender,"§a§l${id}のステータスを${formatStatus(status)}に変更しました")
 
                     return true
 

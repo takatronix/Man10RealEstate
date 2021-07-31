@@ -12,6 +12,7 @@ import red.man10.realestate.menu.CustomInventory.IS
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.CustomInventory.setData
 import red.man10.realestate.region.Region
+import red.man10.realestate.region.Region.formatStatus
 import red.man10.realestate.region.User
 import java.util.*
 import kotlin.collections.HashMap
@@ -62,7 +63,7 @@ object InventoryMenu {
             val icon = IS(Material.PAPER, rg.name, mutableListOf(
                     "§e§lID:$id",
                     "§b§lオーナー:${Region.getOwner(rg)}",
-                    "§a§lステータス:${rg.status}",
+                    "§a§lステータス:${formatStatus(rg.status)}",
                     "§fX:${rg.teleport.blockX}",
                     "§fY:${rg.teleport.blockY}",
                     "§fZ:${rg.teleport.blockZ}"
@@ -181,7 +182,7 @@ object InventoryMenu {
         inv.setItem(0, back)
         inv.setItem(11, IS(Material.PAPER, "§f§l土地の詳細設定", mutableListOf(
                 "§f§l現在の設定",
-                "§7§lステータス:${data.status}",
+                "§7§lステータス:${formatStatus(data.status)}",
                 "§8§l値段:${data.price}",
                 "§7§l支払いスパン:${
                     when (data.span) {
@@ -215,7 +216,7 @@ object InventoryMenu {
 
         inv.setItem(0, backBtn)
 
-        inv.setItem(10, IS(Material.COMPASS, "§e§lステータス", mutableListOf("§a現在のステータス：${rg.status}"), id))
+        inv.setItem(10, IS(Material.COMPASS, "§e§lステータス", mutableListOf("§a現在のステータス：${formatStatus(rg.status)}"), id))
         inv.setItem(13, IS(Material.EMERALD, "§e§l料金設定",
                 mutableListOf("§e現在の料金：${String.format("%,.1f", rg.price)}"), id)
         )
