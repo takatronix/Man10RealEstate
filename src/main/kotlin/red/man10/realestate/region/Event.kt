@@ -159,7 +159,7 @@ object Event :Listener{
             e.line(0, Component.text("§eID:$id"))
             e.line(1, Component.text(data.name))
             e.line(2, Component.text("§d§l${Region.getOwner(data)}"))
-            e.line(3, Component.text("§b§l${data.status}"))
+            e.line(3, Component.text("§b§l${Region.formatStatus(data.status)}"))
 
             sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
         }

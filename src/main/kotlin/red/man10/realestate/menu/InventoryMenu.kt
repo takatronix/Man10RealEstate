@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import red.man10.realestate.Plugin.Companion.es
+import red.man10.realestate.Utility.format
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.IS
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
@@ -64,6 +65,8 @@ object InventoryMenu {
                     "§e§lID:$id",
                     "§b§lオーナー:${Region.getOwner(rg)}",
                     "§a§lステータス:${formatStatus(rg.status)}",
+                    "§f§l=============座標==============",
+                    "§fワールド:${rg.teleport.world.name}",
                     "§fX:${rg.teleport.blockX}",
                     "§fY:${rg.teleport.blockY}",
                     "§fZ:${rg.teleport.blockZ}"
@@ -129,7 +132,7 @@ object InventoryMenu {
 
             val icon = IS(Material.PAPER, rg.name, mutableListOf(
                     "§e§lID:${list[i]}",
-                    "§a§lStatus:${formatStatus(rg.status)}"
+                    "§a§lステータス:${formatStatus(rg.status)}"
             ))
 
             setData(icon, "id", "${list[i]}")
@@ -183,7 +186,7 @@ object InventoryMenu {
         inv.setItem(11, IS(Material.PAPER, "§f§l土地の詳細設定", mutableListOf(
                 "§f§l現在の設定",
                 "§7§lステータス:${formatStatus(data.status)}",
-                "§8§l値段:${data.price}",
+                "§8§l値段:${format(data.price)}",
                 "§7§l支払いスパン:${
                     when (data.span) {
                         0 -> "一ヶ月ごと"
@@ -194,8 +197,8 @@ object InventoryMenu {
         ), id)
         )
 
-        inv.setItem(13, IS(Material.PLAYER_HEAD, "§b§l住人の管理", mutableListOf(), id))
-        inv.setItem(15, IS(Material.EMERALD_BLOCK, "§a§l住人の追加", mutableListOf(), id))
+        inv.setItem(13, IS(Material.PLAYER_HEAD, "§b§l住人を管理する", mutableListOf(), id))
+        inv.setItem(15, IS(Material.EMERALD_BLOCK, "§a§l住人を追加する", mutableListOf(), id))
 
         p.openInventory(inv)
         CustomInventory.open(p, REGION_MENU)
@@ -218,7 +221,7 @@ object InventoryMenu {
 
         inv.setItem(10, IS(Material.COMPASS, "§e§lステータス", mutableListOf("§a現在のステータス：${formatStatus(rg.status)}"), id))
         inv.setItem(13, IS(Material.EMERALD, "§e§l料金設定",
-                mutableListOf("§e現在の料金：${String.format("%,.1f", rg.price)}"), id)
+                mutableListOf("§e現在の料金：${format(rg.price)}"), id)
         )
 
         inv.setItem(16, IS(Material.ENDER_PEARL, "§a§lテレポート設定", mutableListOf("§a現在位置をテレポート地点にします"), id))
@@ -319,13 +322,8 @@ object InventoryMenu {
                 }
 
                 meta.displayName(Component.text("§6§l${user.name}"))
-                meta.lore = mutableListOf(
-                    if (user.isOnline) {
-                        "§aオンライン"
-                    } else {
-                        "§4§lオフライン"
-                    },
-                    "§7§lステータス:${userData.status}",
+                meta.lore = mutableListOf(if (user.isOnline) { "§aオンライン" } else { "§4§lオフライン" },
+                    "§7§lステータス:${if (userData.status=="Share") "§a§l共有されています" else "§c§lロックされています"}",
                     "§8§l賃料:${userData.rent}"
                 )
 

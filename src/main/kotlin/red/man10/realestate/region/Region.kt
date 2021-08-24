@@ -406,7 +406,7 @@ object Region {
 
             sendMessage(p,"§e§l=====================================================")
 
-            sendMessage(p,"§e§lID:${id} 支払う賃料:${format(rent)} 支払日:${SimpleDateFormat("yyyy/MM/dd").format(paid.time)}")
+            sendMessage(p,"§e§lID:${id} 支払う賃料:${format(rent)} 支払日:${SimpleDateFormat("yyyy-MM-dd").format(paid.time)}")
 
         }
 
@@ -417,8 +417,8 @@ object Region {
 
     fun formatStatus(status:String):String{
         return when(status){
-            "Protected" -> "保護"
-            "OnSell" -> "販売中"
+            "Protected" -> "保護されています"
+            "OnSale" -> "販売中"
             "Lock" -> "ロック"
             "Free" -> "フリー"
             else -> status
