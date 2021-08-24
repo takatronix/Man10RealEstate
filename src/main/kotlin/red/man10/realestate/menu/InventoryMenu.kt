@@ -6,7 +6,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import red.man10.realestate.Plugin.Companion.es
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Utility.format
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.IS
@@ -295,13 +295,13 @@ object InventoryMenu {
 
         inv.setItem(22, loadItem)
 
-        es.execute {
+        Bukkit.getScheduler().runTask(plugin,Runnable {
             val list = User.loadUsers(id, page)
 
             if (list == null) {
                 sendMessage(p, "§c§lこの土地には住人がいないようです")
                 CustomInventory.close(p)
-                return@execute
+                return@Runnable
             }
 
             inv.remove(loadItem)
@@ -367,7 +367,7 @@ object InventoryMenu {
                 }
             }
 
-        }
+        })
 
         p.openInventory(inv)
         CustomInventory.open(p, USER_LIST)
@@ -398,7 +398,7 @@ object InventoryMenu {
 
         inv.setItem(22, loadItem)
 
-        es.execute {
+        Bukkit.getScheduler().runTask(plugin,Runnable {
             val data = cache[Pair(uuid, id)] ?: User.get(uuid, id)!!
 
             val backBtn = back.clone()
@@ -434,7 +434,7 @@ object InventoryMenu {
             if (cache[Pair(uuid, id)] == null) {
                 cache[Pair(uuid, id)] = data
             }
-        }
+        })
 
         p.openInventory(inv)
         CustomInventory.open(p, USER_PERMISSION)

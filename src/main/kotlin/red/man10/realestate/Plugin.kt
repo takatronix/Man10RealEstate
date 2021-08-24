@@ -5,6 +5,7 @@
 
 package red.man10.realestate
 
+import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
@@ -24,7 +25,7 @@ class Plugin : JavaPlugin(), Listener {
 
         lateinit var bank : BankAPI
 
-        lateinit var es : ExecutorService
+//        lateinit var es : ExecutorService
 
         lateinit var vault : VaultManager
 
@@ -47,7 +48,7 @@ class Plugin : JavaPlugin(), Listener {
     override fun onEnable() { // Plugin startup logic
         saveDefaultConfig()
 
-        es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
+//        es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
         vault = VaultManager(this)
 
         bank = BankAPI(this)
@@ -68,7 +69,7 @@ class Plugin : JavaPlugin(), Listener {
         Region.load()
         City.load()
 
-        es.execute {
+        Bukkit.getScheduler().runTask(this,Runnable {
 
             val now = Calendar.getInstance()
 
@@ -101,7 +102,7 @@ class Plugin : JavaPlugin(), Listener {
                 saveConfig()
                 Thread.sleep(100000)
             }
-        }
+        })
 
     }
 
@@ -119,7 +120,7 @@ class Plugin : JavaPlugin(), Listener {
     }
 
     override fun onDisable() { // Plugin shutdown logic
-        es.shutdownNow()
+//        es.shutdownNow()
     }
 
 
