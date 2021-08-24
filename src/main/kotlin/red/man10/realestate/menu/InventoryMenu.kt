@@ -295,7 +295,7 @@ object InventoryMenu {
 
         inv.setItem(22, loadItem)
 
-        Bukkit.getScheduler().runTask(plugin,Runnable {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
             val list = User.loadUsers(id, page)
 
             if (list == null) {
@@ -398,7 +398,7 @@ object InventoryMenu {
 
         inv.setItem(22, loadItem)
 
-        Bukkit.getScheduler().runTask(plugin,Runnable {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
             val data = cache[Pair(uuid, id)] ?: User.get(uuid, id)!!
 
             val backBtn = back.clone()

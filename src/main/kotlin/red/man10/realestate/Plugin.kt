@@ -69,7 +69,7 @@ class Plugin : JavaPlugin(), Listener {
         Region.load()
         City.load()
 
-        Bukkit.getScheduler().runTask(this,Runnable {
+        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
 
             val now = Calendar.getInstance()
 

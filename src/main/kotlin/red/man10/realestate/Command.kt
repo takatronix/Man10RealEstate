@@ -65,7 +65,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         Region.buy(sender,id)
                     })
                     return true
@@ -151,7 +151,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         if (!City.liveScore(id,p)){
                             sendMessage(sender,"ユーザーのスコアが足りません！")
                             return@Runnable
@@ -392,7 +392,7 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender, USER))return false
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         Region.showTaxAndRent(sender)
                     })
 
@@ -468,7 +468,7 @@ object Command:CommandExecutor {
 
                     sendMessage(sender,"§a§l現在登録中です・・・")
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         val c1 = lore[3].replace("§aStart:§fX:","")
                             .replace("Y","").replace("Z","")
                             .replace(":","").split(",")
@@ -555,7 +555,7 @@ object Command:CommandExecutor {
 
                 "reload" ->{
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         Region.load()
                         City.load()
 
@@ -583,7 +583,7 @@ object Command:CommandExecutor {
                     if (args[1] == "add"){
                         disableWorld.add(args[2])
 
-                        Bukkit.getScheduler().runTask(plugin,Runnable {
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                             plugin.config.set("disableWorld", disableWorld)
                             plugin.saveConfig()
                             sendMessage(sender,"追加完了！")
@@ -592,7 +592,7 @@ object Command:CommandExecutor {
                     if (args[1] == "remove"){
                         disableWorld.remove(args[2])
 
-                        Bukkit.getScheduler().runTask(plugin,Runnable {
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                             plugin.config.set("disableWorld", disableWorld)
                             plugin.saveConfig()
                             sendMessage(sender,"削除完了！")
@@ -605,7 +605,7 @@ object Command:CommandExecutor {
 
                     val loc = sender.location
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         sendMessage(sender, "§e§l=====================================")
 
                         for (rg in Region.map()) {
@@ -752,7 +752,7 @@ object Command:CommandExecutor {
 
                 "starttax" ->{
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         sender.sendMessage("税金の徴収開始")
                         User.tax()
                         sender.sendMessage("税金の徴収完了")
@@ -767,7 +767,7 @@ object Command:CommandExecutor {
 
                     if (uuid==null){
 
-                        Bukkit.getScheduler().runTask(plugin,Runnable {
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                             val mysql = MySQLManager(plugin,"mre")
 
                             val rs = mysql.query("select id from region where owner_name = '${args[1]}';")?:return@Runnable
@@ -815,7 +815,7 @@ object Command:CommandExecutor {
 
                     var tax = 0.0
 
-                    Bukkit.getScheduler().runTask(plugin,Runnable {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         for (rg in Region.map()){
 
                             if (City.whereRegion(rg.key) !=cityID)continue

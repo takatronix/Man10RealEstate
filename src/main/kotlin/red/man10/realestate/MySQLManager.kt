@@ -208,7 +208,7 @@ class MySQLManager(private val plugin: JavaPlugin, private val conName: String) 
         ////////////////////////
         fun mysqlQueue(plugin:JavaPlugin){
 
-            Plugin.es.execute {
+            Thread{
                 val sql = MySQLManager(plugin,"man10RealEstate Queue")
                 try{
                     while (true){
@@ -217,7 +217,9 @@ class MySQLManager(private val plugin: JavaPlugin, private val conName: String) 
                     }
                 }catch (e:InterruptedException){
                 }
-            }
+
+            }.start()
+
         }
 
 

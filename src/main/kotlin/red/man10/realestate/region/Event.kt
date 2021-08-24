@@ -1,6 +1,7 @@
 package red.man10.realestate.region
 
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -22,8 +23,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
-import red.man10.realestate.Plugin.Companion.es
-import red.man10.realestate.Plugin.Companion.prefix
+import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Utility
 import red.man10.realestate.Utility.format
@@ -37,10 +37,10 @@ object Event :Listener{
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
-        es.execute {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
             Thread.sleep(5000)
             User.load(e.player)
-        }
+        })
     }
 
     /**
