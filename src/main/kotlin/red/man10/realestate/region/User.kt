@@ -175,7 +175,7 @@ object User{
         mysql.close()
 
         //オーナーリストに追加
-        for (rg in Region.map()){
+        for (rg in Region.regionData){
             if (rg.value.ownerUUID == p.uniqueId)ownerList.add(rg.key)
         }
         this.ownerList[p] = ownerList
@@ -392,7 +392,7 @@ object User{
 
     fun tax(){
         Bukkit.getLogger().info("税金の徴収開始")
-        for (rg in Region.map()){
+        for (rg in Region.regionData){
             val uuid = rg.value.ownerUUID?:continue
             City.payingTax(uuid,rg.key)
         }

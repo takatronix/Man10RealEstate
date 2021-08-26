@@ -4,11 +4,13 @@ import net.kyori.adventure.text.Component
 import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.disableWorld
@@ -20,6 +22,7 @@ import red.man10.realestate.menu.InventoryMenu
 import red.man10.realestate.region.City
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.Region.formatStatus
+import red.man10.realestate.region.Region.getUsers
 import red.man10.realestate.region.User
 import java.util.*
 import kotlin.collections.HashMap
@@ -152,6 +155,13 @@ object Command:CommandExecutor {
                     }
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
+
+                        val city = City.get(City.where(data.teleport)!!)!!
+
+                        if (city.maxUser<= getUsers(id)){
+                            sendMessage(sender,"§c§l土地に住まわせることのできる住人の上限に達しています")
+                            return@Runnable
+                        }
                         if (!City.liveScore(id,p)){
                             sendMessage(sender,"ユーザーのスコアが足りません！")
                             return@Runnable
@@ -469,15 +479,15 @@ object Command:CommandExecutor {
                     sendMessage(sender,"§a§l現在登録中です・・・")
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-                        val c1 = lore[3].replace("§aStart:§fX:","")
-                            .replace("Y","").replace("Z","")
-                            .replace(":","").split(",")
 
+                        val meta = wand.itemMeta
+
+                        val c1 = meta.persistentDataContainer[NamespacedKey.fromString("first")!!,
+                                PersistentDataType.STRING]?.split(";")?:return@Runnable
                         val startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
 
-                        val c2 = lore[4].replace("§aEnd:§fX:","")
-                            .replace("Y","").replace("Z","")
-                            .replace(":","").split(",")
+                        val c2 = meta.persistentDataContainer[NamespacedKey.fromString("second")!!,
+                                PersistentDataType.STRING]?.split(";")?:return@Runnable
 
                         val endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
 
@@ -485,7 +495,7 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            id = City.create(startPosition,endPosition,args[2],amount,sender.location)
+                            City.create(startPosition,endPosition,args[2],amount,sender.location)
 
                         }else if (args[1] == "rg"){
                             id = Region.create(startPosition,endPosition,args[2],amount,sender.location)
@@ -515,11 +525,12 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    val id = args[2].toInt()
-
                     val isRg = args[1] == "rg"
 
                     if (isRg){
+
+                        val id = args[2].toInt()
+
                         if (Region.get(id) == null){
                             sendMessage(sender,"§c§l存在しない土地です！")
                             return true
@@ -532,6 +543,8 @@ object Command:CommandExecutor {
                         return true
 
                     }
+
+                    val id = args[2]
 
                     if (City.get(id) == null){
                         sendMessage(sender,"§c§l存在しない都市です！")
@@ -608,7 +621,7 @@ object Command:CommandExecutor {
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         sendMessage(sender, "§e§l=====================================")
 
-                        for (rg in Region.map()) {
+                        for (rg in Region.regionData) {
 
                             val data = rg.value
 
@@ -622,11 +635,11 @@ object Command:CommandExecutor {
                             }
                         }
 
-                        for (c in City.map()){
+                        for (c in City.cityData){
 
                             val data = c.value
 
-                            if(Utility.isWithinRange(loc, data.startPosition, data.endPosition, data.world,data.server)) {
+                            if(Utility.isWithinRange(loc, data.getStart(), data.getEnd(), data.world,data.server)) {
                                 sendMessage(sender, "§e§lCityID:${c.key}")
                                 sendMessage(sender, "§7Name:${c.value.name}")
                                 sendMessage(sender, "§8Tax:${c.value.tax}")
@@ -661,24 +674,23 @@ object Command:CommandExecutor {
 
                     if (!NumberUtils.isNumber(args[2]))return true
 
-                    val id = args[2].toInt()
-
                     val isRg = args[1] == "rg"
 
-                    val c1 = lore[3].replace("§aStart:§fX:","")
-                            .replace("Y","").replace("Z","")
-                            .replace(":","").split(",")
+                    val meta = wand.itemMeta
 
+                    val c1 = meta.persistentDataContainer[NamespacedKey.fromString("first")!!,
+                            PersistentDataType.STRING]?.split(";")?:return true
                     val startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
 
-                    val c2 = lore[4].replace("§aEnd:§fX:","")
-                            .replace("Y","").replace("Z","")
-                            .replace(":","").split(",")
+                    val c2 = meta.persistentDataContainer[NamespacedKey.fromString("second")!!,
+                            PersistentDataType.STRING]?.split(";")?:return true
 
                     val endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
 
-
                     if (isRg){
+
+                        val id = args[2].toInt()
+
                         val data = Region.get(id)
 
                         if (data == null){
@@ -695,6 +707,8 @@ object Command:CommandExecutor {
                         return true
                     }
 
+                    val id = args[2]
+
                     val data = City.get(id)
 
                     if (data == null){
@@ -702,8 +716,8 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    data.startPosition = startPosition
-                    data.endPosition = endPosition
+                    data.setStart(startPosition)
+                    data.setEnd(endPosition)
 
                     City.set(id, data)
 
@@ -715,7 +729,7 @@ object Command:CommandExecutor {
                     if (args.size != 3)return false
                     if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
 
-                    val id = args[1].toInt()
+                    val id = args[1]
                     val tax= args[2].toDouble()
 
                     City.setTax(id,tax)
@@ -784,7 +798,7 @@ object Command:CommandExecutor {
 
                         return true
                     }
-                    for (rg in Region.map().filter { it.value.ownerUUID == uuid }.keys){
+                    for (rg in Region.regionData.filter { it.value.ownerUUID == uuid }.keys){
                         sendClickMessage(sender,"§e§lID:${rg}","mreop tp $rg")
                     }
 
@@ -795,7 +809,7 @@ object Command:CommandExecutor {
                     if (args.size != 3)return false
                     if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
 
-                    val id = args[1].toInt()
+                    val id = args[1]
                     val amount= args[2].toInt()
 
                     City.setMaxUser(id,amount)
@@ -811,12 +825,12 @@ object Command:CommandExecutor {
 
                     if(args.size != 2)return false
 
-                    val cityID = args[1].toInt()
+                    val cityID = args[1]
 
                     var tax = 0.0
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-                        for (rg in Region.map()){
+                        for (rg in Region.regionData){
 
                             if (City.whereRegion(rg.key) !=cityID)continue
 
@@ -854,9 +868,9 @@ object Command:CommandExecutor {
 
                 "buyscore" ->{
                     if (args.size != 3)return false
-                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+                    if (!NumberUtils.isNumber(args[2]))return false
 
-                    val id = args[1].toInt()
+                    val id = args[1]
                     val score= args[2].toInt()
 
                     City.setBuyScore(id,score)
@@ -870,7 +884,7 @@ object Command:CommandExecutor {
                 "livescore" ->{
                     if (args.size != 3)return false
 
-                    val id = args[1].toIntOrNull()?:return true
+                    val id = args[1]
                     val score= args[2].toIntOrNull()?:return true
 
                     City.setLiveScore(id,score)
@@ -881,19 +895,19 @@ object Command:CommandExecutor {
 
                 }
 
-                "unpaid" ->{//mreop unpaid cityId <amount>
-
-                    val id = args[1].toIntOrNull()?:return true
-                    val amount = args[2].toDoubleOrNull()?:return true
-
-                    val data = City.get(id)?:return true
-                    data.defaultPrice = amount
-
-                    City.set(id,data)
-
-                    sendMessage(sender,"§a§l設定完了！")
-
-                }
+//                "unpaid" ->{//mreop unpaid cityId <amount>
+//
+//                    val id = args[1].toIntOrNull()?:return true
+//                    val amount = args[2].toDoubleOrNull()?:return true
+//
+//                    val data = City.get(id)?:return true
+//                    data.defaultPrice = amount
+//
+//                    City.set(id,data)
+//
+//                    sendMessage(sender,"§a§l設定完了！")
+//
+//                }
 
                 else ->{
 

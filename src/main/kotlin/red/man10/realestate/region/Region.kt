@@ -22,14 +22,10 @@ import kotlin.collections.toMap
 object Region {
 
     //idとリージョンデータの辞書
-    private val regionData = ConcurrentHashMap<Int,RegionData>()
+    val regionData = ConcurrentHashMap<Int,RegionData>()
 
     fun get(id:Int):RegionData?{
         return regionData[id]
-    }
-
-    fun map(): Map<Int, RegionData> {
-        return regionData.toMap()
     }
 
     fun set(id: Int,region: RegionData){
@@ -107,11 +103,6 @@ object Region {
 
         set(id,data)
 
-        val cID = City.where(data.teleport)
-        if (cID != -1){
-            City.updateRegion(cID)
-        }
-
         return id
 
     }
@@ -187,7 +178,7 @@ object Region {
     /**
      * リージョンのデータをdbに保存する
      */
-    fun save(id:Int,data:RegionData){
+    private fun save(id:Int,data:RegionData){
 
         mysqlQueue.add("UPDATE region SET " +
                 "owner_uuid = '${data.ownerUUID}', " +

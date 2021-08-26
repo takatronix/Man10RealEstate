@@ -1,9 +1,10 @@
 package red.man10.realestate.region
 
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
@@ -20,6 +21,8 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
@@ -50,88 +53,94 @@ object Event :Listener{
 
         val data = Region.get(id)?:return
 
-        sign.line(0, Component.text("§eID:$id"))
-        sign.line(1, Component.text(data.name))
-        sign.line(2,Component.text("§d§l${Region.getOwner(data)}"))
-        sign.line(3,Component.text("§b§l${Region.formatStatus(data.status)}"))
+        sign.line(0, text("§eID:$id"))
+        sign.line(1, text(data.name))
+        sign.line(2, text("§d§l${Region.getOwner(data)}"))
+        sign.line(3, text("§b§l${Region.formatStatus(data.status)}"))
 
         sign.update()
 
     }
 
-    /**
-     * 範囲指定(pos1)
-     */
-    @EventHandler
-    fun setFirstPosition(e: PlayerInteractEvent){
-        val p = e.player
+    private fun setFirstPosition(p:Player,loc: Location,wand:ItemStack){
 
-        if (!p.hasPermission(Command.OP))return
+        val meta = wand.itemMeta
 
-        val wand = e.item?:return
-        if (wand.type != Material.STICK)return
-        if (!wand.hasItemMeta())return
-        if(wand.itemMeta.displayName != WAND_NAME) return
+        val lore = meta.lore()?: mutableListOf()
 
-        val lore = wand.lore?: mutableListOf()
+        meta.persistentDataContainer.set(NamespacedKey.fromString("first")!!, PersistentDataType.STRING,"${loc.blockX};${loc.blockY};${loc.blockZ}")
 
-        val loc = when(e.action){
-            Action.LEFT_CLICK_AIR -> p.location
-            Action.LEFT_CLICK_BLOCK -> e.clickedBlock!!.location
-            else ->return
-        }
 
         if (lore.size>=5){
-            lore[0] = ("§aOwner:§f${p.name}")
-            lore[1] = ("§aServer:§f$serverName")
-            lore[2] = ("§aWorld:§f${p.world.name}")
-            lore[3] = ("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+            lore[0] = text("§aOwner:§f${p.name}")
+            lore[1] = text("§aServer:§f$serverName")
+            lore[2] = text("§aWorld:§f${p.world.name}")
+            lore[3] = text("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
         }else{
-            lore.add("§aOwner:§f${p.name}")
-            lore.add("§aServer:§f"+p.server.name)
-            lore.add("§aWorld:§f"+p.world.name)
-            lore.add("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+            lore.add(text("§aOwner:§f${p.name}"))
+            lore.add(text("§aServer:§f"+p.server.name))
+            lore.add(text("§aWorld:§f"+p.world.name))
+            lore.add(text("§aStart:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}"))
         }
 
+        meta.lore(lore)
+
+        wand.itemMeta = meta
         sendMessage(p,"§e§lSet Start:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+    }
 
-        wand.lore = lore
+    private fun setSecondPosition(p:Player,loc: Location,wand:ItemStack){
 
-        e.isCancelled = true
+        val meta = wand.itemMeta
+
+        val lore = meta.lore()?: mutableListOf()
+
+        meta.persistentDataContainer.set(NamespacedKey.fromString("second")!!, PersistentDataType.STRING,"${loc.blockX};${loc.blockY};${loc.blockZ}")
+
+        if (lore.size == 5){
+            lore[4] = text("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+        }else{
+            lore.add(text("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}"))
+        }
+
+        meta.lore(lore)
+
+        wand.itemMeta = meta
+        sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
 
     }
 
     /**
-     * 範囲指定(pos2)
+     * 範囲指定
      */
     @EventHandler
-    fun setSecondPosition(e:PlayerInteractEvent){
-
+    fun setPosition(e: PlayerInteractEvent){
         val p = e.player
 
-        if (!p.hasPermission("mre.op"/*仮パーミッション*/))return
+        if (!p.hasPermission(Command.OP))return
+
+        val isFirst = when(e.action){
+            Action.RIGHT_CLICK_BLOCK,Action.RIGHT_CLICK_AIR ->false
+            Action.LEFT_CLICK_AIR,Action.LEFT_CLICK_BLOCK->true
+            else -> return
+        }
 
         val wand = e.item?:return
         if (wand.type != Material.STICK)return
         if (!wand.hasItemMeta())return
         if(wand.itemMeta.displayName != WAND_NAME) return
 
-        val lore = wand.lore?: mutableListOf("","","","","")
-
         val loc = when(e.action){
-            Action.RIGHT_CLICK_AIR -> p.location
-            Action.RIGHT_CLICK_BLOCK -> e.clickedBlock!!.location
+            Action.LEFT_CLICK_AIR,Action.RIGHT_CLICK_AIR -> p.location
+            Action.LEFT_CLICK_BLOCK,Action.RIGHT_CLICK_BLOCK -> e.clickedBlock!!.location
             else ->return
         }
 
-        if (lore.size == 5){
-            lore[4] = "§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}"
+        if (isFirst){
+            setFirstPosition(p,loc, wand)
         }else{
-            lore.add("§aEnd:§fX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
+            setSecondPosition(p,loc,wand)
         }
-        sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
-
-        wand.lore = lore
 
         e.isCancelled = true
 
@@ -156,10 +165,10 @@ object Event :Listener{
 
             val data = Region.get(id)?:return
 
-            e.line(0, Component.text("§eID:$id"))
-            e.line(1, Component.text(data.name))
-            e.line(2, Component.text("§d§l${Region.getOwner(data)}"))
-            e.line(3, Component.text("§b§l${Region.formatStatus(data.status)}"))
+            e.line(0, text("§eID:$id"))
+            e.line(1, text(data.name))
+            e.line(2, text("§d§l${Region.getOwner(data)}"))
+            e.line(3, text("§b§l${Region.formatStatus(data.status)}"))
 
             sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
         }
@@ -370,11 +379,7 @@ object Event :Listener{
             return true
         }
 
-        val cityID = City.where(loc)
-
-        if (cityID == -1)return false
-
-        for (id in City.get(cityID)!!.regionList){
+        for (id in Region.regionData.keys){
 
             val rg = Region.get(id)?:continue
 

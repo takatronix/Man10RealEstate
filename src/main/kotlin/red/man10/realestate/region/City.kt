@@ -1,99 +1,84 @@
 package red.man10.realestate.region
 
+import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import red.man10.man10bank.MySQLManager.Companion.mysqlQueue
 import red.man10.man10score.ScoreDatabase
-import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
 import red.man10.realestate.Utility
+import java.io.File
+import java.io.FileReader
+import java.io.FileWriter
+import java.io.IOException
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 object City {
 
-    private val cityData = ConcurrentHashMap<Int,CityData>()
+    val cityData = ConcurrentHashMap<String,CityData>()
+    private val gson = Gson()
 
-    fun get(id:Int):CityData?{
+    fun get(id:String):CityData?{
         return cityData[id]
     }
 
-    fun set(id:Int,data:CityData){
+    fun set(id:String,data:CityData){
         cityData[id] = data
-        save(id,data)
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+            save(id,data)
+        })
     }
 
-    fun map():ConcurrentHashMap<Int,CityData>{
-        return cityData
-    }
-
-    fun delete(id: Int){
-
+    fun delete(id: String){
         cityData.remove(id)
-
-        mysqlQueue.add("DELETE FROM `city` WHERE  `id`=$id;")
-
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+            try {
+                val file = File("${plugin.dataFolder.name}/$id.json")
+                if (file.exists())file.delete()
+            }catch (e:Exception){}
+        })
     }
 
 
     /**
      * 新規都市作成
      */
-    fun create(pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>,name:String,tax:Double,tp:Location):Int{
-
-        val sql = "INSERT INTO city " +
-                "(name, server, world, x, y, z, pitch, yaw, sx, sy, sz, ex, ey, ez, tax) " +
-                "VALUE(" +
-                "'$name', " +
-                "'$serverName', " +
-                "'${tp.world.name}', " +
-                "${tp.x}, " +
-                "${tp.y}, " +
-                "${tp.z}, " +
-                "${tp.pitch}, " +
-                "${tp.yaw}, " +
-                "${pos1.first}, " +
-                "${pos1.second}, " +
-                "${pos1.third}, " +
-                "${pos2.first}, " +
-                "${pos2.second}, " +
-                "${pos2.third}, " +
-                "$tax);"
-
-        val mysql = MySQLManager(plugin,"Man10RealEstate City")
-
-        mysql.execute(sql)
-
-        val rs = mysql.query("SELECT t.* FROM city t ORDER BY id DESC LIMIT 1;")?:return -1
-        rs.next()
-        val id = rs.getInt("id")
-
-        rs.close()
-        mysql.close()
+    fun create(pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>,name:String,tax:Double,tp:Location){
 
         val data = CityData()
 
         data.server = serverName
         data.world = tp.world.name
 
-        data.startPosition = pos1
-        data.endPosition = pos2
+        data.setStart(pos1)
+        data.setEnd(pos2)
         data.teleport = tp
 
         data.tax = tax
 
         data.name = name
 
+        try {
 
-        cityData[id] = data
+            val jsonStr = gson.toJson(data)
 
-        updateRegion(id)
+            val file = File("${plugin.dataFolder.name}/$name.json")
+            if (file.exists()){
+                Bukkit.getLogger().info("すでにファイル")
+                return
+            }
+            file.createNewFile()
+            val writer = FileWriter(file)
 
-        return id
-
+            writer.write(jsonStr)
+            writer.close()
+        }catch (e:IOException){
+            Bukkit.getLogger().info(e.message)
+        }
     }
 
     /**
@@ -102,104 +87,58 @@ object City {
     fun load(){
         cityData.clear()
 
-        val sql = MySQLManager(plugin,"Man10RealEstate Loading")
+        val files = File(plugin.dataFolder,File.separator).listFiles()?.toMutableList()?:return
 
-        val rs = sql.query("SELECT * FROM city WHERE server='$serverName';")?:return
+        for (file in files){
 
-        while (rs.next()){
-
-            val id = rs.getInt("id")
-
-            val data = CityData()
-
-            data.name = rs.getString("name")
-            data.world = rs.getString("world")
-            data.server = serverName
-
-            data.tax = rs.getDouble("tax")
-
-            data.maxUser = rs.getInt("max_user")
-
-            data.startPosition = Triple(
-                    rs.getDouble("sx"),
-                    rs.getDouble("sy"),
-                    rs.getDouble("sz")
-            )
-            data.endPosition = Triple(
-                    rs.getDouble("ex"),
-                    rs.getDouble("ey"),
-                    rs.getDouble("ez")
-            )
-
-            data.teleport = Location(
-                    Bukkit.getWorld(data.world),
-                    rs.getDouble("x"),
-                    rs.getDouble("y"),
-                    rs.getDouble("z"),
-                    rs.getFloat("yaw"),
-                    rs.getFloat("pitch")
-            )
-
-            data.buyScore = rs.getInt("buy_score")
-            data.liveScore = rs.getInt("live_score")
-
-            data.defaultPrice = rs.getDouble("default_price")
-
-            cityData[id] = data
-
-            updateRegion(id)
-        }
-
-        rs.close()
-        sql.close()
-
-    }
-
-    /**
-     * 都市内のリージョンを探す
-     */
-    fun updateRegion(id:Int){
-
-        val data = get(id)?:return
-
-        val pos1 = data.startPosition
-        val pos2 = data.endPosition
-        val world = data.world
-        val server = serverName
-
-        val list = mutableListOf<Int>()
-
-        for (rg in Region.map()){
-            if (Utility.isWithinRange(rg.value.teleport,pos1,pos2,world,server)){
-                list.add(rg.key)
+            if (!file.path.endsWith(".json") || file.isDirectory){
+                Bukkit.getLogger().info("${file.name} はJsonファイルではありません")
+                continue
             }
+
+            try {
+
+                val name = file.name.replace(".json","")
+
+                val reader = FileReader(file)
+                val jsonStr = reader.readText()
+
+                reader.close()
+
+                val data = gson.fromJson(jsonStr,CityData::class.java)
+
+                cityData[name] = data
+
+            }catch (e:IOException){
+                Bukkit.getLogger().info(e.message)
+            }
+
         }
 
-        data.regionList = list
-
-        cityData[id] = data
-
     }
+
 
     /**
      * 現在地点がどの都市か
      *
-     * @return 指定地点の都市id(存在しなかったら -1　を返す)
+     * @return 指定地点の都市id(存在しなかったら null　を返す)
      */
-    fun where(loc:Location):Int{
+    fun where(loc:Location):String?{
+
         for (city in cityData){
-            if (Utility.isWithinRange(loc,city.value.startPosition,city.value.endPosition,city.value.world,city.value.server)){
+            if (Utility.isWithinRange(loc,city.value.getStart(),city.value.getEnd(),city.value.world,city.value.server)){
                 return city.key
             }
         }
-        return  -1
+
+        return null
     }
 
 
     /**
      * 税金の変更
      */
-    fun setTax(id:Int, tax:Double){
+    fun setTax(id:String, tax:Double){
         val data = get(id)?:return
         data.tax = tax
         set(id,data)
@@ -210,9 +149,7 @@ object City {
 
         val data = Region.get(regionId)?:return false
 
-        val id = where(data.teleport)
-
-        if (id == -1)return false
+        val id = where(data.teleport) ?: return false
 
         val city = get(id)?:return false
 
@@ -223,9 +160,7 @@ object City {
 
         val data = Region.get(regionId)?:return false
 
-        val id = where(data.teleport)
-
-        if (id == -1)return false
+        val id = where(data.teleport)?:return false
 
         val city = get(id)?:return false
 
@@ -235,7 +170,7 @@ object City {
     /**
      * 住むのに必要なスコアの変更
      */
-    fun setLiveScore(id:Int, score:Int){
+    fun setLiveScore(id:String, score:Int){
         val data = get(id)?:return
         data.liveScore = score
         set(id,data)
@@ -244,7 +179,7 @@ object City {
     /**
      * 買うのに必要なスコアの変更
      */
-    fun setBuyScore(id:Int, score:Int){
+    fun setBuyScore(id:String, score:Int){
         val data = get(id)?:return
         data.buyScore = score
         set(id,data)
@@ -252,30 +187,24 @@ object City {
     /**
      * 現在のデータを保存する
      */
-    private fun save(id:Int,data:CityData){
+    private fun save(id:String,data:CityData){
 
-        mysqlQueue.add("UPDATE city SET " +
-                "name = '${data.name}', " +
-                "server = '${data.server}', " +
-                "world = '${data.world}', " +
-                "x = ${data.teleport.x}, " +
-                "y = ${data.teleport.y}, " +
-                "z = ${data.teleport.z}, " +
-                "pitch = ${data.teleport.pitch}, " +
-                "yaw = ${data.teleport.yaw}, " +
-                "sx = ${data.startPosition.first}, " +
-                "sy = ${data.startPosition.second}, " +
-                "sz = ${data.startPosition.third}, " +
-                "ex = ${data.endPosition.first}, " +
-                "ey = ${data.endPosition.second}, " +
-                "ez = ${data.endPosition.third}, " +
-                "tax = ${data.tax}," +
-                "max_user = ${data.maxUser}," +
-                "buy_score= ${data.buyScore}," +
-                "live_score= ${data.liveScore}," +
-                "default_price= ${data.defaultPrice}" +
-                " WHERE id = $id")
+        try {
+            val file = File("${plugin.dataFolder.name}/${id}.json")
 
+            if (file.exists()){
+                file.delete()
+            }
+
+            file.createNewFile()
+            val jsonStr = gson.toJson(data)
+            val writer = FileWriter(file)
+
+            writer.write(jsonStr)
+            writer.close()
+        }catch (e:IOException){
+            Bukkit.getLogger().info(e.message)
+        }
     }
 
     /**
@@ -286,11 +215,9 @@ object City {
     fun payingTax(p:UUID,id:Int):Boolean{
 
         val rg = Region.get(id)?:return false
-        val cityID = where(rg.teleport)
+        val cityID = where(rg.teleport)?:return false
 
         if (rg.isRemitTax)return false
-
-        if (cityID == -1)return false
 
         val city = get(cityID)?:return false
 
@@ -318,7 +245,7 @@ object City {
     /**
      * 土地の税金を計算する
      */
-    fun getTax(cityID:Int,rgID:Int):Double{
+    fun getTax(cityID:String,rgID:Int):Double{
 
         val city = get(cityID)?:return 0.0
         val rg = Region.get(rgID)?:return 0.0
@@ -332,24 +259,21 @@ object City {
 
     }
 
-    fun getMaxUser(cityID: Int):Int{
-        return get(cityID)?.maxUser?:0
-    }
 
-    fun setMaxUser(cityID: Int,value:Int){
+    fun setMaxUser(cityID: String,value:Int){
         val data = get(cityID)?:return
         data.maxUser = value
         set(cityID,data)
     }
 
     //リージョンのidから都市を返す
-    fun whereRegion(id:Int):Int{
-        return where(Region.get(id)!!.teleport)
+    fun whereRegion(id:Int): String {
+        return where(Region.get(id)!!.teleport)?:"無名の都市"
     }
 
     class CityData{
 
-        var regionList = mutableListOf<Int>()
+//        var regionList = mutableListOf<Int>()
 
         var tax = 0.0
 
@@ -365,10 +289,35 @@ object City {
 
         var defaultPrice = 0.0
 
-        var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
-        var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
+//        var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
+//        var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
+
+        var startX = 0.0
+        var startY = 0.0
+        var startZ = 0.0
+
+        var endX = 0.0
+        var endY = 0.0
+        var endZ = 0.0
+
         lateinit var teleport : Location
 
+        fun getStart(): Triple<Double, Double, Double> {
+            return Triple(startX,startY,startZ)
+        }
+        fun getEnd(): Triple<Double, Double, Double> {
+            return Triple(endX,endY,endZ)
+        }
+        fun setStart(triple: Triple<Double,Double,Double>){
+            startX = triple.first
+            startY = triple.second
+            startZ = triple.third
+        }
+        fun setEnd(triple: Triple<Double,Double,Double>){
+            endX = triple.first
+            endY = triple.second
+            endZ = triple.third
+        }
     }
 
 }

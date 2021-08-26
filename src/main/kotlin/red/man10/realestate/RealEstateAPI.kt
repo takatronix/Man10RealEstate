@@ -35,7 +35,7 @@ object RealEstateAPI {
      * 土地を所有しているかどうか
      */
     fun hasRegion(uuid: UUID):Boolean{
-        if (Region.map().values.any { it.ownerUUID == uuid })return true
+        if (Region.regionData.values.any { it.ownerUUID == uuid })return true
 
         return false
     }
