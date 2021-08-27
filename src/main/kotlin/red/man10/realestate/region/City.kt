@@ -109,7 +109,6 @@ object City {
                 continue
             }
 
-            //TODO:Jsonファイルに問題があったときの対策
             try {
 
                 val name = file.name.replace(".json","")
