@@ -729,7 +729,7 @@ object Command:CommandExecutor {
                 "tax" ->{
 
                     if (args.size != 3)return false
-                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+                    if (!NumberUtils.isNumber(args[2]))return false
 
                     val id = args[1]
                     val tax= args[2].toDouble()
@@ -809,7 +809,7 @@ object Command:CommandExecutor {
                 "maxuser" ->{
 
                     if (args.size != 3)return false
-                    if (!NumberUtils.isNumber(args[1]) || !NumberUtils.isNumber(args[2]))return false
+                    if (!NumberUtils.isNumber(args[2]))return false
 
                     val id = args[1]
                     val amount= args[2].toInt()

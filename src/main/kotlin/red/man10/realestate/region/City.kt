@@ -128,6 +128,8 @@ object City {
 
             }catch (e:IOException){
                 Bukkit.getLogger().info(e.message)
+            }catch (e:java.lang.Exception){
+                Bukkit.getLogger().info("Error")
             }
 
         }
@@ -207,10 +209,13 @@ object City {
     private fun save(id:String,data:CityData){
 
         try {
-            val file = File("${plugin.dataFolder.name}/${id}.json")
+            val file = File("${plugin.dataFolder}/${id}.json")
 
             if (file.exists()){
                 file.delete()
+            }else{
+                Bukkit.getLogger().info("存在しない都市")
+                return
             }
 
             file.createNewFile()
