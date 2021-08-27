@@ -497,6 +497,8 @@ object Command:CommandExecutor {
 
                             City.create(startPosition,endPosition,args[2],amount,sender.location)
 
+                            return@Runnable
+
                         }else if (args[1] == "rg"){
                             id = Region.create(startPosition,endPosition,args[2],amount,sender.location)
                         }

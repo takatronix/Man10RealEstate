@@ -13,7 +13,6 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,6 +20,7 @@ object City {
 
     val cityData = ConcurrentHashMap<String,CityData>()
     private val gson = Gson()
+//    val mapper = ObjectMapper()
 
     fun get(id:String):CityData?{
         return cityData[id]
@@ -56,23 +56,36 @@ object City {
 
         data.setStart(pos1)
         data.setEnd(pos2)
-        data.teleport = tp
+//        data.teleport = tp
 
         data.tax = tax
 
         data.name = name
 
+        val jsonStr = gson.toJson(data)
         try {
 
-            val jsonStr = gson.toJson(data)
 
-            val file = File("${plugin.dataFolder.name}/$name.json")
+//            val jsonStr = mapper.writeValueAsString(data)
+
+            val file = File("${plugin.dataFolder}",File.separator+"/$name.json")
+
+            Bukkit.getLogger().info("1")
+
             if (file.exists()){
                 Bukkit.getLogger().info("すでにファイル")
                 return
             }
+
             file.createNewFile()
+
+
+            Bukkit.getLogger().info("2")
+
             val writer = FileWriter(file)
+
+            Bukkit.getLogger().info("3")
+
 
             writer.write(jsonStr)
             writer.close()
@@ -96,6 +109,7 @@ object City {
                 continue
             }
 
+            //TODO:Jsonファイルに問題があったときの対策
             try {
 
                 val name = file.name.replace(".json","")
@@ -106,6 +120,9 @@ object City {
                 reader.close()
 
                 val data = gson.fromJson(jsonStr,CityData::class.java)
+//                val data = mapper.readValue(jsonStr,CityData::class.java)
+
+                Bukkit.getLogger().info("load city : $name")
 
                 cityData[name] = data
 
@@ -197,6 +214,7 @@ object City {
             }
 
             file.createNewFile()
+//            val jsonStr = mapper.writeValueAsString(data)
             val jsonStr = gson.toJson(data)
             val writer = FileWriter(file)
 
@@ -204,6 +222,7 @@ object City {
             writer.close()
         }catch (e:IOException){
             Bukkit.getLogger().info(e.message)
+            Bukkit.getLogger().info(e.stackTraceToString())
         }
     }
 
@@ -300,7 +319,7 @@ object City {
         var endY = 0.0
         var endZ = 0.0
 
-        lateinit var teleport : Location
+//        lateinit var teleport : Location
 
         fun getStart(): Triple<Double, Double, Double> {
             return Triple(startX,startY,startZ)
