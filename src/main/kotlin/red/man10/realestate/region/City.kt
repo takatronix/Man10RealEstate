@@ -51,7 +51,7 @@ object City {
     /**
      * 新規都市作成
      */
-    fun create(pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>,name:String,tax:Double,tp:Location){
+    fun create(pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>,name:String,tax:Double,tp:Location):Boolean{
 
         val data = CityData()
 
@@ -69,26 +69,16 @@ object City {
         val jsonStr = gson.toJson(data)
         try {
 
-
-//            val jsonStr = mapper.writeValueAsString(data)
-
             val file = File("${plugin.dataFolder}",File.separator+"/$name.json")
-
-            Bukkit.getLogger().info("1")
 
             if (file.exists()){
                 Bukkit.getLogger().info("すでにファイル")
-                return
+                return false
             }
 
             file.createNewFile()
 
-
-            Bukkit.getLogger().info("2")
-
             val writer = FileWriter(file)
-
-            Bukkit.getLogger().info("3")
 
             writer.write(jsonStr)
             writer.close()
@@ -97,7 +87,10 @@ object City {
 
         }catch (e:IOException){
             Bukkit.getLogger().info(e.message)
+            return false
         }
+
+        return true
     }
 
     /**

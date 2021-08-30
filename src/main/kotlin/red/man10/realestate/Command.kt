@@ -495,9 +495,12 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            City.create(startPosition,endPosition,args[2],amount,sender.location)
+                            if (City.create(startPosition,endPosition,args[2],amount,sender.location)){
+                                sendMessage(sender,"§a§l登録完了！")
+                                return@Runnable
+                            }
 
-                            sendMessage(sender,"§a§l登録完了！")
+                            sendMessage(sender,"§c§l登録失敗！")
 
                             return@Runnable
 
