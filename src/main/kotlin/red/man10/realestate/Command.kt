@@ -497,6 +497,8 @@ object Command:CommandExecutor {
 
                             City.create(startPosition,endPosition,args[2],amount,sender.location)
 
+                            sendMessage(sender,"§a§l登録完了！")
+
                             return@Runnable
 
                         }else if (args[1] == "rg"){
@@ -522,14 +524,15 @@ object Command:CommandExecutor {
 
                     if (args.size != 3)return false
 
-                    if (!NumberUtils.isNumber(args[2])){
-                        sendMessage(sender,"§c§l数字を入力してください")
-                        return true
-                    }
 
                     val isRg = args[1] == "rg"
 
                     if (isRg){
+
+                        if (!NumberUtils.isNumber(args[2])){
+                            sendMessage(sender,"§c§l数字を入力してください")
+                            return true
+                        }
 
                         val id = args[2].toInt()
 
@@ -669,7 +672,7 @@ object Command:CommandExecutor {
 
                     val lore = wand.lore
 
-                    if (lore == null || wand.lore!!.size != 5){
+                    if (lore == null){
                         sendMessage(sender,"§e§fの範囲指定ができていません！")
                         return true
                     }

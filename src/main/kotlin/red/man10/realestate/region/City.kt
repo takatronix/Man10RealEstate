@@ -34,6 +34,10 @@ object City {
     }
 
     fun delete(id: String){
+
+        val data = get(id)?:return
+        data.isLoad = false
+        set(id,data)
         cityData.remove(id)
         Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
             try {
@@ -86,9 +90,11 @@ object City {
 
             Bukkit.getLogger().info("3")
 
-
             writer.write(jsonStr)
             writer.close()
+
+            cityData[name] = data
+
         }catch (e:IOException){
             Bukkit.getLogger().info(e.message)
         }
@@ -121,6 +127,11 @@ object City {
                 val data = gson.fromJson(jsonStr,CityData::class.java)
 //                val data = mapper.readValue(jsonStr,CityData::class.java)
 
+
+                if (!data.isLoad){
+                    Bukkit.getLogger().info("unload city : $name")
+                    continue
+                }
                 Bukkit.getLogger().info("load city : $name")
 
                 cityData[name] = data
@@ -324,6 +335,8 @@ object City {
         var endZ = 0.0
 
 //        lateinit var teleport : Location
+
+        var isLoad = true
 
         fun getStart(): Triple<Double, Double, Double> {
             return Triple(startX,startY,startZ)

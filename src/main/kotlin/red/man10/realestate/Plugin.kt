@@ -121,6 +121,7 @@ class Plugin : JavaPlugin(), Listener {
 
     override fun onDisable() { // Plugin shutdown logic
 //        es.shutdownNow()
+        Bukkit.getScheduler().cancelTasks(this)
     }
 
 
