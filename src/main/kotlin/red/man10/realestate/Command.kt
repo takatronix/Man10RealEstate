@@ -129,7 +129,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    val rent = if (args.size <= 4) args[3].toDoubleOrNull()?:0.0 else 0.0
+                    val rent = if (args.size == 4) args[3].toDoubleOrNull()?:0.0 else 0.0
 
                     val spanDisplay = when(data.span){
                         0 -> "一ヶ月ごと"
