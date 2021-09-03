@@ -19,8 +19,8 @@ object Utility {
         if (loc.world.name != world)return false
 
         if (abs((start.first+end.first)-2*loc.blockX) > abs(start.first-end.first) ||
-            abs((start.second+end.second)-2*loc.blockY) > abs(start.second-end.second)||
-            abs((start.third+end.third)-2*loc.blockZ) > abs(start.third-end.third))return false
+            abs((start.third+end.third)-2*loc.blockZ) > abs(start.third-end.third) ||
+            abs((start.second+end.second)-2*loc.blockY) > abs(start.second-end.second))return false
 
         return true
 

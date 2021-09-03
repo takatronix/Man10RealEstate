@@ -15,8 +15,6 @@ import red.man10.realestate.region.Event
 import red.man10.realestate.region.Region
 import red.man10.realestate.region.User
 import java.util.*
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -113,7 +111,7 @@ class Plugin : JavaPlugin(), Listener {
         serverName = config.getString("server","paper")!!
         lastTax.time = config.getLong("lastTax")
         lastRent.time = config.getLong("lastRent")
-        Event.containerAmount = config.getInt("containerAmount",24)
+        Event.maxContainers = config.getInt("containerAmount",24)
 
         saveResource("config.yml", false)
 

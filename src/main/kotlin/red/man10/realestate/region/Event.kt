@@ -5,6 +5,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -35,7 +36,7 @@ import red.man10.realestate.region.User.Permission.*
 
 object Event :Listener{
 
-    var containerAmount = 24
+    var maxContainers = 24
 
     @EventHandler
     fun playerJoin(e:PlayerJoinEvent){
@@ -271,6 +272,11 @@ object Event :Listener{
             return
         }
 
+        if (containerList.contains(block.type) && countContainer(block)> maxContainers){
+            sendMessage(p,"§cこのチャンクには、これ以上このブロックは置けません！")
+            e.isCancelled = true
+        }
+
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -414,6 +420,19 @@ object Event :Listener{
         }
 
         return false
+    }
+
+    private fun countContainer(block: Block): Int {
+
+        val te = block.chunk.tileEntities
+
+        var count = 0
+
+        for (entity in te){
+            if (containerList.contains(entity.block.type))count++
+        }
+
+        return count
     }
 
 
