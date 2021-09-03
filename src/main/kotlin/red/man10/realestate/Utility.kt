@@ -6,24 +6,21 @@ import net.kyori.adventure.text.event.ClickEvent.suggestCommand
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.Plugin.Companion.prefix
+import kotlin.math.abs
 
 object Utility {
 
     ////////////////////////////////////////////////////////////
     //立体の対角線の頂点から、指定座標が立体の中にあるかどうか判定するメソッド
     ////////////////////////////////////////////////////////////
-    fun isWithinRange(loc: Location, start:Triple<Double,Double,Double>, end:Triple<Double,Double,Double>, world:String,server:String):Boolean{
+    fun isWithinRange(loc: Location, start:Triple<Int,Int,Int>, end:Triple<Int,Int,Int>, world:String,server:String):Boolean{
 
         if (Plugin.serverName!=server)return false
         if (loc.world.name != world)return false
 
-        val x = loc.blockX
-        val y = loc.blockY
-        val z = loc.blockZ
-
-        if (x < start.first.coerceAtMost(end.first) || x > start.first.coerceAtLeast(end.first))return false
-        if (y < start.second.coerceAtMost(end.second) || y > start.second.coerceAtLeast(end.second))return false
-        if (z < start.third.coerceAtMost(end.third) || z > start.third.coerceAtLeast(end.third))return false
+        if (abs((start.first+end.first)-2*loc.blockX) > abs(start.first-end.first) ||
+            abs((start.second+end.second)-2*loc.blockY) > abs(start.second-end.second)||
+            abs((start.third+end.third)-2*loc.blockZ) > abs(start.third-end.third))return false
 
         return true
 

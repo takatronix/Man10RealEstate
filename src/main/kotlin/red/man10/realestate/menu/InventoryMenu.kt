@@ -62,14 +62,11 @@ object InventoryMenu {
             val rg = Region.get(id) ?: continue
 
             val icon = IS(Material.PAPER, rg.name, mutableListOf(
-                    "§e§lID:$id",
-                    "§b§lオーナー:${Region.getOwner(rg)}",
-                    "§a§lステータス:${formatStatus(rg.status)}",
-                    "§f§l=============座標==============",
-                    "§fワールド:${rg.teleport.world.name}",
-                    "§fX:${rg.teleport.blockX}",
-                    "§fY:${rg.teleport.blockY}",
-                    "§fZ:${rg.teleport.blockZ}"
+                    "§7§lID:$id",
+                    "§f§lオーナー:${Region.getOwner(rg)}",
+                    "§7§lステータス:${formatStatus(rg.status)}",
+                    "§f§lクリックでテレポート",
+
             ))
             setData(icon, "id", id.toString())
 
@@ -186,7 +183,7 @@ object InventoryMenu {
         inv.setItem(11, IS(Material.PAPER, "§f§l土地の詳細設定", mutableListOf(
                 "§f§l現在の設定",
                 "§7§lステータス:${formatStatus(data.status)}",
-                "§8§l値段:${format(data.price)}",
+                "§f§l値段:${format(data.price)}",
                 "§7§l支払いスパン:${
                     when (data.span) {
                         0 -> "一ヶ月ごと"
@@ -321,10 +318,10 @@ object InventoryMenu {
                     meta.owningPlayer = user
                 }
 
-                meta.displayName(Component.text("§6§l${user.name}"))
+                meta.displayName(Component.text("§f§l${user.name}"))
                 meta.lore = mutableListOf(if (user.isOnline) { "§aオンライン" } else { "§4§lオフライン" },
                     "§7§lステータス:${if (userData.status=="Share") "§a§l共有されています" else "§c§lロックされています"}",
-                    "§8§l賃料:${userData.rent}"
+                    "§f§l賃料:${format(userData.rent)}"
                 )
 
                 head.itemMeta = meta

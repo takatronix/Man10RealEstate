@@ -484,12 +484,12 @@ object Command:CommandExecutor {
 
                         val c1 = meta.persistentDataContainer[NamespacedKey.fromString("first")!!,
                                 PersistentDataType.STRING]?.split(";")?:return@Runnable
-                        val startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+                        val startPosition = Triple(c1[0].toInt(),c1[1].toInt(),c1[2].toInt())
 
                         val c2 = meta.persistentDataContainer[NamespacedKey.fromString("second")!!,
                                 PersistentDataType.STRING]?.split(";")?:return@Runnable
 
-                        val endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+                        val endPosition = Triple(c2[0].toInt(),c2[1].toInt(),c2[2].toInt())
 
                         var id = -1
 
@@ -688,12 +688,12 @@ object Command:CommandExecutor {
 
                     val c1 = meta.persistentDataContainer[NamespacedKey.fromString("first")!!,
                             PersistentDataType.STRING]?.split(";")?:return true
-                    val startPosition = Triple(c1[0].toDouble(),c1[1].toDouble(),c1[2].toDouble())
+                    val startPosition = Triple(c1[0].toInt(),c1[1].toInt(),c1[2].toInt())
 
                     val c2 = meta.persistentDataContainer[NamespacedKey.fromString("second")!!,
                             PersistentDataType.STRING]?.split(";")?:return true
 
-                    val endPosition = Triple(c2[0].toDouble(),c2[1].toDouble(),c2[2].toDouble())
+                    val endPosition = Triple(c2[0].toInt(),c2[1].toInt(),c2[2].toInt())
 
                     if (isRg){
 

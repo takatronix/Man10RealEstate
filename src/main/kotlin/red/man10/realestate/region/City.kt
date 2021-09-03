@@ -20,7 +20,6 @@ object City {
 
     val cityData = ConcurrentHashMap<String,CityData>()
     private val gson = Gson()
-//    val mapper = ObjectMapper()
 
     fun get(id:String):CityData?{
         return cityData[id]
@@ -51,7 +50,7 @@ object City {
     /**
      * 新規都市作成
      */
-    fun create(pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>,name:String,tax:Double,tp:Location):Boolean{
+    fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,tax:Double,tp:Location):Boolean{
 
         val data = CityData()
 
@@ -222,7 +221,7 @@ object City {
             }
 
             file.createNewFile()
-//            val jsonStr = mapper.writeValueAsString(data)
+
             val jsonStr = gson.toJson(data)
             val writer = FileWriter(file)
 
@@ -259,8 +258,6 @@ object City {
             }else{
                 Region.initRegion(id,city.defaultPrice)
             }
-
-//            Region.initRegion(id,10000000.0)
 
             return false
 
@@ -316,33 +313,28 @@ object City {
 
         var defaultPrice = 0.0
 
-//        var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
-//        var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
+        var startX = 0
+        var startY = 0
+        var startZ = 0
 
-        var startX = 0.0
-        var startY = 0.0
-        var startZ = 0.0
-
-        var endX = 0.0
-        var endY = 0.0
-        var endZ = 0.0
-
-//        lateinit var teleport : Location
+        var endX = 0
+        var endY = 0
+        var endZ = 0
 
         var isLoad = true
 
-        fun getStart(): Triple<Double, Double, Double> {
+        fun getStart(): Triple<Int, Int, Int> {
             return Triple(startX,startY,startZ)
         }
-        fun getEnd(): Triple<Double, Double, Double> {
+        fun getEnd(): Triple<Int, Int, Int> {
             return Triple(endX,endY,endZ)
         }
-        fun setStart(triple: Triple<Double,Double,Double>){
+        fun setStart(triple: Triple<Int,Int,Int>){
             startX = triple.first
             startY = triple.second
             startZ = triple.third
         }
-        fun setEnd(triple: Triple<Double,Double,Double>){
+        fun setEnd(triple: Triple<Int,Int,Int>){
             endX = triple.first
             endY = triple.second
             endZ = triple.third

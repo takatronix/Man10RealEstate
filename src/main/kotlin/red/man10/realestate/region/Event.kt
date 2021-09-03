@@ -5,7 +5,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -230,7 +229,7 @@ object Event :Listener{
     //保護処理
     ///////////////////////////////////////////////////////////////////////////
 
-    private val invList = mutableListOf(
+    private val invList = listOf(
             Material.CHEST,
             Material.ENDER_CHEST,
             Material.HOPPER,
@@ -241,7 +240,7 @@ object Event :Listener{
             Material.BARREL,
             Material.SHULKER_BOX)
 
-    private val blockList = mutableListOf(
+    private val containerList = listOf(
             Material.CHEST,
             Material.HOPPER,
             Material.TRAPPED_CHEST,
@@ -269,12 +268,9 @@ object Event :Listener{
         if (!hasPermission(p,block.location,BLOCK)){
             sendMessage(p,"§cここにブロックを置くことはできません！")
             e.isCancelled = true
+            return
         }
 
-        if (blockList.contains(block.type) && containerAmount< countChest(block)){
-            sendMessage(p,"§cこのチャンクには、これ以上このブロックは置けません！")
-            e.isCancelled = true
-        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -379,6 +375,8 @@ object Event :Listener{
             return true
         }
 
+        if (City.where(loc) == null)return false
+
         for (id in Region.regionData.keys){
 
             val rg = Region.get(id)?:continue
@@ -418,17 +416,5 @@ object Event :Listener{
         return false
     }
 
-    private fun countChest(block: Block): Int {
-
-        val te = block.chunk.tileEntities
-
-        var count = 0
-
-        for (entity in te){
-            if (blockList.contains(entity.block.type))count++
-        }
-
-        return count
-    }
 
 }

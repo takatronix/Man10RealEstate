@@ -53,7 +53,7 @@ object Region {
      *
      * @return region id
      */
-    fun create(pos1:Triple<Double,Double,Double>,pos2:Triple<Double,Double,Double>,name:String,price:Double,tp:Location):Int{
+    fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location):Int{
 
         val query = "INSERT INTO region " +
                 "(server, world, name, status, price, " +
@@ -234,14 +234,14 @@ object Region {
             data.span = rs.getInt("span")
 
             data.startPosition = Triple(
-                    rs.getDouble("sx"),
-                    rs.getDouble("sy"),
-                    rs.getDouble("sz")
+                    rs.getInt("sx"),
+                    rs.getInt("sy"),
+                    rs.getInt("sz")
             )
             data.endPosition = Triple(
-                    rs.getDouble("ex"),
-                    rs.getDouble("ey"),
-                    rs.getDouble("ez")
+                    rs.getInt("ex"),
+                    rs.getInt("ey"),
+                    rs.getInt("ez")
             )
 
             data.teleport = Location(
@@ -254,6 +254,8 @@ object Region {
             )
 
             data.isRemitTax = rs.getInt("remit_tax") == 1
+
+
 
             regionData[id] = data
 
@@ -425,8 +427,8 @@ object Region {
         var world = "builder"
         var server = "server"
 
-        var startPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
-        var endPosition: Triple<Double,Double,Double> = Triple(0.0,0.0,0.0)
+        var startPosition: Triple<Int,Int,Int> = Triple(0,0,0)
+        var endPosition: Triple<Int,Int,Int> = Triple(0,0,0)
         lateinit var teleport : Location
 
         var price : Double = 0.0
