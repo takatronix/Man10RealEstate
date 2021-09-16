@@ -14,10 +14,7 @@ import red.man10.realestate.Utility.sendMessage
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.Map
-import kotlin.collections.mutableListOf
 import kotlin.collections.set
-import kotlin.collections.toMap
 
 object Region {
 
@@ -366,7 +363,7 @@ object Region {
             val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
             val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
 
-            totalArea += (width*height).toInt()
+            totalArea += (width*height)
             totalTax += City.getTax(City.whereRegion(id),id)
             total++
 
@@ -375,12 +372,13 @@ object Region {
         rs1.close()
         db.close()
 
-        sendMessage(p,"§e§l所有してる土地の数:${total}")
-        sendMessage(p,"§e§l所持してる土地の総面積:${totalArea}ブロック")
-        sendMessage(p,"§e§l翌月に支払う税額:${format(totalTax)}")
+        if (total!=0){
+            sendMessage(p,"§e§l土地の数:${total}")
+            sendMessage(p,"§e§l土地の総面積:${totalArea}ブロック")
+            sendMessage(p,"§e§l支払う税金:${format(totalTax)}")
+        }
 
-
-        val rs2 = db.query("select id,rent,paid_date from region_user where uuid='${p.uniqueId}' and is_rent=1 and rent>0;")?:return
+        val rs2 = db.query("select * from region_user where uuid='${p.uniqueId}' and is_rent=1 and rent>0;")?:return
 
         while (rs2.next()){
 
