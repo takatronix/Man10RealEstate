@@ -24,8 +24,6 @@ import red.man10.realestate.region.Region
 import red.man10.realestate.region.Region.formatStatus
 import red.man10.realestate.region.Region.getUsers
 import red.man10.realestate.region.User
-import java.util.*
-import kotlin.collections.HashMap
 
 
 class AddUserData{
@@ -50,7 +48,7 @@ object Command:CommandExecutor {
 
         if (label == "mre"){
 
-            if (args.isNullOrEmpty()){
+            if (args.isEmpty()){
 
                 if (!hasPermission(sender,GUEST))return false
 

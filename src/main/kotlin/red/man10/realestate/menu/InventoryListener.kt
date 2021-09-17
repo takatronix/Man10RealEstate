@@ -242,7 +242,7 @@ object InventoryListener : Listener{
                             p.performCommand("mre removeuser $id ${user1.name}")
                         }else{
                             User.remove(user1.uniqueId,id)
-                            Utility.sendMessage(p,"§a§l住人を削除しました!")
+                            sendMessage(p,"§a§l住人を削除しました!")
                             return
                         }
                     }
