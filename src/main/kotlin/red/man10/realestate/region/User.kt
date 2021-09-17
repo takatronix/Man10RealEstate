@@ -18,8 +18,6 @@ object User{
 
     val ownerList = ConcurrentHashMap<Player,MutableList<Int>>()
 
-    private val mysql = MySQLManager(plugin,"Man10RealEstate")
-
     fun set(p:Player,id:Int,data:UserData){
         (userData[p]?: HashMap())[id] = data
         save(p,id)
@@ -36,6 +34,8 @@ object User{
         if (p.isOnline){
             return get(p.player!!,id)
         }
+
+        val mysql = MySQLManager(plugin,"Man10RealEstate")
 
         val rs = mysql.query("SELECT * FROM `region_user` WHERE `uuid`='${p.uniqueId}' AND region_id=$id;")?:return null
 
@@ -122,6 +122,8 @@ object User{
             userData[p]!!.clear()
         }
 
+        val mysql = MySQLManager(plugin,"Man10RealEstate")
+
         val rs1 = mysql.query("SELECT * FROM `region_user` WHERE `uuid`='${p.uniqueId}';")?:return
 
         val reMap = HashMap<Int,UserData>()
@@ -131,6 +133,11 @@ object User{
         while (rs1.next()){
 
             val id = rs1.getInt("region_id")
+
+            if (Region.get(id) ==null) {
+                remove(p, id)
+                continue
+            }
 
             val data = UserData()
 
@@ -182,6 +189,8 @@ object User{
      */
     @Synchronized//uuid,data
     fun loadUsers(id:Int, page: Int): MutableList<Pair<String,UserData>>? {
+
+        val mysql = MySQLManager(plugin,"Man10RealEstate")
 
         val rs = mysql.query("SELECT * FROM `region_user` WHERE `region_id`='$id' LIMIT ${page*45}, ${(page+1)*45};")?:return null
 
@@ -357,6 +366,8 @@ object User{
     }
 
     fun rent(){
+
+        val mysql = MySQLManager(plugin,"Man10RealEstate")
 
         val rs = mysql.query("SELECT * FROM region_user WHERE rent>0.0;")?:return
 

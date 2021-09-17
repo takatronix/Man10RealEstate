@@ -387,7 +387,7 @@ object Region {
             val paid = Calendar.getInstance()
             paid.time = rs2.getDate("paid_date")
 
-            val rg = get(id)!!
+            val rg = get(id)?:continue
 
             when(rg.span){
                 0 ->{paid.add(Calendar.DAY_OF_YEAR,30)}
