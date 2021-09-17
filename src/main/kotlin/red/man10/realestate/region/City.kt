@@ -260,7 +260,6 @@ object City {
             }
 
             return false
-
         }
         return true
     }
@@ -313,13 +312,13 @@ object City {
 
         var defaultPrice = 0.0
 
-        var startX = 0
-        var startY = 0
-        var startZ = 0
+        private var startX = 0
+        private var startY = 0
+        private var startZ = 0
 
-        var endX = 0
-        var endY = 0
-        var endZ = 0
+        private var endX = 0
+        private var endY = 0
+        private var endZ = 0
 
         var isLoad = true
 

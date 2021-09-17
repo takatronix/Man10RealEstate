@@ -272,7 +272,7 @@ object Event :Listener{
             return
         }
 
-        if (block.type==Material.CHEST){ sendMessage(p,"§c§lチェストより樽をおすすめします！") }
+        if (block.type==Material.CHEST){ sendMessage(p,"§c§lチェストより樽の使用をおすすめします！") }
 
         if (containerList.contains(block.type) && countContainer(block)> maxContainers){
             sendMessage(p,"§cこのチャンクには、これ以上このブロックは置けません！")

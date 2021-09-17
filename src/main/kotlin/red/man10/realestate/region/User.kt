@@ -145,14 +145,9 @@ object User{
 
             reMap[id] = data
 
-            if (data.status == "Lock"){
-                sendMessage(p,"§4§lID:$id はロックされた土地です")
-            }
+            if (data.status == "Lock"){ sendMessage(p,"§c§lID:${id}の賃料が支払われていませんでした！") }
 
-
-            if (data.allowAll){
-                ownerList.add(id)
-            }
+            if (data.allowAll){ ownerList.add(id) }
 
         }
 
@@ -344,7 +339,7 @@ object User{
      *
      * @return 賃料の支払いが成功したらtrue
      */
-    fun payingRent(p:UUID,id:Int,rent:Double):Boolean{
+    private fun payingRent(p:UUID,id:Int,rent:Double):Boolean{
 
         val rg = Region.get(id)?:return false
         val owner = rg.ownerUUID
@@ -354,9 +349,7 @@ object User{
             return false
         }
 
-        if (owner !=null){
-            bank.deposit(owner,rent,"Man10RealEstate RentProfit")
-        }
+        if (owner !=null){ bank.deposit(owner,rent,"Man10RealEstate RentProfit") }
 
         mysqlQueue.add("UPDATE `region_user` SET paid_date=now(), status='Share' WHERE uuid='$p' AND region_id=$id;")
 
