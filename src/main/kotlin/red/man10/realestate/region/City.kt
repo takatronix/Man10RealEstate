@@ -27,9 +27,7 @@ object City {
 
     fun set(id:String,data:CityData){
         cityData[id] = data
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
-            save(id,data)
-        })
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable { save(id,data) })
     }
 
     fun delete(id: String){
@@ -50,7 +48,7 @@ object City {
     /**
      * 新規都市作成
      */
-    fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,tax:Double,tp:Location):Boolean{
+    fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,tax:Double,tp:Location):Int{
 
         val data = CityData()
 
@@ -71,8 +69,8 @@ object City {
             val file = File("${plugin.dataFolder}",File.separator+"/$name.json")
 
             if (file.exists()){
-                Bukkit.getLogger().info("すでにファイル")
-                return false
+                set(name,data)
+                return 1
             }
 
             file.createNewFile()
@@ -86,10 +84,10 @@ object City {
 
         }catch (e:IOException){
             Bukkit.getLogger().info(e.message)
-            return false
+            return 2
         }
 
-        return true
+        return 0
     }
 
     /**
@@ -117,8 +115,6 @@ object City {
                 reader.close()
 
                 val data = gson.fromJson(jsonStr,CityData::class.java)
-//                val data = mapper.readValue(jsonStr,CityData::class.java)
-
 
                 if (!data.isLoad){
                     Bukkit.getLogger().info("unload city : $name")
@@ -220,8 +216,8 @@ object City {
                 return
             }
 
-            file.createNewFile()
-
+//            file.createNewFile()
+//
             val jsonStr = gson.toJson(data)
             val writer = FileWriter(file)
 
@@ -279,7 +275,6 @@ object City {
         val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
 
         return width * height * city.tax
-
     }
 
 
@@ -295,8 +290,6 @@ object City {
     }
 
     class CityData{
-
-//        var regionList = mutableListOf<Int>()
 
         var tax = 0.0
 

@@ -22,16 +22,13 @@ class Plugin : JavaPlugin(), Listener {
     companion object{
 
         lateinit var bank : BankAPI
-
-//        lateinit var es : ExecutorService
-
         lateinit var vault : VaultManager
 
         lateinit var plugin: Plugin
 
         const val WAND_NAME = "範囲指定ワンド"
 
-        var prefix = "[§5Man10RealEstate§f]"
+        const val prefix = "[§5Man10RealEstate§f]"
 
         //保護を無効にするワールド
         var disableWorld = mutableListOf<String>()
@@ -46,11 +43,8 @@ class Plugin : JavaPlugin(), Listener {
     override fun onEnable() { // Plugin startup logic
         saveDefaultConfig()
 
-//        es = Executors.newCachedThreadPool()//スレッドプールを作成、必要に応じて新規スレッドを作成
         vault = VaultManager(this)
-
         bank = BankAPI(this)
-
         plugin = this
 
         server.pluginManager.registerEvents(this, this)
@@ -61,12 +55,16 @@ class Plugin : JavaPlugin(), Listener {
         getCommand("mreop")!!.setExecutor(Command)
 
         loadConfig()
-
         MySQLManager.mysqlQueue(this)
 
-        Region.load()
         City.load()
+        Region.load()
 
+        batchSchedule()
+
+    }
+
+    private fun batchSchedule(){
         Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
 
             val now = Calendar.getInstance()
@@ -80,7 +78,6 @@ class Plugin : JavaPlugin(), Listener {
 
                 //賃料の支払い処理、日付が変更されたタイミングで走る
                 if (now.get(Calendar.DAY_OF_MONTH) != rent.get(Calendar.DAY_OF_MONTH)){
-
                     User.rent()
                     lastRent = Date()
                     config.set("lastRent",lastRent.time)
@@ -91,7 +88,6 @@ class Plugin : JavaPlugin(), Listener {
 
                 //税金の支払い処理、月が変わったタイミングで走る
                 if (now.get(Calendar.MONTH) != tax.get(Calendar.MONTH)){
-
                     User.tax()
                     lastTax = Date()
                     config.set("lastTax",lastTax.time)

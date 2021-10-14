@@ -119,7 +119,7 @@ object CustomInventory{
     enum class InventoryID{
 
         MAIN_MENU,
-        BOOKMARK,
+        LIKED_MENU,
         REGION_LIST,
         REGION_MENU,
         REGION_STATUS,

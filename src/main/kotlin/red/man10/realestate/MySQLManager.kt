@@ -222,7 +222,17 @@ class MySQLManager(private val plugin: JavaPlugin, private val conName: String) 
 
         }
 
-
+        fun escapeStringForMySQL(s: String): String {
+            return s.replace("\\", "\\\\")
+                .replace("\b", "\\b")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\\x1A", "\\Z")
+                .replace("\\x00", "\\0")
+                .replace("'", "\\'")
+                .replace("\"", "\\\"")
+        }
 
     }
 }

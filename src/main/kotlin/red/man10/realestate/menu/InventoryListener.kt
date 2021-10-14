@@ -37,7 +37,7 @@ object InventoryListener : Listener{
                 when(e.slot){
 
                     1 -> InventoryMenu.openRegionList(p,0)
-                    4 -> InventoryMenu.openBookmark(p,0)
+                    4 -> InventoryMenu.openLikedList(p,0)
                     7 -> {
                         CustomInventory.close(p)
                         p.performCommand("mre balance")
@@ -47,7 +47,7 @@ object InventoryListener : Listener{
                 }
             }
 
-            BOOKMARK ->{
+            LIKED_MENU ->{
 
 //                if (slot <45)return
 
@@ -55,12 +55,12 @@ object InventoryListener : Listener{
                     "back" ->InventoryMenu.mainMenu(p)
                     "next" ->{
                         val page = CustomInventory.getData(item,"page").toInt()
-                        InventoryMenu.openBookmark(p,page+1)
+                        InventoryMenu.openLikedList(p,page+1)
 
                     }
                     "previous" ->{
                         val page = CustomInventory.getData(item,"page").toInt()
-                        InventoryMenu.openBookmark(p,page-1)
+                        InventoryMenu.openLikedList(p,page-1)
 
                     }
                 }
@@ -109,7 +109,7 @@ object InventoryListener : Listener{
                     15 -> {
                         CustomInventory.close(p)
                         sendMessage(p,"§a§l/mre adduser $id <住人の名前> <賃料(支払う場合のみ)>")
-                        Utility.sendSuggest(p,"§a§l住人を追加する","mre adduser $id ")
+                        Utility.sendSuggest(p,"§a§l住人を追加する","mre adduser $id ","チャット欄にコマンドが表示されます")
                         return
                     }
                 }
@@ -126,7 +126,7 @@ object InventoryListener : Listener{
                     10->InventoryMenu.statusMenu(p,id)
                     13->{
                         CustomInventory.close(p)
-                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setprice $id ")
+                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setprice $id ","チャット欄にコマンドが表示されます")
                     }
                     16->{
                         p.performCommand("mre settp $id")
@@ -135,7 +135,7 @@ object InventoryListener : Listener{
                     38->InventoryMenu.spanMenu(p,id)
                     42->{
                         CustomInventory.close(p)
-                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setowner $id ")
+                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setowner $id ","チャット欄にコマンドが表示されます")
                     }
                 }
 
@@ -234,7 +234,7 @@ object InventoryListener : Listener{
                     13->{
                         CustomInventory.close(p)
                         Utility.sendSuggest(p,"§a§l賃料を設定する","mre setrent $id" +
-                                " ${Bukkit.getOfflinePlayer(uuid).name} ")
+                                " ${Bukkit.getOfflinePlayer(uuid).name} ","チャット欄にコマンドが表示されます")
                     }
                     15->{
                         val user1 = Bukkit.getOfflinePlayer(uuid)

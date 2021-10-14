@@ -16,7 +16,7 @@ object User{
     val userData = ConcurrentHashMap<Player,HashMap<Int,UserData>>()
     val likeData = ConcurrentHashMap<Player,MutableList<Int>>()
 
-    val ownerList = ConcurrentHashMap<Player,MutableList<Int>>()
+//    val ownerList = ConcurrentHashMap<Player,MutableList<Int>>()
 
     fun set(p:Player,id:Int,data:UserData){
         (userData[p]?: HashMap())[id] = data
@@ -118,17 +118,15 @@ object User{
     @Synchronized
     fun load(p:Player){
 
-        if (!userData[p].isNullOrEmpty()){
-            userData[p]!!.clear()
-        }
+        if (!userData[p].isNullOrEmpty()){ userData[p]!!.clear() }
 
         val mysql = MySQLManager(plugin,"Man10RealEstate")
 
         val rs1 = mysql.query("SELECT * FROM `region_user` WHERE `uuid`='${p.uniqueId}';")?:return
 
-        val reMap = HashMap<Int,UserData>()
+        val map = HashMap<Int,UserData>()
 
-        val ownerList = mutableListOf<Int>()
+//        val ownerList = mutableListOf<Int>()
 
         while (rs1.next()){
 
@@ -150,15 +148,15 @@ object User{
 
             data.isRent = rs1.getInt("is_rent")==1
 
-            reMap[id] = data
+            map[id] = data
 
             if (data.status == "Lock"){ sendMessage(p,"§c§lID:${id}の賃料が支払われていませんでした！") }
 
-            if (data.allowAll){ ownerList.add(id) }
+//            if (data.allowAll){ ownerList.add(id) }
 
         }
 
-        userData[p] = reMap
+        userData[p] = map
 
         rs1.close()
         mysql.close()
@@ -167,20 +165,18 @@ object User{
 
         val likeList = mutableListOf<Int>()
 
-        while (rs2.next()){
-            likeList.add(rs2.getInt("region_id"))
-        }
+        while (rs2.next()){ likeList.add(rs2.getInt("region_id")) }
 
         likeData[p] = likeList
 
         rs2.close()
         mysql.close()
 
-        //オーナーリストに追加
-        for (rg in Region.regionData){
-            if (rg.value.ownerUUID == p.uniqueId)ownerList.add(rg.key)
-        }
-        this.ownerList[p] = ownerList
+//        //オーナーリストに追加
+//        for (rg in Region.regionData){
+//            if (rg.value.ownerUUID == p.uniqueId)ownerList.add(rg.key)
+//        }
+//        this.ownerList[p] = ownerList
 
     }
 
@@ -188,13 +184,13 @@ object User{
      * 住人のリストを返す(inventory用)
      */
     @Synchronized//uuid,data
-    fun loadUsers(id:Int, page: Int): MutableList<Pair<String,UserData>>? {
+    fun loadUsers(id:Int): MutableList<Pair<UUID,UserData>>? {
 
         val mysql = MySQLManager(plugin,"Man10RealEstate")
 
-        val rs = mysql.query("SELECT * FROM `region_user` WHERE `region_id`='$id' LIMIT ${page*45}, ${(page+1)*45};")?:return null
+        val rs = mysql.query("SELECT * FROM `region_user` WHERE `region_id`='$id';")?:return null
 
-        val list = mutableListOf<Pair<String,UserData>>()
+        val list = mutableListOf<Pair<UUID,UserData>>()
 
         while (rs.next()){
 
@@ -209,7 +205,7 @@ object User{
             data.allowInv = rs.getInt("allow_inv")==1
             data.allowDoor = rs.getInt("allow_door")==1
 
-            list.add(Pair(rs.getString("uuid"),data))
+            list.add(Pair(UUID.fromString(rs.getString("uuid")),data))
         }
 
         rs.close()
@@ -243,7 +239,7 @@ object User{
     /**
      * @return いいねしてるかどうか
      */
-    private fun isLike(p:Player, id:Int):Boolean{
+    private fun isLiked(p:Player, id:Int):Boolean{
 
         val data = likeData[p]
 
@@ -257,7 +253,7 @@ object User{
     /**
      * いいね、いいねの解除(トグル式)
      */
-    fun setLike(p:Player,id:Int){
+    fun changeLike(p:Player, id:Int){
 
         val rg = Region.get(id)?:return
 
@@ -266,7 +262,7 @@ object User{
             return
         }
 
-        if (isLike(p,id)){
+        if (isLiked(p,id)){
             likeData[p]!!.remove(id)
 
             mysqlQueue.add("DELETE FROM `liked_index` WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
@@ -288,9 +284,9 @@ object User{
         val data = get(p,id)?:return
 
         if (rent == 0.0){
-            changeRent(p,id,false)
+            isChargeRent(p,id,false)
         }else{
-            changeRent(p,id,true)
+            isChargeRent(p,id,true)
         }
 
         data.rent = rent
@@ -300,7 +296,7 @@ object User{
     /**
      * 賃料を徴収するかどうか
      */
-    private fun changeRent(p:Player,id:Int,isRent:Boolean){
+    private fun isChargeRent(p:Player, id:Int, isRent:Boolean){
 
         val data = get(p,id)?:return
         data.isRent = isRent
@@ -330,6 +326,7 @@ object User{
             return
         }
 
+        //オフラインだった場合
         when(perm){
             Permission.ALL -> mysqlQueue.add("UPDATE region_user SET allow_all='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
             Permission.BLOCK -> mysqlQueue.add("UPDATE region_user SET allow_block='${if (value){1}else{0}}' WHERE uuid='${uuid}' AND region_id=$id;")
