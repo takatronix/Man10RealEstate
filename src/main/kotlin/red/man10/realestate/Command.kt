@@ -24,6 +24,8 @@ import red.man10.realestate.region.Region
 import red.man10.realestate.region.Region.formatStatus
 import red.man10.realestate.region.Region.getUsers
 import red.man10.realestate.region.User
+import java.util.*
+import kotlin.collections.HashMap
 
 
 class AddUserData{
@@ -41,6 +43,8 @@ object Command:CommandExecutor {
     const val OP = "mre.op"
 
     private val userMap = HashMap<Player,AddUserData>()
+    // buycheck -> buyコマンドへの確認キー playerUUID, pair<landId, keyUUID>
+    val buyConfirmationKey = HashMap<UUID, Pair<Int, UUID>>()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -62,12 +66,20 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,USER))return false
 
-                    if (args.size != 2)return false
+                    if (args.size != 3)return false
 
                     val id = args[1].toIntOrNull()?:return false
 
+                    //購入確認キー確認
+                    val confirmationData = buyConfirmationKey[sender.uniqueId]
+                    if(confirmationData == null || confirmationData.first != id || !confirmationData.second.toString().equals(args[2])){
+                        sendMessage(sender,"§4§l購入確認をしていません！")
+                        return false
+                    }
+
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         Region.buy(sender,id)
+                        buyConfirmationKey.remove(sender.uniqueId) //購入確認キー消去
                     })
                     return true
                 }
@@ -87,12 +99,17 @@ object Command:CommandExecutor {
                         return false
                     }
 
+                    // 購入確認キーを生成
+                    val confirmationKey = UUID.randomUUID()
+                    buyConfirmationKey[sender.uniqueId] = Pair(id, confirmationKey)
+
+
                     sendMessage(sender,"§c§l値段：${format(data.price)}")
                     sendMessage(sender,"§c§lID：${id}")
                     sendMessage(sender,"§a§l現在のオーナー：${Region.getOwner(data)}")
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
 
-                    sendClickMessage(sender,"§a§l[購入する](§6§l電子マネー${format(data.price)}円)","mre buy $id")
+                    sendClickMessage(sender,"§a§l[購入する](§6§l電子マネー${format(data.price)}円)","mre buy $id $confirmationKey")
 
                     return true
                 }

@@ -164,6 +164,10 @@ object Event :Listener{
             }
 
             val data = Region.get(id)?:return
+            if (!Utility.isWithinRange(e.block.location ,data.startPosition,data.endPosition,data.world,data.server) && !hasPermission(e.player, e.block.location, BLOCK)){
+                sendMessage(e.player,"§c土地の外に看板を設置することはできません")
+                return
+            }
 
             e.line(0, text("§eID:$id"))
             e.line(1, text(data.name))
