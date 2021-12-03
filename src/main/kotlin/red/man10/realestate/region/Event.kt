@@ -38,14 +38,6 @@ object Event :Listener{
 
     var maxContainers = 24
 
-    @EventHandler
-    fun playerJoin(e:PlayerJoinEvent){
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
-            Thread.sleep(5000)
-            User.load(e.player)
-        })
-    }
-
     /**
      * 看板のアップデート
      */
@@ -159,7 +151,7 @@ object Event :Listener{
             try {
                 id = lines[0].replace("mre:","").toInt()
             }catch (e:Exception){
-                sendMessage(p,"§3§l入力方法：”mre:<id>”")
+                sendMessage(p,"§3§l入力方法：\"mre:<id>\"")
                 return
             }
 
@@ -185,23 +177,13 @@ object Event :Listener{
         if (e.action != Action.RIGHT_CLICK_BLOCK && e.action !=Action.LEFT_CLICK_BLOCK)return
 
         val b= e.clickedBlock?:return
-        val sign : Sign
+        val sign = b.state
 
-        try{
-            sign = b.state as Sign
-        }catch (e:Exception){
-            return
-        }
+        if (sign !is Sign)return
 
         val lines = sign.lines
 
-        val id: Int
-
-        try {
-            id = lines[0].replace("§eID:","").toInt()
-        }catch (e:Exception){
-            return
-        }
+        val id = lines[0].replace("§eID:","").toIntOrNull()?:return
 
         val data = Region.get(id)?:return
 
@@ -221,17 +203,17 @@ object Event :Listener{
         sendMessage(p,"§a値段:${format(data.price)}")
         sendMessage(p,"§a==========================================")
 
-        sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id")
+        sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id","いいねをすると、/mreメニューから テレポートをすることができます")
 
         if (data.status == "OnSale"){
-            sendClickMessage(p,"§a§l§n[土地を買う！] §e§l値段:${format(data.price)}","mre buycheck $id")
+            sendClickMessage(p,"§a§l§n[土地を買う！]","mre buycheck $id","§e§l値段:${format(data.price)}")
         }
 
         updateSign(sign,id)
     }
 
     //////////////////////////////////////////////////////////////////////////
-    //保護処理
+    //保護処理 イベント
     ///////////////////////////////////////////////////////////////////////////
 
     private val invList = listOf(
@@ -252,6 +234,13 @@ object Event :Listener{
             Material.FURNACE
     )
 
+    @EventHandler
+    fun playerJoin(e:PlayerJoinEvent){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+            Thread.sleep(5000)
+            User.load(e.player)
+        })
+    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun blockBreakEvent(e: BlockBreakEvent){
@@ -383,9 +372,7 @@ object Event :Listener{
 
         if (p.hasPermission(Command.OP))return true
 
-        if (disableWorld.contains(loc.world.name)){
-            return true
-        }
+        if (disableWorld.contains(loc.world.name)){ return true }
 
         if (City.where(loc) == null)return false
 
@@ -408,15 +395,9 @@ object Event :Listener{
 
                 when(perm){
 
-                    BLOCK ->{
-                        if (data.allowBlock)return true
-                    }
-                    INVENTORY ->{
-                        if (data.allowInv)return true
-                    }
-                    DOOR ->{
-                        if (data.allowDoor)return true
-                    }
+                    BLOCK ->{ if (data.allowBlock)return true }
+                    INVENTORY ->{ if (data.allowInv)return true }
+                    DOOR ->{ if (data.allowDoor)return true }
                     else->return false
 
                 }

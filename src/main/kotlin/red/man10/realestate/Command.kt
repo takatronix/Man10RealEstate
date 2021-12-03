@@ -95,7 +95,7 @@ object Command:CommandExecutor {
                     val data = Region.get(id)?:return false
 
                     if (data.status != "OnSale"){
-                        sendMessage(sender,"§4§lこの土地は販売されていません！")
+                        sendMessage(sender,"§c§lこの土地は販売されていません！")
                         return false
                     }
 
@@ -120,7 +120,7 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,GUEST))return false
 
-                    User.setLike(sender,args[1].toIntOrNull()?:return true)
+                    User.changeLike(sender,args[1].toIntOrNull()?:return true)
 
                     return true
                 }
@@ -133,6 +133,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§c§l/mre adduser <ID> <ユーザー名> <賃料(支払う場合のみ)>")
                         return false
                     }
+
                     val id = args[1].toIntOrNull()?:return false
 
                     if (!hasRegionPermission(sender,id)){ return false }
@@ -153,18 +154,18 @@ object Command:CommandExecutor {
                         else -> "不明"
                     }
 
-                    val p = Bukkit.getPlayer(args[2])
+                    val user = Bukkit.getPlayer(args[2])
 
-                    if (p == null){
+                    if (user == null){
                         sendMessage(sender,"§c§lユーザーがオフラインの可能性があります！")
                         return false
                     }
 
-                    if (p.uniqueId == data.ownerUUID){
+                    if (user.uniqueId == data.ownerUUID){
                         return false
                     }
 
-                    if (User.get(p,id) != null){
+                    if (User.get(user,id) != null){
                         sendMessage(sender,"§c§lこのユーザーは既に住人です！")
                         return false
                     }
@@ -177,27 +178,27 @@ object Command:CommandExecutor {
                             sendMessage(sender,"§c§l土地に住まわせることのできる住人の上限に達しています")
                             return@Runnable
                         }
-                        if (!City.liveScore(id,p)){
+                        if (!City.liveScore(id,user)){
                             sendMessage(sender,"ユーザーのスコアが足りません！")
                             return@Runnable
                         }
 
-                        sendMessage(p,"§a§l=================土地の情報==================")
-                        sendMessage(p,"§a§lオーナー：${sender.name}")
-                        sendMessage(p,"§a§l土地のID：$id")
+                        sendMessage(user,"§a§l=================土地の情報==================")
+                        sendMessage(user,"§a§lオーナー：${sender.name}")
+                        sendMessage(user,"§a§l土地のID：$id")
                         if (rent>0.0){
-                            sendMessage(p,"§a§l賃料：$rent スパン:${spanDisplay}")
-                            sendMessage(p,"§a§l住人になる場合、初回賃料を銀行から引き出されます！")
+                            sendMessage(user,"§a§l賃料：$rent スパン:${spanDisplay}")
+                            sendMessage(user,"§a§l住人になる場合、初回賃料を銀行から引き出されます！")
                         }
-                        sendMessage(p,"§a§l===========================================")
+                        sendMessage(user,"§a§l===========================================")
 
                         val addData = AddUserData()
                         addData.id = id
                         addData.rent = rent
                         addData.owner = sender
-                        userMap[p] = addData
+                        userMap[user] = addData
 
-                        sendClickMessage(p,"§e§l住人になる場合は§nここを§e§lクリック！","mre acceptuser")
+                        sendClickMessage(user,"§e§l住人になる場合は§nここを§e§lクリック！","mre acceptuser","§eこの土地の住人になります")
 
                         sendMessage(sender,"§a§l現在承諾待ちです....")
                         return@Runnable
@@ -231,7 +232,7 @@ object Command:CommandExecutor {
 
                     sendMessage(sender,"§a§lあなたは住人になりました！")
 
-                    sendMessage(data.owner,"§a§l${sender.name}が住人の入居に承諾しました！")
+                    sendMessage(data.owner,"§a§l${sender.name}が住人になりました！")
 
                     return true
 
@@ -288,7 +289,7 @@ object Command:CommandExecutor {
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null){
-                        sendMessage(sender,"§3§lオンラインのユーザーを入力してください")
+                        sendMessage(sender,"§c§lオンラインのユーザーを入力してください")
                         return true
                     }
 
@@ -368,7 +369,7 @@ object Command:CommandExecutor {
 
                     Region.setStatus(id,status)
 
-                    sendMessage(sender,"§a§l${id}のステータスを${formatStatus(status)}に変更しました")
+                    sendMessage(sender,"§a§l${id}の土地の状態を${formatStatus(status)}に変更しました")
 
                     return true
 
@@ -388,7 +389,7 @@ object Command:CommandExecutor {
                     val price = args[2].toDoubleOrNull()
 
                     if (price==null || price <0.0){
-                        sendMessage(sender,"金額の設定に問題があります！")
+                        sendMessage(sender,"§c§l金額の設定に問題があります！")
                         return false
                     }
 
@@ -403,9 +404,19 @@ object Command:CommandExecutor {
 
                     if (args.size < 2)return false
 
-                    val id = args[1].toIntOrNull()?:return true
+                    val id = args[1].toIntOrNull()
 
-                    val data = Region.get(id)?:return true
+                    if (id == null){
+                        sendMessage(sender,"§c§l数字を入力してください")
+                        return true
+                    }
+
+                    val data = Region.get(id)
+
+                    if (data==null){
+                        sendMessage(sender,"§c§l指定したIDの土地は存在しません")
+                        return true
+                    }
 
                     sender.teleport(data.teleport)
 
@@ -510,12 +521,9 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            if (City.create(startPosition,endPosition,args[2],amount,sender.location)){
-                                sendMessage(sender,"§a§l登録完了！")
-                                return@Runnable
-                            }
+                            val ret = City.create(startPosition,endPosition,args[2],amount,sender.location)
 
-                            sendMessage(sender,"§c§l登録失敗！")
+                            sendMessage(sender,"§a§lcode:${ret} 登録処理終了")
 
                             return@Runnable
 
@@ -811,7 +819,7 @@ object Command:CommandExecutor {
 
                             while (rs.next()){
                                 val id = rs.getInt("id")
-                                sendClickMessage(sender,"§e§lID:$id","mreop tp $id")
+                                sendClickMessage(sender,"§e§lID:$id","mreop tp $id","飛ぶ")
                             }
 
                             rs.close()
@@ -822,7 +830,7 @@ object Command:CommandExecutor {
                         return true
                     }
                     for (rg in Region.regionData.filter { it.value.ownerUUID == uuid }.keys){
-                        sendClickMessage(sender,"§e§lID:${rg}","mreop tp $rg")
+                        sendClickMessage(sender,"§e§lID:${rg}","mreop tp $rg","飛ぶ")
                     }
 
                 }
@@ -917,20 +925,6 @@ object Command:CommandExecutor {
                     return  true
 
                 }
-
-//                "unpaid" ->{//mreop unpaid cityId <amount>
-//
-//                    val id = args[1].toIntOrNull()?:return true
-//                    val amount = args[2].toDoubleOrNull()?:return true
-//
-//                    val data = City.get(id)?:return true
-//                    data.defaultPrice = amount
-//
-//                    City.set(id,data)
-//
-//                    sendMessage(sender,"§a§l設定完了！")
-//
-//                }
 
                 else ->{
 

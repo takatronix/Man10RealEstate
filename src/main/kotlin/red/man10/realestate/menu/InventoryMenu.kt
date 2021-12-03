@@ -20,13 +20,11 @@ import kotlin.collections.HashMap
 
 object InventoryMenu {
 
-    private val loadItem: ItemStack = IS(Material.CLOCK, "§e§l現在データの読み込み中です.....")
-    private val back = IS(Material.RED_STAINED_GLASS_PANE, "§c§l戻る")
+    private val loadItem : ItemStack = IS(Material.CLOCK, "§e§l現在データの読み込み中です.....")
+    private val back : ItemStack = IS(Material.RED_STAINED_GLASS_PANE, "§c§l戻る")
     val cache = HashMap<Pair<UUID, Int>, User.UserData>()
 
-    init {
-        setData(back, "type", "back")
-    }
+    init { setData(back, "type", "back") }
 
     /**
      * メインメニュー
@@ -47,17 +45,13 @@ object InventoryMenu {
     /**
      * いいねのリスト
      */
-    fun openBookmark(p: Player, page: Int) {
+    fun openLikedList(p: Player, page: Int) {
 
         val inv = CustomInventory.createInventory(54, "§a§lいいねしたリスト")
 
-        val list = User.likeData[p] ?: return
+        val list = (User.likeData[p] ?: return).drop(page*45).take(45)
 
-        for (i in page * 45..(page + 1) * 45) {
-
-            if (list.size <= i) break
-
-            val id = list[i]
+        for (id in list) {
 
             val rg = Region.get(id) ?: continue
 
@@ -78,7 +72,7 @@ object InventoryMenu {
             inv.setItem(i, back)
         }
 
-        if (inv.getItem(44) != null) {
+        if (list.size>=45) {
 
             val next = IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "§6§l次のページ")
             setData(next, "type", "next")
@@ -102,7 +96,7 @@ object InventoryMenu {
         }
 
         p.openInventory(inv)
-        CustomInventory.open(p, BOOKMARK)
+        CustomInventory.open(p, LIKED_MENU)
 
     }
 
@@ -113,13 +107,18 @@ object InventoryMenu {
 
         val inv = CustomInventory.createInventory(54, "§a§l土地のリスト")
 
-        val list = User.ownerList[p]
+        var list = mutableListOf<Int>()
 
-        if (list.isNullOrEmpty()) {
+        Region.regionData.forEach { if (it.value.ownerUUID == p.uniqueId) list.add(it.key) }
+        User.userData[p]!!.forEach { if (it.value.allowAll) list.add(it.key) }
+
+        if (list.isEmpty()) {
             sendMessage(p, "§c§lあなたは自分の土地を持っていません")
             CustomInventory.close(p)
             return
         }
+
+        list = list.drop(page*45).take(45).toMutableList()
 
         for (i in page * 45..(page + 1) * 45) {
 
@@ -142,7 +141,7 @@ object InventoryMenu {
             inv.setItem(i, back)
         }
 
-        if (inv.getItem(44) != null) {
+        if (list.size>=45) {
 
             val next = IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "§6§l次のページ")
             setData(next, "type", "next")
@@ -293,7 +292,7 @@ object InventoryMenu {
         inv.setItem(22, loadItem)
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-            val list = User.loadUsers(id, page)
+            var list = User.loadUsers(id)
 
             if (list == null) {
                 sendMessage(p, "§c§lこの土地には住人がいないようです")
@@ -301,12 +300,13 @@ object InventoryMenu {
                 return@Runnable
             }
 
+            list = list.drop(page*45).take(45).toMutableList()
+
             inv.remove(loadItem)
 
             for (d in list) {
 
-
-                val user = Bukkit.getOfflinePlayer(UUID.fromString(d.first))
+                val user = Bukkit.getOfflinePlayer(d.first)
                 val userData = d.second
 
                 if (p.uniqueId == user.uniqueId) continue
@@ -319,6 +319,7 @@ object InventoryMenu {
                 }
 
                 meta.displayName(Component.text("§f§l${user.name}"))
+
                 meta.lore = mutableListOf(if (user.isOnline) { "§aオンライン" } else { "§4§lオフライン" },
                     "§7§lステータス:${if (userData.status=="Share") "§a§l共有されています" else "§c§lロックされています"}",
                     "§f§l賃料:${format(userData.rent)}"
@@ -340,7 +341,7 @@ object InventoryMenu {
                 inv.setItem(i, backBtn)
             }
 
-            if (inv.getItem(44) != null) {
+            if (list.size>=45) {
 
                 val next = IS(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "§6§l次のページ")
                 setData(next, "type", "next")

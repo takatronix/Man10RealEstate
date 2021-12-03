@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.MySQLManager
+import red.man10.realestate.MySQLManager.Companion.escapeStringForMySQL
 import red.man10.realestate.MySQLManager.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
@@ -38,7 +39,6 @@ object Region {
         User.removeAll(id)
     }
 
-
     /**
      * create new region
      *
@@ -59,7 +59,7 @@ object Region {
                 "VALUES(" +
                 "'$serverName', " +
                 "'${tp.world.name}', " +
-                "'$name', " +
+                "'${escapeStringForMySQL(name)}', " +
                 "'OnSale', " +
                 "$price, " +
                 "${tp.x}, " +
@@ -119,21 +119,21 @@ object Region {
     fun setOwner(id:Int, p: Player?){
         val data = get(id)?:return
 
-        if (data.ownerUUID !=null){
-            val old = Bukkit.getPlayer(data.ownerUUID!!)
-
-            if (old !=null){
-                val list = User.ownerList[old]!!
-                list.remove(id)
-                User.ownerList[old] = list
-            }
-        }
+//        if (data.ownerUUID !=null){
+//            val old = Bukkit.getPlayer(data.ownerUUID!!)
+//
+//            if (old !=null){
+//                val list = User.ownerList[old]!!
+//                list.remove(id)
+//                User.ownerList[old] = list
+//            }
+//        }
 
         if (p != null){
             data.ownerUUID = p.uniqueId
-            val list = User.ownerList[p]?: mutableListOf()
-            list.add(id)
-            User.ownerList[p] = list
+//            val list = User.ownerList[p]?: mutableListOf()
+//            list.add(id)
+//            User.ownerList[p] = list
         }else{
             data.ownerUUID = p
         }
@@ -192,7 +192,7 @@ object Region {
                 "ex = ${data.endPosition.first}, " +
                 "ey = ${data.endPosition.second}, " +
                 "ez = ${data.endPosition.third}, " +
-                "status = '${data.status}', " +
+                "status = '${escapeStringForMySQL(data.status)}', " +
                 "price = ${data.price}, " +
                 "profit = 0, " +
                 "span = ${data.span}," +
@@ -252,13 +252,11 @@ object Region {
 
             data.isRemitTax = rs.getInt("remit_tax") == 1
 
-
-
             regionData[id] = data
 
             if (Bukkit.getWorld(data.world) == null){
                 delete(id)
-                Bukkit.getLogger().info("存在しない土地だったので、削除しました!")
+                Bukkit.getLogger().info("id:${id}は存在しない土地だったので、削除しました!")
             }
 
         }
@@ -287,13 +285,13 @@ object Region {
             return
         }
 
-        if (vault.getBalance(p.uniqueId) < data.price){
-            sendMessage(p,"§c§l電子マネーが足りません！")
+        if (!City.buyScore(id,p)){
+            sendMessage(p,"§c§lあなたにはこの土地を買うためのスコアが足りません！")
             return
         }
 
-        if (!City.buyScore(id,p)){
-            sendMessage(p,"あなたにはこの土地を買うためのスコアが足りません！")
+        if (vault.getBalance(p.uniqueId) < data.price){
+            sendMessage(p,"§c§l電子マネーが足りません！")
             return
         }
 
@@ -318,9 +316,9 @@ object Region {
         val uuid = data.ownerUUID
 
         return if (uuid == null){
-            "Admin"
+            "サーバー運営"
         }else{
-            Bukkit.getOfflinePlayer(uuid).name!!
+            Bukkit.getOfflinePlayer(uuid).name?:"不明なユーザー"
         }
     }
 

@@ -1,8 +1,9 @@
 package red.man10.realestate
 
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent.runCommand
 import net.kyori.adventure.text.event.ClickEvent.suggestCommand
+import net.kyori.adventure.text.event.HoverEvent.showText
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.Plugin.Companion.prefix
@@ -27,15 +28,16 @@ object Utility {
     }
 
     //ホバーテキスト、クリックイベント
-    fun sendClickMessage(p: Player, text: String, command: String) {
+    fun sendClickMessage(p: Player, text: String, command: String,hoverText : String) {
+        val c = text()
+        val h =
 
-        p.sendMessage(Component.text("$prefix$text").clickEvent(runCommand("/$command")))
-
+        p.sendMessage(text("$prefix$text").clickEvent(runCommand("/$command")).hoverEvent(showText(text(hoverText))))
     }
 
     //サジェストメッセージ
-    fun sendSuggest(p: Player, text: String?, command: String) {
-        p.sendMessage(Component.text("${prefix}$text§a§n[ここをクリック！]").clickEvent(suggestCommand("/$command")))
+    fun sendSuggest(p: Player, text: String?, command: String,hoverText: String) {
+        p.sendMessage(text("${prefix}$text§a§n[ここをクリック！]").clickEvent(suggestCommand("/$command")).hoverEvent(showText(text(hoverText))))
     }
 
     //prefix付きのメッセージ
