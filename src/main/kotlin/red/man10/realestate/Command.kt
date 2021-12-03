@@ -25,7 +25,6 @@ import red.man10.realestate.region.Region.formatStatus
 import red.man10.realestate.region.Region.getUsers
 import red.man10.realestate.region.User
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class AddUserData{
@@ -104,12 +103,12 @@ object Command:CommandExecutor {
                     buyConfirmationKey[sender.uniqueId] = Pair(id, confirmationKey)
 
 
-                    sendMessage(sender,"§c§l値段：${format(data.price)}")
-                    sendMessage(sender,"§c§lID：${id}")
+                    sendMessage(sender,"§e§l値段：${format(data.price)}")
+                    sendMessage(sender,"§e§lID：${id}")
                     sendMessage(sender,"§a§l現在のオーナー：${Region.getOwner(data)}")
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
 
-                    sendClickMessage(sender,"§a§l[購入する](§6§l電子マネー${format(data.price)}円)","mre buy $id $confirmationKey")
+                    sendClickMessage(sender,"§a§l[購入する]","mre buy $id $confirmationKey","§6§l電子マネー${format(data.price)}円")
 
                     return true
                 }

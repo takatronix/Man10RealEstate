@@ -29,12 +29,10 @@ repositories {
 }
 
 dependencies {
-//    testCompile group: 'junit', name: 'junit', version: '4.12'
     compileOnly "io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-//    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -50,7 +48,7 @@ processResources {
 
 buildscript {
     ext{
-        kotlin_version = '1.4.21'
+        kotlin_version = '1.4.0'
     }
     repositories {
         mavenCentral()
