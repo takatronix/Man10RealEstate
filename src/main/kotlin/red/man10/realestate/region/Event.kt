@@ -230,8 +230,7 @@ object Event :Listener{
     private val containerList = listOf(
             Material.CHEST,
             Material.HOPPER,
-            Material.TRAPPED_CHEST,
-            Material.FURNACE
+            Material.TRAPPED_CHEST
     )
 
     @EventHandler
@@ -386,9 +385,9 @@ object Event :Listener{
                 if (rg.ownerUUID == p.uniqueId)return true
                 if (rg.status == "Danger")return true
 
-                val data = User.get(p,id)?:return false
-
                 if (perm != BLOCK &&rg.status == "Free")return true
+
+                val data = User.get(p,id)?:return false
 
                 if (data.status == "Lock")return false
                 if (data.allowAll)return true
