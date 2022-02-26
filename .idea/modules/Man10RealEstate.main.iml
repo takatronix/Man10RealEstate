@@ -5,6 +5,7 @@
       <configuration>
         <autoDetectTypes>
           <platformType>BUKKIT</platformType>
+          <platformType>ADVENTURE</platformType>
         </autoDetectTypes>
       </configuration>
     </facet>

@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.material.Colorable
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
@@ -292,7 +293,14 @@ object Event :Listener{
 
         val p = e.player
 
-        if (e.hasBlock()&&e.clickedBlock!!.state is Sign){ return }
+        if (e.hasBlock()&&e.clickedBlock!!.state is Sign){
+
+            if (!e.hasItem()){return}
+
+            val dye = e.item!!.itemMeta
+
+            if (dye !is Colorable && e.item!!.type != Material.GLOW_INK_SAC)return
+        }
 
         if (!hasPermission(p,e.clickedBlock!!.location, DOOR)){
             sendMessage(p,"§cこのブロックを触ることはできません！")
