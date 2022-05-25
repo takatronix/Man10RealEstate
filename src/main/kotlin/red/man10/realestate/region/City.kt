@@ -162,7 +162,7 @@ object City {
     }
 
 
-    fun liveScore(regionId:Int, p:Player):Boolean{
+    fun setLiveScore(regionId:Int, p:Player):Boolean{
 
         val data = Region.get(regionId)?:return false
 
@@ -173,7 +173,7 @@ object City {
         return city.liveScore<=ScoreDatabase.getScore(p.uniqueId)
     }
 
-    fun buyScore(regionId:Int,p:Player):Boolean{
+    fun setBuyScore(regionId:Int, p:Player):Boolean{
 
         val data = Region.get(regionId)?:return false
 
@@ -281,6 +281,12 @@ object City {
     fun setMaxUser(cityID: String,value:Int){
         val data = get(cityID)?:return
         data.maxUser = value
+        set(cityID,data)
+    }
+
+    fun setDefaultPrice(cityID: String,price:Double){
+        val data = get(cityID)?:return
+        data.defaultPrice = price
         set(cityID,data)
     }
 

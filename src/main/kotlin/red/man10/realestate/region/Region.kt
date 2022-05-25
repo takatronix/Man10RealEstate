@@ -285,7 +285,7 @@ object Region {
             return
         }
 
-        if (!City.buyScore(id,p)){
+        if (!City.setBuyScore(id,p)){
             sendMessage(p,"§c§lあなたにはこの土地を買うためのスコアが足りません！")
             return
         }

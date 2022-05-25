@@ -177,7 +177,7 @@ object Command:CommandExecutor {
                             sendMessage(sender,"§c§l土地に住まわせることのできる住人の上限に達しています")
                             return@Runnable
                         }
-                        if (!City.liveScore(id,user)){
+                        if (!City.setLiveScore(id,user)){
                             sendMessage(sender,"ユーザーのスコアが足りません！")
                             return@Runnable
                         }
@@ -923,6 +923,19 @@ object Command:CommandExecutor {
 
                     return  true
 
+                }
+
+                "defaultPrice" ->{//mreop defaultPrice id amount
+                    if (args.size != 3)return false
+
+                    val id = args[1]
+                    val amount= args[2].toDoubleOrNull()?:return true
+
+                    City.setDefaultPrice(id,amount)
+
+                    sendMessage(sender,"§a§l設定完了！")
+
+                    return true
                 }
 
                 else ->{
