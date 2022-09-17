@@ -249,7 +249,7 @@ object City {
         if (!bank.withdraw(p,getTax(cityID,id),"Man10RealEstate Tax")){
 
             if (city.defaultPrice == 0.0){
-                Region.setStatus(id,"Lock")
+                Region.setStatus(id,"OnSale")
 
             }else{
                 Region.initRegion(id,city.defaultPrice)
