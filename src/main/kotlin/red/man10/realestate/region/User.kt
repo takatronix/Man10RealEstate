@@ -254,13 +254,13 @@ object User{
      * いいね、いいねの解除(トグル式)
      */
     fun changeLike(p:Player, id:Int){
-
-        val rg = Region.get(id)?:return
-
-        if (rg.ownerUUID == p.uniqueId){
-            sendMessage(p,"§3§lあなたはオーナーなのでいいね出来ません！")
-            return
-        }
+//
+//        val rg = Region.get(id)?:return
+//
+//        if (rg.ownerUUID == p.uniqueId){
+//            sendMessage(p,"§3§lあなたはオーナーなのでいいね出来ません！")
+//            return
+//        }
 
         if (isLiked(p,id)){
             likeData[p]!!.remove(id)
