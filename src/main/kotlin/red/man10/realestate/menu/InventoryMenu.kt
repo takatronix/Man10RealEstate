@@ -7,13 +7,13 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Utility.format
-import red.man10.realestate.Utility.sendMessage
+import red.man10.realestate.util.Utility.format
+import red.man10.realestate.util.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.IS
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.CustomInventory.setData
-import red.man10.realestate.region.Region
-import red.man10.realestate.region.Region.formatStatus
+import red.man10.realestate.region.RegionOld
+import red.man10.realestate.region.RegionOld.formatStatus
 import red.man10.realestate.region.User
 import java.util.*
 import kotlin.collections.HashMap
@@ -53,11 +53,11 @@ object InventoryMenu {
 
         for (id in list) {
 
-            val rg = Region.get(id) ?: continue
+            val rg = RegionOld.get(id) ?: continue
 
             val icon = IS(Material.PAPER, rg.name, mutableListOf(
                     "§7§lID:$id",
-                    "§f§lオーナー:${Region.getOwner(rg)}",
+                    "§f§lオーナー:${RegionOld.getOwner(rg)}",
                     "§7§lステータス:${formatStatus(rg.status)}",
                     "§f§lクリックでテレポート",
 
@@ -109,7 +109,7 @@ object InventoryMenu {
 
         var list = mutableListOf<Int>()
 
-        Region.regionData.forEach { if (it.value.ownerUUID == p.uniqueId) list.add(it.key) }
+        RegionOld.regionData.forEach { if (it.value.ownerUUID == p.uniqueId) list.add(it.key) }
         User.userData[p]!!.forEach { if (it.value.allowAll) list.add(it.key) }
 
         if (list.isEmpty()) {
@@ -124,7 +124,7 @@ object InventoryMenu {
 
             if (list.size <= i) break
 
-            val rg = Region.get(list[i]) ?: continue
+            val rg = RegionOld.get(list[i]) ?: continue
 
             val icon = IS(Material.PAPER, rg.name, mutableListOf(
                     "§e§lID:${list[i]}",
@@ -174,7 +174,7 @@ object InventoryMenu {
      */
     fun regionMenu(p: Player, id: Int) {
 
-        val data = Region.get(id) ?: return
+        val data = RegionOld.get(id) ?: return
 
         val inv = CustomInventory.createInventory(27, "§a§l土地の設定")
 
@@ -208,7 +208,7 @@ object InventoryMenu {
 
         val inv = CustomInventory.createInventory(54, "§6§l土地の詳細設定")
 
-        val rg = Region.get(id) ?: return
+        val rg = RegionOld.get(id) ?: return
 
         val backBtn = back.clone()
         setData(backBtn, "id", "$id")

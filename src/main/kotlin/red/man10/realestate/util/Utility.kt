@@ -1,4 +1,4 @@
-package red.man10.realestate
+package red.man10.realestate.util
 
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent.runCommand
@@ -6,6 +6,7 @@ import net.kyori.adventure.text.event.ClickEvent.suggestCommand
 import net.kyori.adventure.text.event.HoverEvent.showText
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.prefix
 import kotlin.math.abs
 
@@ -16,7 +17,7 @@ object Utility {
     ////////////////////////////////////////////////////////////
     fun isWithinRange(loc: Location, start:Triple<Int,Int,Int>, end:Triple<Int,Int,Int>, world:String,server:String):Boolean{
 
-        if (Plugin.serverName!=server)return false
+        if (Plugin.serverName !=server)return false
         if (loc.world.name != world)return false
 
         if (abs((start.first+end.first)-2*loc.blockX) > abs(start.first-end.first) ||

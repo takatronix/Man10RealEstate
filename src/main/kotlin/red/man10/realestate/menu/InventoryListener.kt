@@ -7,8 +7,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
-import red.man10.realestate.Utility
-import red.man10.realestate.Utility.sendMessage
+import red.man10.realestate.util.Utility
+import red.man10.realestate.util.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.InventoryMenu.cache
 import red.man10.realestate.region.User

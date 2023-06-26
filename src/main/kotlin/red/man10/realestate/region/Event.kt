@@ -29,10 +29,10 @@ import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
-import red.man10.realestate.Utility
-import red.man10.realestate.Utility.format
-import red.man10.realestate.Utility.sendClickMessage
-import red.man10.realestate.Utility.sendMessage
+import red.man10.realestate.util.Utility
+import red.man10.realestate.util.Utility.format
+import red.man10.realestate.util.Utility.sendClickMessage
+import red.man10.realestate.util.Utility.sendMessage
 import red.man10.realestate.region.User.Permission.*
 
 object Event :Listener{
@@ -44,12 +44,12 @@ object Event :Listener{
      */
     private fun updateSign(sign: Sign, id:Int){
 
-        val data = Region.get(id)?:return
+        val data = RegionOld.get(id)?:return
 
         sign.line(0, text("§eID:$id"))
         sign.line(1, text(data.name))
-        sign.line(2, text("§d§l${Region.getOwner(data)}"))
-        sign.line(3, text("§b§l${Region.formatStatus(data.status)}"))
+        sign.line(2, text("§d§l${RegionOld.getOwner(data)}"))
+        sign.line(3, text("§b§l${RegionOld.formatStatus(data.status)}"))
 
         sign.update()
 
@@ -156,7 +156,7 @@ object Event :Listener{
                 return
             }
 
-            val data = Region.get(id)?:return
+            val data = RegionOld.get(id)?:return
             if (!Utility.isWithinRange(e.block.location ,data.startPosition,data.endPosition,data.world,data.server) && !hasPermission(e.player, e.block.location, BLOCK)){
                 sendMessage(e.player,"§c土地の外に看板を設置することはできません")
                 return
@@ -164,8 +164,8 @@ object Event :Listener{
 
             e.line(0, text("§eID:$id"))
             e.line(1, text(data.name))
-            e.line(2, text("§d§l${Region.getOwner(data)}"))
-            e.line(3, text("§b§l${Region.formatStatus(data.status)}"))
+            e.line(2, text("§d§l${RegionOld.getOwner(data)}"))
+            e.line(3, text("§b§l${RegionOld.formatStatus(data.status)}"))
 
             sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
         }
@@ -186,7 +186,7 @@ object Event :Listener{
 
         val id = lines[0].replace("§eID:","").toIntOrNull()?:return
 
-        val data = Region.get(id)?:return
+        val data = RegionOld.get(id)?:return
 
         val p = e.player
 
@@ -199,8 +199,8 @@ object Event :Listener{
 
         sendMessage(p,"§a==========${data.name}§a§lの情報==========")
         sendMessage(p,"§aID:$id")
-        sendMessage(p,"§aステータス:${Region.formatStatus(data.status)}")
-        sendMessage(p,"§aオーナー:${Region.getOwner(data)}")
+        sendMessage(p,"§aステータス:${RegionOld.formatStatus(data.status)}")
+        sendMessage(p,"§aオーナー:${RegionOld.getOwner(data)}")
         sendMessage(p,"§a値段:${format(data.price)}")
         sendMessage(p,"§a==========================================")
 
@@ -381,11 +381,11 @@ object Event :Listener{
 
         if (disableWorld.contains(loc.world.name)){ return true }
 
-        if (City.where(loc) == null)return false
+        if (CityOld.where(loc) == null)return false
 
-        for (id in Region.regionData.keys){
+        for (id in RegionOld.regionData.keys){
 
-            val rg = Region.get(id)?:continue
+            val rg = RegionOld.get(id)?:continue
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 

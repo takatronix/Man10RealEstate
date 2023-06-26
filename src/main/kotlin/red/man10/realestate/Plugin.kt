@@ -10,11 +10,13 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.menu.InventoryListener
-import red.man10.realestate.region.City
+import red.man10.realestate.region.CityOld
 import red.man10.realestate.region.Event
-import red.man10.realestate.region.Region
+import red.man10.realestate.region.RegionOld
 import red.man10.realestate.region.User
+import red.man10.realestate.util.MySQLManager
 import java.util.*
+import java.util.concurrent.Executors
 
 
 class Plugin : JavaPlugin(), Listener {
@@ -23,11 +25,11 @@ class Plugin : JavaPlugin(), Listener {
 
         lateinit var bank : BankAPI
         lateinit var vault : VaultManager
-
         lateinit var plugin: Plugin
 
-        const val WAND_NAME = "範囲指定ワンド"
+        val async = Executors.newSingleThreadExecutor()
 
+        const val WAND_NAME = "範囲指定ワンド"
         const val prefix = "[§5Man10RealEstate§f]"
 
         //保護を無効にするワールド
@@ -57,8 +59,8 @@ class Plugin : JavaPlugin(), Listener {
         loadConfig()
         MySQLManager.mysqlQueue(this)
 
-        City.load()
-        Region.load()
+        CityOld.load()
+        RegionOld.load()
 
         batchSchedule()
 

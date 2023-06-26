@@ -2,11 +2,11 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.realestate.MySQLManager
-import red.man10.realestate.MySQLManager.Companion.mysqlQueue
+import red.man10.realestate.util.MySQLManager
+import red.man10.realestate.util.MySQLManager.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Utility.sendMessage
+import red.man10.realestate.util.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
@@ -132,7 +132,7 @@ object User{
 
             val id = rs1.getInt("region_id")
 
-            if (Region.get(id) ==null) {
+            if (RegionOld.get(id) ==null) {
                 remove(p, id)
                 continue
             }
@@ -347,7 +347,7 @@ object User{
      */
     private fun payingRent(p:UUID,id:Int,rent:Double):Boolean{
 
-        val rg = Region.get(id)?:return false
+        val rg = RegionOld.get(id)?:return false
         val owner = rg.ownerUUID
 
         if (!bank.withdraw(p,rent,"Man10RealEstate Rent")){
@@ -377,7 +377,7 @@ object User{
 
             val different = (Date().time - rs.getDate("paid_date").time)/1000/3600/24
 
-            val rg = Region.get(id)?:continue
+            val rg = RegionOld.get(id)?:continue
 
             if (rg.span == 0 && different < 30)continue
             if (rg.span == 1 && different < 7)continue
@@ -393,9 +393,9 @@ object User{
 
     fun tax(){
         Bukkit.getLogger().info("税金の徴収開始")
-        for (rg in Region.regionData){
+        for (rg in RegionOld.regionData){
             val uuid = rg.value.ownerUUID?:continue
-            City.payingTax(uuid,rg.key)
+            CityOld.payingTax(uuid,rg.key)
         }
         Bukkit.getLogger().info("税金の徴収完了！")
 

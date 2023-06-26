@@ -1,4 +1,4 @@
-package red.man10.realestate
+package red.man10.realestate.util
 
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin

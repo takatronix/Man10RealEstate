@@ -15,15 +15,17 @@ import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Utility.format
-import red.man10.realestate.Utility.sendClickMessage
-import red.man10.realestate.Utility.sendMessage
+import red.man10.realestate.util.Utility.format
+import red.man10.realestate.util.Utility.sendClickMessage
+import red.man10.realestate.util.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
-import red.man10.realestate.region.City
-import red.man10.realestate.region.Region
-import red.man10.realestate.region.Region.formatStatus
-import red.man10.realestate.region.Region.getUsers
+import red.man10.realestate.region.CityOld
+import red.man10.realestate.region.RegionOld
+import red.man10.realestate.region.RegionOld.formatStatus
+import red.man10.realestate.region.RegionOld.getUsers
 import red.man10.realestate.region.User
+import red.man10.realestate.util.MySQLManager
+import red.man10.realestate.util.Utility
 import java.util.*
 
 
@@ -77,7 +79,7 @@ object Command:CommandExecutor {
                     }
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-                        Region.buy(sender,id)
+                        RegionOld.buy(sender,id)
                         buyConfirmationKey.remove(sender.uniqueId) //購入確認キー消去
                     })
                     return true
@@ -91,7 +93,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    val data = Region.get(id)?:return false
+                    val data = RegionOld.get(id)?:return false
 
                     if (data.status != "OnSale"){
                         sendMessage(sender,"§c§lこの土地は販売されていません！")
@@ -105,7 +107,7 @@ object Command:CommandExecutor {
 
                     sendMessage(sender,"§e§l値段：${format(data.price)}")
                     sendMessage(sender,"§e§lID：${id}")
-                    sendMessage(sender,"§a§l現在のオーナー：${Region.getOwner(data)}")
+                    sendMessage(sender,"§a§l現在のオーナー：${RegionOld.getOwner(data)}")
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
 
                     sendClickMessage(sender,"§a§l[購入する]","mre buy $id $confirmationKey","§6§l電子マネー${format(data.price)}円")
@@ -137,7 +139,7 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id)){ return false }
 
-                    val data = Region.get(id)
+                    val data = RegionOld.get(id)
 
                     if (data == null){
                         sendMessage(sender,"§c§l存在しない土地です！")
@@ -171,13 +173,13 @@ object Command:CommandExecutor {
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
 
-                        val city = City.get(City.where(data.teleport)!!)!!
+                        val city = CityOld.get(CityOld.where(data.teleport)!!)!!
 
                         if (city.maxUser<= getUsers(id)){
                             sendMessage(sender,"§c§l土地に住まわせることのできる住人の上限に達しています")
                             return@Runnable
                         }
-                        if (!City.setLiveScore(id,user)){
+                        if (!CityOld.setLiveScore(id,user)){
                             sendMessage(sender,"ユーザーのスコアが足りません！")
                             return@Runnable
                         }
@@ -271,7 +273,7 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id))return false
 
-                    Region.setSpan(id,span)
+                    RegionOld.setSpan(id,span)
 
                 }
 
@@ -282,7 +284,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    if ((sender.uniqueId != Region.get(id)!!.ownerUUID) && !sender.hasPermission(OP))return false
+                    if ((sender.uniqueId != RegionOld.get(id)!!.ownerUUID) && !sender.hasPermission(OP))return false
 
 
                     val p = Bukkit.getPlayer(args[2])
@@ -292,7 +294,7 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    Region.setOwner(id,p)
+                    RegionOld.setOwner(id,p)
 
                     sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
 
@@ -309,14 +311,14 @@ object Command:CommandExecutor {
 
                     val loc = sender.location
 
-                    val data = Region.get(id)?:return false
+                    val data = RegionOld.get(id)?:return false
 
                     if (!Utility.isWithinRange(loc,data.startPosition,data.endPosition,data.world,data.server)){
                         sendMessage(sender,"§c土地の外にテレポートポイントを登録することはできません")
                         return true
                     }
 
-                    Region.setTeleport(args[1].toInt(), loc)
+                    RegionOld.setTeleport(args[1].toInt(), loc)
 
                     sendMessage(sender,"§e§l登録完了！")
                     return true
@@ -366,7 +368,7 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,OP) && status=="Lock"){ return true }
 
-                    Region.setStatus(id,status)
+                    RegionOld.setStatus(id,status)
 
                     sendMessage(sender,"§a§l${id}の土地の状態を${formatStatus(status)}に変更しました")
 
@@ -392,7 +394,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    Region.setPrice(id,price)
+                    RegionOld.setPrice(id,price)
 
                     sendMessage(sender,"§a§l${id}の金額を${args[2]}に変更しました")
 
@@ -410,7 +412,7 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    val data = Region.get(id)
+                    val data = RegionOld.get(id)
 
                     if (data==null){
                         sendMessage(sender,"§c§l指定したIDの土地は存在しません")
@@ -428,7 +430,7 @@ object Command:CommandExecutor {
                     if (!hasPermission(sender, USER))return false
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-                        Region.showTaxAndRent(sender)
+                        RegionOld.showTaxAndRent(sender)
                     })
 
                 }
@@ -520,14 +522,14 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            val ret = City.create(startPosition,endPosition,args[2],amount,sender.location)
+                            val ret = CityOld.create(startPosition,endPosition,args[2],amount,sender.location)
 
                             sendMessage(sender,"§a§lcode:${ret} 登録処理終了")
 
                             return@Runnable
 
                         }else if (args[1] == "rg"){
-                            id = Region.create(startPosition,endPosition,args[2],amount,sender.location)
+                            id = RegionOld.create(startPosition,endPosition,args[2],amount,sender.location)
                         }
 
                         if (id == -1){
@@ -561,13 +563,13 @@ object Command:CommandExecutor {
 
                         val id = args[2].toInt()
 
-                        if (Region.get(id) == null){
+                        if (RegionOld.get(id) == null){
                             sendMessage(sender,"§c§l存在しない土地です！")
                             return true
 
                         }
 
-                        Region.delete(id)
+                        RegionOld.delete(id)
                         sendMessage(sender,"§a§l削除完了！")
 
                         return true
@@ -576,12 +578,12 @@ object Command:CommandExecutor {
 
                     val id = args[2]
 
-                    if (City.get(id) == null){
+                    if (CityOld.get(id) == null){
                         sendMessage(sender,"§c§l存在しない都市です！")
                         return true
 
                     }
-                    City.delete(id)
+                    CityOld.delete(id)
                     sendMessage(sender,"§a§l削除完了！")
 
                 }
@@ -599,8 +601,8 @@ object Command:CommandExecutor {
                 "reload" ->{
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-                        Region.load()
-                        City.load()
+                        RegionOld.load()
+                        CityOld.load()
 
                         for (p in Bukkit.getOnlinePlayers()){
                             User.load(p)
@@ -651,7 +653,7 @@ object Command:CommandExecutor {
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         sendMessage(sender, "§e§l=====================================")
 
-                        for (rg in Region.regionData) {
+                        for (rg in RegionOld.regionData) {
 
                             val data = rg.value
 
@@ -659,13 +661,13 @@ object Command:CommandExecutor {
                                 sendMessage(sender, "§e§lRegionID:${rg.key}")
                                 sendMessage(sender, "§7Name:${rg.value.name}")
                                 sendMessage(sender, "§8Price:${rg.value.price}")
-                                sendMessage(sender, "§7Owner:${Region.getOwner(rg.value)}")
-                                sendMessage(sender,"§8Tax:${City.getTax(City.whereRegion(rg.key),rg.key)}")
+                                sendMessage(sender, "§7Owner:${RegionOld.getOwner(rg.value)}")
+                                sendMessage(sender,"§8Tax:${CityOld.getTax(CityOld.whereRegion(rg.key),rg.key)}")
 
                             }
                         }
 
-                        for (c in City.cityData){
+                        for (c in CityOld.cityData){
 
                             val data = c.value
 
@@ -721,7 +723,7 @@ object Command:CommandExecutor {
 
                         val id = args[2].toInt()
 
-                        val data = Region.get(id)
+                        val data = RegionOld.get(id)
 
                         if (data == null){
                             sendMessage(sender,"§c§l存在しない土地です！")
@@ -731,7 +733,7 @@ object Command:CommandExecutor {
                         data.startPosition = startPosition
                         data.endPosition = endPosition
 
-                        Region.set(id,data)
+                        RegionOld.set(id,data)
 
                         sendMessage(sender,"§a§l再設定完了！")
                         return true
@@ -739,7 +741,7 @@ object Command:CommandExecutor {
 
                     val id = args[2]
 
-                    val data = City.get(id)
+                    val data = CityOld.get(id)
 
                     if (data == null){
                         sendMessage(sender,"§c§l存在しない土地です！")
@@ -749,7 +751,7 @@ object Command:CommandExecutor {
                     data.setStart(startPosition)
                     data.setEnd(endPosition)
 
-                    City.set(id, data)
+                    CityOld.set(id, data)
 
                     sendMessage(sender,"§a§l再設定完了！")
                 }
@@ -762,7 +764,7 @@ object Command:CommandExecutor {
                     val id = args[1]
                     val tax= args[2].toDouble()
 
-                    City.setTax(id,tax)
+                    CityOld.setTax(id,tax)
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -773,7 +775,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toInt()
 
-                    val data = Region.get(id)?:return true
+                    val data = RegionOld.get(id)?:return true
 
                     sender.teleport(data.teleport)
 
@@ -787,7 +789,7 @@ object Command:CommandExecutor {
 
                     val price =  args[2].toDouble()
 
-                    Region.initRegion(id,price)
+                    RegionOld.initRegion(id,price)
 
                     sendMessage(sender,"§a§l初期化完了")
 
@@ -828,7 +830,7 @@ object Command:CommandExecutor {
 
                         return true
                     }
-                    for (rg in Region.regionData.filter { it.value.ownerUUID == uuid }.keys){
+                    for (rg in RegionOld.regionData.filter { it.value.ownerUUID == uuid }.keys){
                         sendClickMessage(sender,"§e§lID:${rg}","mreop tp $rg","飛ぶ")
                     }
 
@@ -842,7 +844,7 @@ object Command:CommandExecutor {
                     val id = args[1]
                     val amount= args[2].toInt()
 
-                    City.setMaxUser(id,amount)
+                    CityOld.setMaxUser(id,amount)
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -860,13 +862,13 @@ object Command:CommandExecutor {
                     var tax = 0.0
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-                        for (rg in Region.regionData){
+                        for (rg in RegionOld.regionData){
 
-                            if (City.whereRegion(rg.key) !=cityID)continue
+                            if (CityOld.whereRegion(rg.key) !=cityID)continue
 
                             if (rg.value.ownerUUID == null)continue
 
-                            tax += City.getTax(cityID,rg.key)
+                            tax += CityOld.getTax(cityID,rg.key)
 
                         }
 
@@ -882,7 +884,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    val rg = Region.get(id)?:return false
+                    val rg = RegionOld.get(id)?:return false
                     rg.isRemitTax = !rg.isRemitTax
 
                     if (rg.isRemitTax){
@@ -891,7 +893,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§a§l$id の税金を免除を解除しました")
                     }
 
-                    Region.set(id,rg)
+                    RegionOld.set(id,rg)
 
                     return true
                 }
@@ -903,7 +905,7 @@ object Command:CommandExecutor {
                     val id = args[1]
                     val score= args[2].toInt()
 
-                    City.setBuyScore(id,score)
+                    CityOld.setBuyScore(id,score)
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -917,7 +919,7 @@ object Command:CommandExecutor {
                     val id = args[1]
                     val score= args[2].toIntOrNull()?:return true
 
-                    City.setLiveScore(id,score)
+                    CityOld.setLiveScore(id,score)
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -931,7 +933,7 @@ object Command:CommandExecutor {
                     val id = args[1]
                     val amount= args[2].toDoubleOrNull()?:return true
 
-                    City.setDefaultPrice(id,amount)
+                    CityOld.setDefaultPrice(id,amount)
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -973,7 +975,7 @@ object Command:CommandExecutor {
 
         if (p.hasPermission(OP))return true
 
-        val data = Region.get(id)?:return false
+        val data = RegionOld.get(id)?:return false
 
         if (data.status == "Lock")return false
 
