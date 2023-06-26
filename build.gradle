@@ -27,7 +27,6 @@ dependencies {
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 }
 
@@ -65,8 +64,3 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
-//maven { url "https://repo.dmulloy2.net/nexus/repository/public/" }
-//maven { url 'https://jitpack.io' }
-//maven { url "https://maven.enginehub.org/repo/" }
-//compileOnly fileTree(dir: 'libs', include: '*.jar')
-//implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
