@@ -59,10 +59,10 @@ class City {
             }
         }
 
-        fun where(loc: Location):String?{
+        fun where(loc: Location):City?{
             for (city in cityData){
                 if (Utility.isWithinRange(loc,city.value.getStart(),city.value.getEnd(),city.value.world,city.value.server)){
-                    return city.key
+                    return city.value
                 }
             }
             return null
@@ -151,7 +151,7 @@ class City {
         return width * height * tax
     }
 
-    fun searchCityFromRegion(rgId:Int):String?{
+    fun searchCityFromRegion(rgId:Int):City?{
         return where(RegionOld.get(rgId)!!.teleport)
     }
 
