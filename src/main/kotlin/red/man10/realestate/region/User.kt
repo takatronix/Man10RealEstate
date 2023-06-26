@@ -16,7 +16,6 @@ object User{
     val userData = ConcurrentHashMap<Player,HashMap<Int,UserData>>()
     val likeData = ConcurrentHashMap<Player,MutableList<Int>>()
 
-//    val ownerList = ConcurrentHashMap<Player,MutableList<Int>>()
 
     fun set(p:Player,id:Int,data:UserData){
         (userData[p]?: HashMap())[id] = data
@@ -68,26 +67,20 @@ object User{
         if (!userData[p].isNullOrEmpty()){
             userData[p]!!.remove(id)
         }
-
         mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$id' AND `uuid`='${p.uniqueId}';")
-
     }
 
     fun remove(uuid:UUID,id:Int){
-
         mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$id' AND `uuid`='${uuid}';")
-
     }
 
     /**
      * 指定idの全住人データを削除
      */
     fun removeAll(id:Int){
-
         for (data in userData.values){
             data.remove(id)
         }
-
         mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`='$id';")
     }
 
@@ -95,20 +88,14 @@ object User{
      * 新規住人データを作成
      */
     fun create(p:Player,id:Int,rent: Double){
-
         mysqlQueue.add("INSERT INTO region_user " +
                 "(region_id, player, uuid, created_time, status, is_rent, paid_date, rent) " +
                 "VALUES ($id, '${p.name}', '${p.uniqueId}', now(), 'Share', ${if (rent>0) 1 else 0}, now(), ${rent});")
 
-
         val data = UserData()
-
         data.rent = rent
         data.isRent = rent>0
-//        data.paid = Date()
-
         set(p,id,data)
-
     }
 
 
@@ -388,7 +375,6 @@ object User{
 
         rs.close()
         mysql.close()
-
     }
 
     fun tax(){
@@ -400,7 +386,6 @@ object User{
         Bukkit.getLogger().info("税金の徴収完了！")
 
     }
-
 
     class UserData{
         var status = "Share"
