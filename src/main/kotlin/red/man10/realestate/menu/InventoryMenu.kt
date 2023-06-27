@@ -14,7 +14,7 @@ import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.CustomInventory.setData
 import red.man10.realestate.region.RegionOld
 import red.man10.realestate.region.RegionOld.formatStatus
-import red.man10.realestate.region.User
+import red.man10.realestate.region.UserOld
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -22,7 +22,7 @@ object InventoryMenu {
 
     private val loadItem : ItemStack = IS(Material.CLOCK, "§e§l現在データの読み込み中です.....")
     private val back : ItemStack = IS(Material.RED_STAINED_GLASS_PANE, "§c§l戻る")
-    val cache = HashMap<Pair<UUID, Int>, User.UserData>()
+    val cache = HashMap<Pair<UUID, Int>, UserOld.UserData>()
 
     init { setData(back, "type", "back") }
 
@@ -49,7 +49,7 @@ object InventoryMenu {
 
         val inv = CustomInventory.createInventory(54, "§a§lいいねしたリスト")
 
-        val list = (User.likeData[p] ?: return).drop(page*45).take(45)
+        val list = (UserOld.likeData[p] ?: return).drop(page*45).take(45)
 
         for (id in list) {
 
@@ -110,7 +110,7 @@ object InventoryMenu {
         var list = mutableListOf<Int>()
 
         RegionOld.regionData.forEach { if (it.value.ownerUUID == p.uniqueId) list.add(it.key) }
-        User.userData[p]!!.forEach { if (it.value.allowAll) list.add(it.key) }
+        UserOld.userData[p]!!.forEach { if (it.value.allowAll) list.add(it.key) }
 
         if (list.isEmpty()) {
             sendMessage(p, "§c§lあなたは自分の土地を持っていません")
@@ -292,7 +292,7 @@ object InventoryMenu {
         inv.setItem(22, loadItem)
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-            var list = User.loadUsers(id)
+            var list = UserOld.loadUsers(id)
 
             if (list == null) {
                 sendMessage(p, "§c§lこの土地には住人がいないようです")
@@ -397,7 +397,7 @@ object InventoryMenu {
         inv.setItem(22, loadItem)
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-            val data = cache[Pair(uuid, id)] ?: User.get(uuid, id)!!
+            val data = cache[Pair(uuid, id)] ?: UserOld.get(uuid, id)!!
 
             val backBtn = back.clone()
             setData(backBtn, "id", "$id")

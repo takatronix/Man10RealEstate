@@ -23,7 +23,7 @@ import red.man10.realestate.region.CityOld
 import red.man10.realestate.region.RegionOld
 import red.man10.realestate.region.RegionOld.formatStatus
 import red.man10.realestate.region.RegionOld.getUsers
-import red.man10.realestate.region.User
+import red.man10.realestate.region.UserOld
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import java.util.*
@@ -121,7 +121,7 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,GUEST))return false
 
-                    User.changeLike(sender,args[1].toIntOrNull()?:return true)
+                    UserOld.changeLike(sender,args[1].toIntOrNull()?:return true)
 
                     return true
                 }
@@ -166,7 +166,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    if (User.get(user,id) != null){
+                    if (UserOld.get(user,id) != null){
                         sendMessage(sender,"§c§lこのユーザーは既に住人です！")
                         return false
                     }
@@ -229,7 +229,7 @@ object Command:CommandExecutor {
                         bank.deposit(data.owner.uniqueId,data.rent,"Man10RealEstate RentProfit")
                     }
 
-                    User.create(sender,data.id,data.rent)
+                    UserOld.create(sender,data.id,data.rent)
 
                     sendMessage(sender,"§a§lあなたは住人になりました！")
 
@@ -256,7 +256,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    User.remove(p,id)
+                    UserOld.remove(p,id)
 
                     sendMessage(sender,"§a§l退去できました！")
                     return true
@@ -347,7 +347,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    User.setRentPrice(p,id,rent)
+                    UserOld.setRentPrice(p,id,rent)
 
                     sendMessage(sender,"§a§l設定完了！")
                     sendMessage(p,"§a§lID:${id}の賃料が変更されました！賃料:$rent")
@@ -605,7 +605,7 @@ object Command:CommandExecutor {
                         CityOld.load()
 
                         for (p in Bukkit.getOnlinePlayers()){
-                            User.load(p)
+                            UserOld.load(p)
                         }
 
                         plugin.loadConfig()
@@ -800,7 +800,7 @@ object Command:CommandExecutor {
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         sender.sendMessage("税金の徴収開始")
-                        User.tax()
+                        UserOld.tax()
                         sender.sendMessage("税金の徴収完了")
 
                     })
@@ -981,7 +981,7 @@ object Command:CommandExecutor {
 
         if (data.ownerUUID == p.uniqueId)return true
 
-        val userData = User.get(p,id)?:return false
+        val userData = UserOld.get(p,id)?:return false
 
         if (userData.allowAll && userData.status == "Share")return true
 

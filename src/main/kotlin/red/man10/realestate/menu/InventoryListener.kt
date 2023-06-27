@@ -11,7 +11,7 @@ import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.sendMessage
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.InventoryMenu.cache
-import red.man10.realestate.region.User
+import red.man10.realestate.region.UserOld
 import java.util.*
 
 object InventoryListener : Listener{
@@ -241,7 +241,7 @@ object InventoryListener : Listener{
                         if (user1.isOnline){
                             p.performCommand("mre removeuser $id ${user1.name}")
                         }else{
-                            User.remove(user1.uniqueId,id)
+                            UserOld.remove(user1.uniqueId,id)
                             sendMessage(p,"§a§l住人を削除しました!")
                             return
                         }
@@ -269,22 +269,22 @@ object InventoryListener : Listener{
 
                     13 ->{
                         cacheData.allowAll = value
-                        User.setPermission(uuid,id, User.Permission.ALL,value)
+                        UserOld.setPermission(uuid,id, UserOld.Permission.ALL,value)
                     }
 
                     22 ->{
                         cacheData.allowBlock = value
-                        User.setPermission(uuid,id, User.Permission.BLOCK,value)
+                        UserOld.setPermission(uuid,id, UserOld.Permission.BLOCK,value)
                     }
 
                     31 ->{
                         cacheData.allowInv = value
-                        User.setPermission(uuid,id, User.Permission.INVENTORY,value)
+                        UserOld.setPermission(uuid,id, UserOld.Permission.INVENTORY,value)
                     }
 
                     40 ->{
                         cacheData.allowDoor = value
-                        User.setPermission(uuid,id, User.Permission.DOOR,value)
+                        UserOld.setPermission(uuid,id, UserOld.Permission.DOOR,value)
                     }
 
                 }

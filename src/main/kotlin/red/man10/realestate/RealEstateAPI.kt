@@ -4,7 +4,7 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.RegionOld
-import red.man10.realestate.region.User
+import red.man10.realestate.region.UserOld
 import java.util.*
 
 object RealEstateAPI {
@@ -12,7 +12,7 @@ object RealEstateAPI {
     /**
      * 権限があるかどうか
      */
-    fun hasPermission(p:Player, loc: Location, perm: User.Permission): Boolean {
+    fun hasPermission(p:Player, loc: Location, perm: UserOld.Permission): Boolean {
         return Event.hasPermission(p,loc,perm)
     }
 
@@ -23,7 +23,7 @@ object RealEstateAPI {
 
         if (hasRegion(p.uniqueId))return true
 
-        val data = User.userData[p]?:return false
+        val data = UserOld.userData[p]?:return false
 
         if (data.isEmpty())return false
 

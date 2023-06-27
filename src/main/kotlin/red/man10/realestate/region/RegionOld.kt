@@ -36,7 +36,7 @@ object RegionOld {
 
         mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
 
-        User.removeAll(id)
+        UserOld.removeAll(id)
     }
 
     /**
@@ -327,7 +327,7 @@ object RegionOld {
         setOwner(id,null)
         setPrice(id,price)
         setStatus(id,"OnSale")
-        User.removeAll(id)
+        UserOld.removeAll(id)
 
     }
 

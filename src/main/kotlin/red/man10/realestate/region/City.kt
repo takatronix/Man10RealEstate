@@ -70,8 +70,34 @@ class City {
 
         fun asyncPayTax(){
             Plugin.async.execute {
-                //TODO:リージョンのリストを引いて処理する
+                val rgList = Region.regionData.values
 
+                for (rg in rgList){
+                    if (rg.isRemitTax || rg.ownerUUID == null)continue
+                    val city = where(rg.teleport)?:continue
+                    val amount = city.getTax(rg.id)
+
+                    if (rg.taxStatus == "FREE")continue
+
+                    if (rg.taxStatus == "WARN"){
+                        if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*2.5,
+                                "Man10RealEstate Tax","税金の支払い(延滞)")){
+                            rg.asyncDelete()
+                            continue
+                        }
+                    }
+                    if (rg.taxStatus == "SUCCESS"){
+                        if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
+                            "Man10RealEstate Tax","税金の支払い")){
+                            rg.status = "WARN"
+                            rg.asyncSave()
+                            continue
+                        }
+                    }
+
+                    rg.taxStatus = "SUCCESS"
+                    rg.asyncSave()
+                }
             }
         }
     }
@@ -114,7 +140,7 @@ class City {
         endZ = triple.third
     }
 
-    fun set(){
+    fun asyncSave(){
 
         Plugin.async.execute {
             try {
@@ -152,10 +178,6 @@ class City {
     }
 
     fun searchCityFromRegion(rgId:Int):City?{
-        return where(RegionOld.get(rgId)!!.teleport)
+        return where(Region.regionData[rgId]?.teleport?:return null)
     }
-
-
-
-
 }

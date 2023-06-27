@@ -13,7 +13,7 @@ import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.CityOld
 import red.man10.realestate.region.Event
 import red.man10.realestate.region.RegionOld
-import red.man10.realestate.region.User
+import red.man10.realestate.region.UserOld
 import red.man10.realestate.util.MySQLManager
 import java.util.*
 import java.util.concurrent.Executors
@@ -80,7 +80,7 @@ class Plugin : JavaPlugin(), Listener {
 
                 //賃料の支払い処理、日付が変更されたタイミングで走る
                 if (now.get(Calendar.DAY_OF_MONTH) != rent.get(Calendar.DAY_OF_MONTH)){
-                    User.rent()
+                    UserOld.rent()
                     lastRent = Date()
                     config.set("lastRent",lastRent.time)
                 }
@@ -90,7 +90,7 @@ class Plugin : JavaPlugin(), Listener {
 
                 //税金の支払い処理、月が変わったタイミングで走る
                 if (now.get(Calendar.MONTH) != tax.get(Calendar.MONTH)){
-                    User.tax()
+                    UserOld.tax()
                     lastTax = Date()
                     config.set("lastTax",lastTax.time)
                 }

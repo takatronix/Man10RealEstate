@@ -33,7 +33,7 @@ import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.format
 import red.man10.realestate.util.Utility.sendClickMessage
 import red.man10.realestate.util.Utility.sendMessage
-import red.man10.realestate.region.User.Permission.*
+import red.man10.realestate.region.UserOld.Permission.*
 
 object Event :Listener{
 
@@ -238,7 +238,7 @@ object Event :Listener{
     fun playerJoin(e:PlayerJoinEvent){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
             Thread.sleep(5000)
-            User.load(e.player)
+            UserOld.load(e.player)
         })
     }
 
@@ -375,7 +375,7 @@ object Event :Listener{
 
     }
 
-    fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
+    fun hasPermission(p:Player, loc: Location, perm:UserOld.Permission):Boolean{
 
         if (p.hasPermission(Command.OP))return true
 
@@ -395,7 +395,7 @@ object Event :Listener{
 
                 if (perm != BLOCK &&rg.status == "Free")return true
 
-                val data = User.get(p,id)?:return false
+                val data = UserOld.get(p,id)?:return false
 
                 if (data.status == "Lock")return false
                 if (data.allowAll)return true

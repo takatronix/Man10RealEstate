@@ -14,7 +14,7 @@ class Region {
 
     companion object{
 
-        val regionData = ConcurrentHashMap<Int, RegionOld.RegionData>()
+        val regionData = ConcurrentHashMap<Int, Region>()
 
         fun formatStatus(status:String):String{
             return when(status){
@@ -39,34 +39,36 @@ class Region {
 
                     val id = rs.getInt("id")
 
-                    val data = RegionOld.RegionData()
+                    val rg = Region()
 
-                    data.name = rs.getString("name")
-                    data.world = rs.getString("world")
-                    data.server = Plugin.serverName
+                    rg.id = id
+                    rg.name = rs.getString("name")
+                    rg.world = rs.getString("world")
+                    rg.server = Plugin.serverName
                     if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
-                        data.ownerUUID = null
+                        rg.ownerUUID = null
                     }else{
-                        data.ownerUUID = UUID.fromString(rs.getString("owner_uuid"))
+                        rg.ownerUUID = UUID.fromString(rs.getString("owner_uuid"))
                     }
-                    data.status = rs.getString("status")
-                    data.price = rs.getDouble("price")
+                    rg.status = rs.getString("status")
+                    rg.taxStatus = rs.getString("tax_status")
+                    rg.price = rs.getDouble("price")
 
-                    data.span = rs.getInt("span")
+                    rg.span = rs.getInt("span")
 
-                    data.startPosition = Triple(
+                    rg.startPosition = Triple(
                         rs.getInt("sx"),
                         rs.getInt("sy"),
                         rs.getInt("sz")
                     )
-                    data.endPosition = Triple(
+                    rg.endPosition = Triple(
                         rs.getInt("ex"),
                         rs.getInt("ey"),
                         rs.getInt("ez")
                     )
 
-                    data.teleport = Location(
-                        Bukkit.getWorld(data.world),
+                    rg.teleport = Location(
+                        Bukkit.getWorld(rg.world),
                         rs.getDouble("x"),
                         rs.getDouble("y"),
                         rs.getDouble("z"),
@@ -74,13 +76,13 @@ class Region {
                         rs.getFloat("pitch")
                     )
 
-                    data.isRemitTax = rs.getInt("remit_tax") == 1
+                    rg.isRemitTax = rs.getInt("remit_tax") == 1
 
-                    RegionOld.regionData[id] = data
+                    regionData[id] = rg
 
-                    if (Bukkit.getWorld(data.world) == null){
-                        RegionOld.delete(id)
-                        Bukkit.getLogger().info("id:${id}は存在しない土地だったので、削除しました!")
+                    if (Bukkit.getWorld(rg.world) == null){
+                        rg.asyncDelete()
+                        Bukkit.getLogger().warning("id:${id}は存在しない土地だったので、削除しました!")
                     }
                 }
                 rs.close()
@@ -143,9 +145,11 @@ class Region {
         }
     }
 
+    var id = 0
     var name = "RegionName"
     var ownerUUID : UUID? = null
     var status = "OnSale" //Danger,Free,OnSale,Protected
+    var taxStatus = "SUCCESS" //SUCCESS,WARN
 
     var world = "builder"
     var server = "server"
@@ -160,28 +164,29 @@ class Region {
 
     var isRemitTax = false
 
-    fun asyncSave(id:Int,data: RegionOld.RegionData){
+    fun asyncSave(){
 
         MySQLManager.mysqlQueue.add("UPDATE region SET " +
-                "owner_uuid = '${data.ownerUUID}', " +
-                "owner_name = '${if (data.ownerUUID == null)null
-                else{Bukkit.getOfflinePlayer(data.ownerUUID!!).name}}', " +
-                "x = ${data.teleport.x}," +
-                "y = ${data.teleport.y}, " +
-                "z = ${data.teleport.z}, " +
-                "pitch = ${data.teleport.pitch}, " +
-                "yaw = ${data.teleport.yaw}, " +
-                "sx = ${data.startPosition.first}, " +
-                "sy = ${data.startPosition.second}, " +
-                "sz = ${data.startPosition.third}, " +
-                "ex = ${data.endPosition.first}, " +
-                "ey = ${data.endPosition.second}, " +
-                "ez = ${data.endPosition.third}, " +
-                "status = '${MySQLManager.escapeStringForMySQL(data.status)}', " +
-                "price = ${data.price}, " +
+                "owner_uuid = '${ownerUUID}', " +
+                "owner_name = '${if (ownerUUID == null)null
+                else{Bukkit.getOfflinePlayer(ownerUUID!!).name}}', " +
+                "x = ${teleport.x}," +
+                "y = ${teleport.y}, " +
+                "z = ${teleport.z}, " +
+                "pitch = ${teleport.pitch}, " +
+                "yaw = ${teleport.yaw}, " +
+                "sx = ${startPosition.first}, " +
+                "sy = ${startPosition.second}, " +
+                "sz = ${startPosition.third}, " +
+                "ex = ${endPosition.first}, " +
+                "ey = ${endPosition.second}, " +
+                "ez = ${endPosition.third}, " +
+                "status = '${status}', " +
+                "tax_status = '${taxStatus}'," +
+                "price = ${price}, " +
                 "profit = 0, " +
-                "span = ${data.span}," +
-                "remit_tax = ${if (data.isRemitTax) 1 else 0} " +
+                "span = ${span}," +
+                "remit_tax = ${if (isRemitTax) 1 else 0} " +
                 "WHERE id = $id")
 
     }
@@ -227,11 +232,22 @@ class Region {
         Utility.sendMessage(p, "§a§l土地の購入成功！")
     }
 
-    fun init(){
+    fun init(status: String = "OnSale"){
         val city = City.where(teleport)?:return
         ownerUUID = null
         price = city.defaultPrice
-        status = "OnSale"
-        //TODO:ユーザーデータ削除する
+        this.status = status
+        User.asyncDeleteFromRegion(id)
+    }
+
+    fun asyncDelete(){
+        MySQLManager.mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
+        User.asyncDeleteFromRegion(id)
+    }
+
+    //土地を譲る
+    fun sendRegion(receiver:UUID){
+        init()
+        ownerUUID = receiver
     }
 }
