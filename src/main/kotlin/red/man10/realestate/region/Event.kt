@@ -1,7 +1,6 @@
 package red.man10.realestate.region
 
 import net.kyori.adventure.text.Component.text
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -20,20 +19,18 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.material.Colorable
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
-import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
+import red.man10.realestate.region.User.Permission.*
 import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.format
 import red.man10.realestate.util.Utility.sendClickMessage
 import red.man10.realestate.util.Utility.sendMessage
-import red.man10.realestate.region.UserOld.Permission.*
 
 object Event :Listener{
 
@@ -44,12 +41,12 @@ object Event :Listener{
      */
     private fun updateSign(sign: Sign, id:Int){
 
-        val data = RegionOld.get(id)?:return
+        val rg = Region.regionData[id]?:return
 
         sign.line(0, text("§eID:$id"))
-        sign.line(1, text(data.name))
-        sign.line(2, text("§d§l${RegionOld.getOwner(data)}"))
-        sign.line(3, text("§b§l${RegionOld.formatStatus(data.status)}"))
+        sign.line(1, text(rg.name))
+        sign.line(2, text("§d§l${rg.ownerName}"))
+        sign.line(3, text("§b§l${Region.formatStatus(rg.status)}"))
 
         sign.update()
 
@@ -156,18 +153,18 @@ object Event :Listener{
                 return
             }
 
-            val data = RegionOld.get(id)?:return
-            if (!Utility.isWithinRange(e.block.location ,data.startPosition,data.endPosition,data.world,data.server) && !hasPermission(e.player, e.block.location, BLOCK)){
+            val rg = Region.regionData[id]?:return
+            if (!Utility.isWithinRange(e.block.location ,rg.startPosition,rg.endPosition,rg.world,rg.server) && !hasPermission(e.player, e.block.location, BLOCK)){
                 sendMessage(e.player,"§c土地の外に看板を設置することはできません")
                 return
             }
 
             e.line(0, text("§eID:$id"))
-            e.line(1, text(data.name))
-            e.line(2, text("§d§l${RegionOld.getOwner(data)}"))
-            e.line(3, text("§b§l${RegionOld.formatStatus(data.status)}"))
+            e.line(1, text(rg.name))
+            e.line(2, text("§d§l${rg.ownerName}"))
+            e.line(3, text("§b§l${Region.formatStatus(rg.status)}"))
 
-            sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
+            sendMessage(p,"§a§l作成完了！ id:$id name:${rg.name}")
         }
     }
 
@@ -186,7 +183,7 @@ object Event :Listener{
 
         val id = lines[0].replace("§eID:","").toIntOrNull()?:return
 
-        val data = RegionOld.get(id)?:return
+        val rg = Region.regionData[id]?:return
 
         val p = e.player
 
@@ -197,17 +194,17 @@ object Event :Listener{
             return
         }
 
-        sendMessage(p,"§a==========${data.name}§a§lの情報==========")
+        sendMessage(p,"§a==========${rg.name}§a§lの情報==========")
         sendMessage(p,"§aID:$id")
-        sendMessage(p,"§aステータス:${RegionOld.formatStatus(data.status)}")
-        sendMessage(p,"§aオーナー:${RegionOld.getOwner(data)}")
-        sendMessage(p,"§a値段:${format(data.price)}")
+        sendMessage(p,"§aステータス:${Region.formatStatus(rg.status)}")
+        sendMessage(p,"§aオーナー:${rg.ownerName}")
+        sendMessage(p,"§a値段:${format(rg.price)}")
         sendMessage(p,"§a==========================================")
 
         sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id","いいねをすると、/mreメニューから テレポートをすることができます")
 
-        if (data.status == "OnSale"){
-            sendClickMessage(p,"§a§l§n[土地を買う！]","mre buycheck $id","§e§l値段:${format(data.price)}")
+        if (rg.status == "OnSale"){
+            sendClickMessage(p,"§a§l§n[土地を買う！]","mre buycheck $id","§e§l値段:${format(rg.price)}")
         }
 
         updateSign(sign,id)
@@ -233,14 +230,6 @@ object Event :Listener{
             Material.HOPPER,
             Material.TRAPPED_CHEST
     )
-
-    @EventHandler
-    fun playerJoin(e:PlayerJoinEvent){
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
-            Thread.sleep(5000)
-            UserOld.load(e.player)
-        })
-    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun blockBreakEvent(e: BlockBreakEvent){
@@ -375,17 +364,17 @@ object Event :Listener{
 
     }
 
-    fun hasPermission(p:Player, loc: Location, perm:UserOld.Permission):Boolean{
+    fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
 
         if (p.hasPermission(Command.OP))return true
 
         if (disableWorld.contains(loc.world.name)){ return true }
 
-        if (CityOld.where(loc) == null)return false
+        if (City.where(loc) == null)return false
 
-        for (id in RegionOld.regionData.keys){
+        for (id in Region.regionData.keys){
 
-            val rg = RegionOld.get(id)?:continue
+            val rg = Region.regionData[id]?:continue
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
@@ -395,7 +384,7 @@ object Event :Listener{
 
                 if (perm != BLOCK &&rg.status == "Free")return true
 
-                val data = UserOld.get(p,id)?:return false
+                val data = User.get(p,id) ?:return false
 
                 if (data.status == "Lock")return false
                 if (data.allowAll)return true

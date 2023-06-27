@@ -1,6 +1,7 @@
 package red.man10.realestate.region
 
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.MySQLManager
 import java.time.LocalDateTime
@@ -14,6 +15,10 @@ class User(val uuid: UUID,val id:Int) {
 
     companion object{
         val userMap = ConcurrentHashMap<Pair<UUID,Int>,User>()
+
+        fun get(p:Player,id:Int):User?{
+            return userMap[Pair(p.uniqueId,id)]
+        }
 
         fun asyncLoad(){
             userMap.clear()
@@ -97,6 +102,13 @@ class User(val uuid: UUID,val id:Int) {
         }
 
         asyncSave()
+    }
+
+    enum class Permission{
+        ALL,
+        BLOCK,
+        DOOR,
+        INVENTORY
     }
 
 }

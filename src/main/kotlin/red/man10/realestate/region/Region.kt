@@ -123,20 +123,20 @@ class Region {
             rs.close()
             mysql.close()
 
-            val data = RegionOld.RegionData()
+            val rg = Region()
 
-            data.name = name
+            rg.name = name
 
-            data.startPosition = pos1
-            data.endPosition = pos2
-            data.teleport = tp
+            rg.startPosition = pos1
+            rg.endPosition = pos2
+            rg.teleport = tp
 
-            data.world = tp.world.name
-            data.server = Plugin.serverName
+            rg.world = tp.world.name
+            rg.server = Plugin.serverName
 
-            data.price = price
+            rg.price = price
 
-            RegionOld.set(id, data)
+            regionData[id] = rg
 
             return id
 
@@ -146,6 +146,7 @@ class Region {
     var id = 0
     var name = "RegionName"
     var ownerUUID : UUID? = null
+    var ownerName : String? = if (ownerUUID == null)null else Bukkit.getOfflinePlayer(ownerUUID!!).name
     var status = "OnSale" //Danger,Free,OnSale,Protected
     var taxStatus = "SUCCESS" //SUCCESS,WARN
 

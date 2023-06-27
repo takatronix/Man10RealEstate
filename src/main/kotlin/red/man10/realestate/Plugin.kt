@@ -10,10 +10,7 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.menu.InventoryListener
-import red.man10.realestate.region.CityOld
-import red.man10.realestate.region.Event
-import red.man10.realestate.region.RegionOld
-import red.man10.realestate.region.UserOld
+import red.man10.realestate.region.*
 import red.man10.realestate.util.MySQLManager
 import java.util.*
 import java.util.concurrent.Executors
@@ -59,48 +56,49 @@ class Plugin : JavaPlugin(), Listener {
         loadConfig()
         MySQLManager.mysqlQueue(this)
 
-        CityOld.load()
-        RegionOld.load()
+        City.asyncLoadAll()
+        Region.asyncLoad()
+        User.asyncLoad()
 
-        batchSchedule()
-
-    }
-
-    private fun batchSchedule(){
-        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
-
-            val now = Calendar.getInstance()
-
-            while (true){
-
-                now.time = Date()
-
-                val rent = Calendar.getInstance()
-                rent.time = lastRent
-
-                //賃料の支払い処理、日付が変更されたタイミングで走る
-                if (now.get(Calendar.DAY_OF_MONTH) != rent.get(Calendar.DAY_OF_MONTH)){
-                    UserOld.rent()
-                    lastRent = Date()
-                    config.set("lastRent",lastRent.time)
-                }
-
-                val tax = Calendar.getInstance()
-                tax.time = lastTax
-
-                //税金の支払い処理、月が変わったタイミングで走る
-                if (now.get(Calendar.MONTH) != tax.get(Calendar.MONTH)){
-                    UserOld.tax()
-                    lastTax = Date()
-                    config.set("lastTax",lastTax.time)
-                }
-
-                saveConfig()
-                Thread.sleep(100000)
-            }
-        })
+//        batchSchedule()
 
     }
+
+//    private fun batchSchedule(){
+//        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
+//
+//            val now = Calendar.getInstance()
+//
+//            while (true){
+//
+//                now.time = Date()
+//
+//                val rent = Calendar.getInstance()
+//                rent.time = lastRent
+//
+//                //賃料の支払い処理、日付が変更されたタイミングで走る
+//                if (now.get(Calendar.DAY_OF_MONTH) != rent.get(Calendar.DAY_OF_MONTH)){
+//                    UserOld.rent()
+//                    lastRent = Date()
+//                    config.set("lastRent",lastRent.time)
+//                }
+//
+//                val tax = Calendar.getInstance()
+//                tax.time = lastTax
+//
+//                //税金の支払い処理、月が変わったタイミングで走る
+//                if (now.get(Calendar.MONTH) != tax.get(Calendar.MONTH)){
+//                    UserOld.tax()
+//                    lastTax = Date()
+//                    config.set("lastTax",lastTax.time)
+//                }
+//
+//                saveConfig()
+//                Thread.sleep(100000)
+//            }
+//        })
+//
+//    }
 
     fun loadConfig(){
         reloadConfig()

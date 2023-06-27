@@ -1,6 +1,9 @@
 package red.man10.realestate
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
 import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -15,18 +18,18 @@ import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.plugin
+import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.util.Utility.format
 import red.man10.realestate.util.Utility.sendClickMessage
 import red.man10.realestate.util.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
-import red.man10.realestate.region.CityOld
-import red.man10.realestate.region.RegionOld
+import red.man10.realestate.region.*
 import red.man10.realestate.region.RegionOld.formatStatus
 import red.man10.realestate.region.RegionOld.getUsers
-import red.man10.realestate.region.UserOld
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class AddUserData{
@@ -45,7 +48,8 @@ object Command:CommandExecutor {
 
     private val userMap = HashMap<Player,AddUserData>()
     // buycheck -> buyコマンドへの確認キー playerUUID, pair<landId, keyUUID>
-    val buyConfirmationKey = HashMap<UUID, Pair<Int, UUID>>()
+    val buyConfirmKey = HashMap<UUID, Pair<Int, UUID>>()
+    val ownerConfirmKey = HashMap<UUID,Pair<Int,UUID>>()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -72,7 +76,7 @@ object Command:CommandExecutor {
                     val id = args[1].toIntOrNull()?:return false
 
                     //購入確認キー確認
-                    val confirmationData = buyConfirmationKey[sender.uniqueId]
+                    val confirmationData = buyConfirmKey[sender.uniqueId]
                     if(confirmationData == null || confirmationData.first != id || !confirmationData.second.toString().equals(args[2])){
                         sendMessage(sender,"§4§l購入確認をしていません！")
                         return false
@@ -80,7 +84,7 @@ object Command:CommandExecutor {
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                         RegionOld.buy(sender,id)
-                        buyConfirmationKey.remove(sender.uniqueId) //購入確認キー消去
+                        buyConfirmKey.remove(sender.uniqueId) //購入確認キー消去
                     })
                     return true
                 }
@@ -93,24 +97,27 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    val data = RegionOld.get(id)?:return false
+                    val rg = Region.regionData[id]?:return false
 
-                    if (data.status != "OnSale"){
+                    if (rg.status != "OnSale"){
                         sendMessage(sender,"§c§lこの土地は販売されていません！")
                         return false
                     }
 
                     // 購入確認キーを生成
                     val confirmationKey = UUID.randomUUID()
-                    buyConfirmationKey[sender.uniqueId] = Pair(id, confirmationKey)
+                    buyConfirmKey[sender.uniqueId] = Pair(id, confirmationKey)
 
 
-                    sendMessage(sender,"§e§l値段：${format(data.price)}")
+                    sendMessage(sender,"§e§l値段：${format(rg.price)}")
                     sendMessage(sender,"§e§lID：${id}")
-                    sendMessage(sender,"§a§l現在のオーナー：${RegionOld.getOwner(data)}")
+                    sendMessage(sender,"§a§l現在のオーナー：${rg.ownerName}")
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
 
-                    sendClickMessage(sender,"§a§l[購入する]","mre buy $id $confirmationKey","§6§l電子マネー${format(data.price)}円")
+                    sender.sendMessage(text(prefix).append(text("§a§l[購入する]")
+                        .clickEvent(ClickEvent.runCommand("mre buy $id $confirmationKey")))
+                        .hoverEvent(HoverEvent.showText(text("§6§l電子マネー${format(rg.price)}円")
+                    )))
 
                     return true
                 }
@@ -121,7 +128,7 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,GUEST))return false
 
-                    UserOld.changeLike(sender,args[1].toIntOrNull()?:return true)
+//                    UserOld.changeLike(sender,args[1].toIntOrNull()?:return true)
 
                     return true
                 }
@@ -591,7 +598,7 @@ object Command:CommandExecutor {
                 "wand" ->{
                     val wand = ItemStack(Material.STICK)
                     val meta = wand.itemMeta
-                    meta.displayName(Component.text(WAND_NAME))
+                    meta.displayName(text(WAND_NAME))
                     wand.itemMeta = meta
                     sender.inventory.addItem(wand)
                     return true
@@ -941,13 +948,10 @@ object Command:CommandExecutor {
                 }
 
                 else ->{
-
                     sendMessage(sender,"§c§l不明なコマンドです！")
 
                     return false
-
                 }
-
             }
 
             return false
@@ -964,7 +968,6 @@ object Command:CommandExecutor {
 
         sendMessage(p,"§c§lあなたはこのコマンドを使うことができません！")
         return false
-
     }
 
 
@@ -975,17 +978,16 @@ object Command:CommandExecutor {
 
         if (p.hasPermission(OP))return true
 
-        val data = RegionOld.get(id)?:return false
+        val data = Region.regionData[id]?:return false
 
         if (data.status == "Lock")return false
 
         if (data.ownerUUID == p.uniqueId)return true
 
-        val userData = UserOld.get(p,id)?:return false
+        val userData = User.get(p,id)?:return false
 
         if (userData.allowAll && userData.status == "Share")return true
 
         return false
-
     }
 }
