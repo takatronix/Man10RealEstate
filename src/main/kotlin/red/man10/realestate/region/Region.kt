@@ -76,8 +76,6 @@ class Region {
                         rs.getFloat("pitch")
                     )
 
-                    rg.isRemitTax = rs.getInt("remit_tax") == 1
-
                     regionData[id] = rg
 
                     if (Bukkit.getWorld(rg.world) == null){
@@ -159,10 +157,8 @@ class Region {
     lateinit var teleport : Location
 
     var price : Double = 0.0
-
     var span = 0 //0:month 1:week 2:day
 
-    var isRemitTax = false
 
     fun asyncSave(){
 
@@ -185,8 +181,7 @@ class Region {
                 "tax_status = '${taxStatus}'," +
                 "price = ${price}, " +
                 "profit = 0, " +
-                "span = ${span}," +
-                "remit_tax = ${if (isRemitTax) 1 else 0} " +
+                "span = ${span} " +
                 "WHERE id = $id")
 
     }
