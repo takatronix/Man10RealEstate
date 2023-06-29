@@ -15,9 +15,9 @@ class City {
 
     companion object{
 
-        private val cityData = ConcurrentHashMap<String, City>()
+        val cityData = ConcurrentHashMap<String, City>()
         private val gson = Gson()
-        fun asyncLoadAll(){
+        fun asyncLoad(){
 
             Plugin.async.execute {
                 cityData.clear()
@@ -40,15 +40,15 @@ class City {
 
                         reader.close()
 
-                        val data = gson.fromJson(jsonStr, CityOld.CityData::class.java)
+                        val data = gson.fromJson(jsonStr, City::class.java)
 
-                        if (!data.enable){
-                            Bukkit.getLogger().info("unload city : $name")
-                            continue
-                        }
+//                        if (!data.){
+//                            Bukkit.getLogger().info("unload city : $name")
+//                            continue
+//                        }
                         Bukkit.getLogger().info("load city : $name")
 
-                        CityOld.cityData[name] = data
+                        cityData[name] = data
 
                     }catch (e: IOException){
                         Bukkit.getLogger().info(e.message)
@@ -68,36 +68,34 @@ class City {
             return null
         }
 
-        fun asyncPayTax(){
-            Plugin.async.execute {
-                val rgList = Region.regionData.values
+        fun payTax(){
+            val rgList = Region.regionData.values
 
-                for (rg in rgList){
-                    if (rg.isRemitTax || rg.ownerUUID == null)continue
-                    val city = where(rg.teleport)?:continue
-                    val amount = city.getTax(rg.id)
+            for (rg in rgList){
+                if (rg.taxStatus == "FREE" || rg.ownerUUID == null)continue
+                val city = where(rg.teleport)?:continue
+                val amount = city.getTax(rg.id)
 
-                    if (rg.taxStatus == "FREE")continue
+                if (rg.taxStatus == "FREE")continue
 
-                    if (rg.taxStatus == "WARN"){
-                        if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*2.5,
-                                "Man10RealEstate Tax","税金の支払い(延滞)")){
-                            rg.asyncDelete()
-                            continue
-                        }
+                if (rg.taxStatus == "WARN"){
+                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*2.5,
+                            "Man10RealEstate Tax","税金の支払い(延滞)")){
+                        rg.asyncDelete()
+                        continue
                     }
-                    if (rg.taxStatus == "SUCCESS"){
-                        if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
-                            "Man10RealEstate Tax","税金の支払い")){
-                            rg.status = "WARN"
-                            rg.asyncSave()
-                            continue
-                        }
-                    }
-
-                    rg.taxStatus = "SUCCESS"
-                    rg.asyncSave()
                 }
+                if (rg.taxStatus == "SUCCESS"){
+                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
+                            "Man10RealEstate Tax","税金の支払い")){
+                        rg.status = "WARN"
+                        rg.asyncSave()
+                        continue
+                    }
+                }
+
+                rg.taxStatus = "SUCCESS"
+                rg.asyncSave()
             }
         }
     }
@@ -168,8 +166,8 @@ class City {
     }
 
     fun getTax(rgID:Int):Double{
-        val rg = RegionOld.get(rgID)?:return 0.0
-        if (rg.isRemitTax)return 0.0
+        val rg = Region.regionData[rgID]?:return 0.0
+        if (rg.status == "FREE")return 0.0
 
         val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
         val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)

@@ -56,7 +56,7 @@ class Plugin : JavaPlugin(), Listener {
         loadConfig()
         MySQLManager.mysqlQueue(this)
 
-        City.asyncLoadAll()
+        City.asyncLoad()
         Region.asyncLoad()
         User.asyncLoad()
 
