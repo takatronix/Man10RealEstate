@@ -221,7 +221,6 @@ object Command:CommandExecutor {
 
                 "removeuser" ->{
 
-                    //TODO:
                     if (args.size != 3)return false
 
                     if (!hasPermission(sender,USER))return false
@@ -238,7 +237,6 @@ object Command:CommandExecutor {
                     }
 
                     User.get(p,id)?.asyncDelete()
-
                     sendMessage(sender,"§a§l退去できました！")
                     return true
 
@@ -446,11 +444,6 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender, USER))return false
 
-                    //TODO:
-
-//                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-//                        RegionOld.showTaxAndRent(sender)
-//                    })
 
                 }
 
@@ -540,10 +533,14 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            //TODO:
-//                            val ret = City.create(startPosition,endPosition,args[2],amount,sender.location)
-//
-//                            sendMessage(sender,"§a§lcode:${ret} 登録処理終了")
+                            val city = City()
+                            city.name = args[2]
+                            city.setStart(startPosition)
+                            city.setEnd(endPosition)
+                            city.tax = amount
+                            city.asyncSave()
+
+                            sendMessage(sender,"§a§l登録処理終了")
 
                             return@execute
 
@@ -594,17 +591,16 @@ object Command:CommandExecutor {
 
                     }
 
-                    //TODO:
+                    val id = args[2]
+                    val city = City.cityData[id]
 
-//                    val id = args[2]
-//
-//                    if (City(id) == null){
-//                        sendMessage(sender,"§c§l存在しない都市です！")
-//                        return true
-//
-//                    }
-//                    CityOld.delete(id)
-//                    sendMessage(sender,"§a§l削除完了！")
+                    if (city == null){
+                        sendMessage(sender,"§c§l存在しない都市です！")
+                        return true
+
+                    }
+                    city.asyncDelete()
+                    sendMessage(sender,"§a§l削除完了！")
 
                 }
 
@@ -747,38 +743,38 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    //TODO:
-//                    val id = args[2]
-//
-//                    val data = CityOld.get(id)
-//
-//                    if (data == null){
-//                        sendMessage(sender,"§c§l存在しない土地です！")
-//                        return true
-//                    }
-//
-//                    data.setStart(startPosition)
-//                    data.setEnd(endPosition)
-//
-//                    CityOld.set(id, data)
-//
-//                    sendMessage(sender,"§a§l再設定完了！")
+                    val id = args[2]
+                    val city = City.cityData[id]
+
+                    if (city == null){
+                        sendMessage(sender,"§c存在しない都市です")
+                        return true
+                    }
+
+                    city.setStart(startPosition)
+                    city.setEnd(endPosition)
+                    city.asyncSave()
+                    sendMessage(sender,"設定完了")
                 }
 
                 "tax" ->{
 
-                    //TODO:
-//                    if (args.size != 3)return false
-//                    if (!NumberUtils.isNumber(args[2]))return false
-//
-//                    val id = args[1]
-//                    val tax= args[2].toDouble()
-//
-//                    CityOld.setTax(id,tax)
-//
-//                    sendMessage(sender,"§a§l設定完了！")
-//
-//                    return  true
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[2]))return false
+
+                    val city = City.cityData[args[1]]
+                    val tax= args[2].toDouble()
+
+                    if (city == null){
+                        sendMessage(sender,"存在しない都市")
+                        return false
+                    }
+                    city.tax = tax
+                    city.asyncSave()
+
+                    sendMessage(sender,"§a§l設定完了！")
+
+                    return  true
                 }
 
 
@@ -837,47 +833,27 @@ object Command:CommandExecutor {
 
                 "maxuser" ->{
 
-                    //TODO:
 
-//                    if (args.size != 3)return false
-//                    if (!NumberUtils.isNumber(args[2]))return false
-//
-//                    val id = args[1]
-//                    val amount= args[2].toInt()
-//
-//                    CityOld.setMaxUser(id,amount)
-//
-//                    sendMessage(sender,"§a§l設定完了！")
-//
-//                    return  true
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[2]))return false
 
+                    val city = City.cityData[args[1]]
+                    val max= args[2].toInt()
 
+                    if (city == null){
+                        sendMessage(sender,"存在しない都市")
+                        return false
+                    }
+                    city.maxUser = max
+                    city.asyncSave()
+
+                    sendMessage(sender,"§a§l設定完了！")
                 }
 
                 "calctax" ->{//mreop calctax <id>
 
-//                    TODO:
 
-//                    if(args.size != 2)return false
-//
-//                    val cityID = args[1]
-//
-//                    var tax = 0.0
-//
-//                    Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
-//                        for (rg in RegionOld.regionData){
-//
-//                            if (CityOld.whereRegion(rg.key) !=cityID)continue
-//
-//                            if (rg.value.ownerUUID == null)continue
-//
-//                            tax += CityOld.getTax(cityID,rg.key)
-//
-//                        }
-//
-//                        sendMessage(sender,"ID:$cityID の回収可能税額は、$tax です。")
-//
-//                    })
+
 
                     return true
 
@@ -891,7 +867,7 @@ object Command:CommandExecutor {
                     if (rg.taxStatus == "FREE"){
                         rg.taxStatus = "SUCCESS"
                     }else{
-                        rg.taxStatus == "FREE"
+                        rg.taxStatus = "FREE"
                     }
 
                     rg.asyncSave()
@@ -907,50 +883,59 @@ object Command:CommandExecutor {
                 }
 
                 "buyscore" ->{
-//                    TODO:
-//                    if (args.size != 3)return false
-//                    if (!NumberUtils.isNumber(args[2]))return false
-//
-//                    val id = args[1]
-//                    val score= args[2].toInt()
-//
-//                    CityOld.setBuyScore(id,score)
-//
-//                    sendMessage(sender,"§a§l設定完了！")
-//
-//                    return  true
+
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[2]))return false
+
+                    val city = City.cityData[args[1]]
+                    val score= args[2].toInt()
+
+                    if (city == null){
+                        sendMessage(sender,"存在しない都市")
+                        return false
+                    }
+                    city.buyScore = score
+                    city.asyncSave()
+
+                    sendMessage(sender,"§a§l設定完了！")
 
                 }
 
                 "livescore" ->{
 
-//                    TODO:
-//                    if (args.size != 3)return false
-//
-//                    val id = args[1]
-//                    val score= args[2].toIntOrNull()?:return true
-//
-//                    CityOld.setLiveScore(id,score)
-//
-//                    sendMessage(sender,"§a§l設定完了！")
-//
-//                    return  true
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[2]))return false
+
+                    val city = City.cityData[args[1]]
+                    val score= args[2].toInt()
+
+                    if (city == null){
+                        sendMessage(sender,"存在しない都市")
+                        return false
+                    }
+                    city.liveScore = score
+                    city.asyncSave()
+
+                    sendMessage(sender,"§a§l設定完了！")
 
                 }
 
                 "defaultPrice" ->{//mreop defaultPrice id amount
 
-//                    TODO:
-//                    if (args.size != 3)return false
-//
-//                    val id = args[1]
-//                    val amount= args[2].toDoubleOrNull()?:return true
-//
-//                    CityOld.setDefaultPrice(id,amount)
-//
-//                    sendMessage(sender,"§a§l設定完了！")
-//
-//                    return true
+                    if (args.size != 3)return false
+                    if (!NumberUtils.isNumber(args[2]))return false
+
+                    val city = City.cityData[args[1]]
+                    val price = args[2].toDouble()
+
+                    if (city == null){
+                        sendMessage(sender,"存在しない都市")
+                        return false
+                    }
+                    city.defaultPrice = price
+                    city.asyncSave()
+
+                    sendMessage(sender,"§a§l設定完了！")
                 }
 
                 else ->{

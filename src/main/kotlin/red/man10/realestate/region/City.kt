@@ -42,10 +42,6 @@ class City {
 
                         val data = gson.fromJson(jsonStr, City::class.java)
 
-//                        if (!data.){
-//                            Bukkit.getLogger().info("unload city : $name")
-//                            continue
-//                        }
                         Bukkit.getLogger().info("load city : $name")
 
                         cityData[name] = data
@@ -144,19 +140,32 @@ class City {
             try {
                 val file = File("${Plugin.plugin.dataFolder}/${name}.json")
 
-                if (file.exists()){
-                    file.delete()
-                }else{
-                    Bukkit.getLogger().info("存在しない都市")
-                    return@execute
-                }
-
+//                if (file.exists()){
+//                    file.delete()
+//                }else{
+//                    Bukkit.getLogger().info("存在しない都市")
+//                    return@execute
+//                }
 
                 val jsonStr = gson.toJson(this)
                 val writer = FileWriter(file)
 
                 writer.write(jsonStr)
                 writer.close()
+            }catch (e:IOException){
+                Bukkit.getLogger().info(e.message)
+                Bukkit.getLogger().info(e.stackTraceToString())
+            }
+
+        }
+    }
+
+    fun asyncDelete(){
+        Plugin.async.execute {
+            try {
+                val file = File("${Plugin.plugin.dataFolder}/${name}.json")
+                file.delete()
+
             }catch (e:IOException){
                 Bukkit.getLogger().info(e.message)
                 Bukkit.getLogger().info(e.stackTraceToString())
