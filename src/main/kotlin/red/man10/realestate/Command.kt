@@ -19,9 +19,12 @@ import red.man10.realestate.Plugin.Companion.async
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.prefix
-import red.man10.realestate.menu.InventoryMenu
-import red.man10.realestate.region.*
+import red.man10.realestate.menu.MainMenu
+import red.man10.realestate.region.Bookmark
+import red.man10.realestate.region.City
+import red.man10.realestate.region.Region
 import red.man10.realestate.region.Region.Companion.formatStatus
+import red.man10.realestate.region.User
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.format
@@ -50,7 +53,7 @@ object Command:CommandExecutor {
 
                 if (!hasPermission(sender,GUEST))return false
 
-                InventoryMenu.mainMenu(sender)
+                MainMenu(sender).open()
                 return true
             }
 

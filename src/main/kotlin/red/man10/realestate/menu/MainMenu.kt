@@ -10,7 +10,7 @@ class MainMenu(p: Player) : MenuFramework(p,9, "メインメニュー") {
         val manageButton = Button(Material.PAPER)
         manageButton.title("§f§l自分の土地を管理する")
         manageButton.setClickAction{
-            ManageRegionMenu(p).open()
+            RegionListMenu(p).open()
         }
         setButton(manageButton,1)
 
