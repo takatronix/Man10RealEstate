@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 object Bookmark {
 
-    private val bookmarkMap = ConcurrentHashMap<UUID,MutableList<Int>>()
+    val bookmarkMap = ConcurrentHashMap<UUID,MutableList<Int>>()
 
     fun asyncLoadBookmark(p:Player){
         Plugin.async.execute {

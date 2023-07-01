@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.*
+import red.man10.realestate.util.MenuFramework
 import red.man10.realestate.util.MySQLManager
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -50,7 +51,7 @@ class Plugin : JavaPlugin(), Listener {
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(Event, this)
-        server.pluginManager.registerEvents(InventoryListener,this)
+        server.pluginManager.registerEvents(MenuFramework.MenuListener,this)
 
         getCommand("mre")!!.setExecutor(Command)
         getCommand("mreop")!!.setExecutor(Command)

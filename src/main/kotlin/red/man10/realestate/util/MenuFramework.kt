@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -15,38 +16,75 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import org.bukkit.plugin.java.JavaPlugin
+import java.awt.Menu
 import java.util.*
 
-open class MenuFramework(val p:Player,menuSize: Int, title: String) {
+/**
+ * マイクラプラグインでメニューを作るためのフレームワーク
+ * このクラスを継承させて使用する。
+ * 起動時にsetup関数を呼んでPluginインスタンスを渡す
+ *
+ * (最終更新 2023/04/06) created by Jin Morikawa
+ */
+open class MenuFramework(val p:Player,private val menuSize: Int, private val title: String){
 
-    var menu : Inventory
+    lateinit var menu : Inventory
     private var closeAction : OnCloseListener? = null
     private var clickAction : Button.OnClickListener? = null
 
-    init {
-        menu = Bukkit.createInventory(null,menuSize, text(title))
-    }
-
     companion object{
-        private val menuMap = HashMap<Player, MenuFramework>()
+        private val menuStack = HashMap<UUID,Stack<MenuFramework>>()
+        private lateinit var instance : JavaPlugin
 
-        fun set(p:Player,menu: MenuFramework){
-            menuMap[p] = menu
+        const val CHEST_SIZE = 27
+        const val LARGE_CHEST_SIZE= 54
+
+        //      起動時に読み込む
+        fun setup(plugin:JavaPlugin){
+            instance = plugin
         }
 
-        fun get(p:Player): MenuFramework?{
-            return menuMap[p]
+        fun push(p:Player,menu:MenuFramework){
+            val stack = menuStack[p.uniqueId]?: Stack()
+            if (stack.isNotEmpty() && menu::class == stack.peek()::class){
+                return
+            }
+            stack.push(menu)
+            menuStack[p.uniqueId] = stack
         }
 
-        fun delete(p:Player){
-            menuMap.remove(p)
+        //      スタックの取り出し
+        fun pop(p:Player):MenuFramework?{
+            val stack = menuStack[p.uniqueId]?:return null
+            if (stack.isEmpty())return null
+            val menu = stack.pop()
+            menuStack[p.uniqueId] = stack
+            return menu
+        }
+
+        //      スタックの最新を確かめる
+        fun peek(p:Player): MenuFramework? {
+            val stack = menuStack[p.uniqueId]
+            if (stack.isNullOrEmpty()) return null
+            return stack.peek()
+        }
+
+        fun dispatch(plugin:JavaPlugin,job:()->Unit){
+            Bukkit.getScheduler().runTask(plugin, Runnable(job))
         }
     }
+
+    open fun init(){}
 
     fun open(){
-        p.closeInventory()
-        set(p,this)
-        p.openInventory(menu)
+//        p.closeInventory()
+        menu = Bukkit.createInventory(null,menuSize, text(title))
+        init()
+        push(p,this)
+        Bukkit.getScheduler().runTask(instance,Runnable {
+            p.openInventory(menu)
+        })
     }
 
     //slotは0スタート
@@ -54,31 +92,37 @@ open class MenuFramework(val p:Player,menuSize: Int, title: String) {
         menu.setItem(slot,button.icon())
     }
 
+    //
+    fun addButton(button:Button){
+        menu.addItem(button.icon())
+    }
+
     //背景として全埋めする
     fun fill(button: Button){
-        button.setClickAction{it.isCancelled = true}
         for (i in 0 until menu.size){
             setButton(button,i)
         }
     }
 
-    fun setCloseListener(action: OnCloseListener){
+    fun setCloseAction(action: OnCloseListener){
         closeAction = action
     }
 
-    fun setClickListener(action: Button.OnClickListener){
+    fun setClickAction(action: Button.OnClickListener){
         clickAction = action
     }
 
     fun close(e:InventoryCloseEvent){
-        delete(e.player as Player)
         closeAction?.closeAction(e)
+        if (e.reason == InventoryCloseEvent.Reason.PLAYER){
+            pop(p)//ひとつ前のメニューに戻るためにスタックを一個削除
+            pop(p)?.open()
+        }
     }
 
     fun interface OnCloseListener{
         fun closeAction(e: InventoryCloseEvent)
     }
-
 
     class Button(icon:Material):Cloneable{
 
@@ -111,6 +155,16 @@ open class MenuFramework(val p:Player,menuSize: Int, title: String) {
 
                 return buttonMap[key]
             }
+        }
+
+        fun fromItemStack(item:ItemStack): Button {
+            buttonItem = item.clone()
+            val meta = buttonItem.itemMeta
+            meta.persistentDataContainer.set(NamespacedKey.fromString("key")!!
+                , PersistentDataType.STRING,key)
+            buttonItem.itemMeta = meta
+            set(this)
+            return this
         }
 
         fun title(text:String): Button {
@@ -167,8 +221,7 @@ open class MenuFramework(val p:Player,menuSize: Int, title: String) {
 
 
         fun click(e:InventoryClickEvent){
-            if (actionData == null)return
-            actionData!!.action(e)
+            actionData?.action(e)
         }
 
         fun icon():ItemStack{
@@ -186,30 +239,29 @@ open class MenuFramework(val p:Player,menuSize: Int, title: String) {
 
     object MenuListener:Listener{
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.HIGHEST)
         fun clickEvent(e:InventoryClickEvent){
 
             val p = e.whoClicked
 
             if (p !is Player)return
 
-            val menu = get(p)
+            val menu = peek(p) ?:return
 
-            if (menu?.clickAction != null){
-                menu.clickAction!!.action(e)
-            }
+            menu.clickAction?.action(e)
 
             val item = e.currentItem?:return
             val data = Button.get(item) ?:return
             e.isCancelled = true
+
             data.click(e)
         }
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.LOW)
         fun closeEvent(e:InventoryCloseEvent){
 
             if (e.player !is Player)return
-            val menu = get(e.player as Player) ?:return
+            val menu = peek(e.player as Player) ?:return
             menu.close(e)
         }
 
