@@ -12,6 +12,8 @@ import red.man10.man10bank.BankAPI
 import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.*
 import red.man10.realestate.util.MySQLManager
+import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -60,45 +62,13 @@ class Plugin : JavaPlugin(), Listener {
         Region.asyncLoad()
         User.asyncLoad()
 
-//        batchSchedule()
+        runDailyTask()
 
     }
 
-//    private fun batchSchedule(){
-//        Bukkit.getScheduler().runTaskAsynchronously(this,Runnable {
-//
-//            val now = Calendar.getInstance()
-//
-//            while (true){
-//
-//                now.time = Date()
-//
-//                val rent = Calendar.getInstance()
-//                rent.time = lastRent
-//
-//                //賃料の支払い処理、日付が変更されたタイミングで走る
-//                if (now.get(Calendar.DAY_OF_MONTH) != rent.get(Calendar.DAY_OF_MONTH)){
-//                    UserOld.rent()
-//                    lastRent = Date()
-//                    config.set("lastRent",lastRent.time)
-//                }
-//
-//                val tax = Calendar.getInstance()
-//                tax.time = lastTax
-//
-//                //税金の支払い処理、月が変わったタイミングで走る
-//                if (now.get(Calendar.MONTH) != tax.get(Calendar.MONTH)){
-//                    UserOld.tax()
-//                    lastTax = Date()
-//                    config.set("lastTax",lastTax.time)
-//                }
-//
-//                saveConfig()
-//                Thread.sleep(100000)
-//            }
-//        })
-//
-//    }
+    override fun onDisable() { // Plugin shutdown logic
+        async.shutdown()
+    }
 
     fun loadConfig(){
         reloadConfig()
@@ -110,13 +80,46 @@ class Plugin : JavaPlugin(), Listener {
         Event.maxContainers = config.getInt("containerAmount",24)
 
         saveResource("config.yml", false)
-
     }
 
-    override fun onDisable() { // Plugin shutdown logic
-//        es.shutdownNow()
-        Bukkit.getScheduler().cancelTasks(this)
-    }
+    private fun runDailyTask(){
 
+        Thread{
+
+            var lastDay = LocalDateTime.now()
+            var lastMonth = LocalDateTime.now()
+
+            while (true){
+
+                val now = LocalDateTime.now()
+                val isChangeDay = lastDay.dayOfYear != now.dayOfYear
+                val isChangeMonth = lastMonth.month != now.month
+
+                //日変更
+                if (isChangeDay){
+                    Bukkit.getLogger().info("日付の変更を検知！")
+                    lastDay = LocalDateTime.now()
+                    Region.regionData.filterValues { it.span == 2 }.values.forEach { it.payRent() }
+                }
+
+                //週変更(月曜日)
+                if (isChangeDay && now.dayOfWeek == DayOfWeek.MONDAY){
+                    Bukkit.getLogger().info("週の変更を検知！")
+                    Region.regionData.filterValues { it.span == 1 }.values.forEach { it.payRent() }
+                }
+
+                //月変更
+                if (isChangeMonth){
+                    Bukkit.getLogger().info("月の変更を検知！")
+                    lastMonth = LocalDateTime.now()
+                    Region.regionData.filterValues { it.span == 0 }.values.forEach { it.payRent() }
+                    City.payTax()
+                }
+
+                Thread.sleep(1000*60)
+            }
+        }.start()
+
+    }
 
 }

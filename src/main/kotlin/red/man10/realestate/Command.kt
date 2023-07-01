@@ -497,7 +497,6 @@ object Command:CommandExecutor {
                     §e§l/mreop tax <id> <tax>: 指定都市の税額を変更します
                     §e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します
                     §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
-                    §e§l/mreop tp <id> : リソース無しでテレポートする
                     §e§l/mreop init <id> <price> : 指定リージョンを初期化する
                     §e§l/mreop starttax : 手動で税金を徴収する
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"

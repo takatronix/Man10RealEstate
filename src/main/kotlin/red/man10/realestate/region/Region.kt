@@ -253,6 +253,10 @@ class Region {
         User.asyncDeleteFromRegion(id)
     }
 
+    //賃料の支払い
+    fun payRent(){
+        User.userMap.filterKeys { pair -> pair.second == id }.values.forEach { it.payRent() }
+    }
 
     data class RegionData(
         var denyTeleport : Boolean,

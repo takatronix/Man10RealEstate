@@ -67,6 +67,8 @@ class City {
         fun payTax(){
             val rgList = Region.regionData.values
 
+            Bukkit.getLogger().warning("税金の支払いを行います")
+
             for (rg in rgList){
                 if (rg.taxStatus == "FREE" || rg.ownerUUID == null)continue
                 val city = where(rg.teleport)?:continue
@@ -93,6 +95,8 @@ class City {
                 rg.taxStatus = "SUCCESS"
                 rg.asyncSave()
             }
+
+            Bukkit.getLogger().warning("税金の支払い完了")
         }
     }
 
