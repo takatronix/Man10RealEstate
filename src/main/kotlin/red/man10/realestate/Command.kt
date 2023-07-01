@@ -112,7 +112,10 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,GUEST))return false
 
-//                    UserOld.changeLike(sender,args[1].toIntOrNull()?:return true)
+                    val id = args[1].toIntOrNull()?:return false
+
+
+                    Bookmark.changeBookmark(sender,id)
 
                     return true
                 }

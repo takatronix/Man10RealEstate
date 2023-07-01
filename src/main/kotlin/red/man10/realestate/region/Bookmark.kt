@@ -26,14 +26,22 @@ object Bookmark {
         }
     }
 
-    fun addBookmark(p:Player,id:Int){
+    fun changeBookmark(p:Player,id:Int){
+        if (bookmarkMap[p.uniqueId] == null){
+            addBookmark(p,id)
+        }else{
+            deleteBookmark(p,id)
+        }
+    }
+
+    private fun addBookmark(p:Player, id:Int){
         val list = bookmarkMap[p.uniqueId]?: mutableListOf()
         list.add(id)
         bookmarkMap[p.uniqueId] = list
         MySQLManager.mysqlQueue.add("INSERT INTO bookmark (player, uuid, region_id) VALUES ('${p.name}', '${p.uniqueId}', $id)")
     }
 
-    fun deleteBookmark(p:Player,id:Int){
+    private fun deleteBookmark(p:Player, id:Int){
         val list = bookmarkMap[p.uniqueId]?: mutableListOf()
         list.remove(id)
         bookmarkMap[p.uniqueId] = list
