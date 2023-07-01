@@ -417,6 +417,25 @@ object Command:CommandExecutor {
 
                 }
 
+                "denytp" ->{
+                    if (!hasPermission(sender,USER))return false
+
+                    if (args.size != 3)return false
+
+                    if (!NumberUtils.isNumber(args[2]))return false
+
+                    val id = args[1].toIntOrNull()?:return false
+                    val rg = Region.regionData[id]?:return false
+
+                    if (!hasRegionPermission(sender,id))return false
+
+                    rg.data.denyTeleport != rg.data.denyTeleport
+                    rg.asyncSave()
+
+                    sendMessage(sender,"§a§l${id}テレポート拒否設定を${if (rg.data.denyTeleport) "有効" else "無効"}にしました")
+                }
+
+
                 "tp" ->{
                     if (!hasPermission(sender, USER))return false
 
@@ -432,6 +451,11 @@ object Command:CommandExecutor {
 
                     if (rg==null){
                         sendMessage(sender,"§c§l指定したIDの土地は存在しません")
+                        return true
+                    }
+
+                    if (!hasRegionPermission(sender,id) && rg.data.denyTeleport){
+                        sendMessage(sender,"この土地はテレポートを許可されていません")
                         return true
                     }
 

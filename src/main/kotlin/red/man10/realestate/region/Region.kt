@@ -1,5 +1,6 @@
 package red.man10.realestate.region
 
+import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -15,6 +16,7 @@ class Region {
     companion object{
 
         val regionData = ConcurrentHashMap<Int, Region>()
+        val gson = Gson()
 
         fun formatStatus(status:String):String{
             return when(status){
@@ -76,6 +78,8 @@ class Region {
                         rs.getFloat("pitch")
                     )
 
+                    rg.data = gson.fromJson(rs.getString("data"),RegionData::class.java)
+
                     regionData[id] = rg
 
                     if (Bukkit.getWorld(rg.world) == null){
@@ -90,10 +94,12 @@ class Region {
 
         fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location):Int{
 
+            val data = RegionData(false,0.0,0.0)
+
             val query = "INSERT INTO region " +
                     "(server, world, name, status, price, " +
                     "x, y, z, pitch, yaw, " +
-                    "sx, sy, sz, ex, ey, ez) " +
+                    "sx, sy, sz, ex, ey, ez, data) " +
                     "VALUES(" +
                     "'${Plugin.serverName}', " +
                     "'${tp.world.name}', " +
@@ -110,7 +116,8 @@ class Region {
                     "${pos1.third}, " +
                     "${pos2.first}, " +
                     "${pos2.second}, " +
-                    "${pos2.third}); "
+                    "${pos2.third}, " +
+                    "${gson.toJson(data)}); "
 
             val mysql = MySQLManager(Plugin.plugin,"Man10RealEstate CreateRegion")
 
@@ -136,6 +143,8 @@ class Region {
 
             rg.price = price
 
+            rg.data = data
+
             regionData[id] = rg
 
             return id
@@ -160,6 +169,8 @@ class Region {
     var price : Double = 0.0
     var span = 0 //0:month 1:week 2:day
 
+    lateinit var data : RegionData
+
 
     fun asyncSave(){
 
@@ -182,7 +193,8 @@ class Region {
                 "tax_status = '${taxStatus}'," +
                 "price = ${price}, " +
                 "profit = 0, " +
-                "span = ${span} " +
+                "span = ${span}," +
+                "data = ${gson.toJson(data)} " +
                 "WHERE id = $id")
 
     }
@@ -241,9 +253,10 @@ class Region {
         User.asyncDeleteFromRegion(id)
     }
 
-    //土地を譲る
-    fun sendRegion(receiver:UUID){
-        init()
-        ownerUUID = receiver
-    }
+
+    data class RegionData(
+        var denyTeleport : Boolean,
+        var defaultPrice : Double,
+        var tax : Double
+    )
 }

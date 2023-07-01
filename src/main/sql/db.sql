@@ -52,7 +52,8 @@ OnSale状態になったときに販売価格
 売り上げ金額は、売上テーブルに登録しオフラインでも売買できるとする
 ',
     profit     double       not null default 0.0 comment '土地の利益',
-    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)'
+    span       Int          null comment '支払うスパン(0:moth 1:week 2:day)',
+    data       varchar(256) null
 );
 
 
