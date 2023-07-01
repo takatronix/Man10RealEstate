@@ -3,6 +3,7 @@ package red.man10.realestate.region
 import org.bukkit.entity.Player
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.MySQLManager
+import red.man10.realestate.util.Utility
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -28,8 +29,10 @@ object Bookmark {
 
     fun changeBookmark(p:Player,id:Int){
         if (bookmarkMap[p.uniqueId] == null){
+            Utility.sendMessage(p,"ブックマークしました！")
             addBookmark(p,id)
         }else{
+            Utility.sendMessage(p,"ブックマークを外しました！")
             deleteBookmark(p,id)
         }
     }

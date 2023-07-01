@@ -193,10 +193,10 @@ object Event :Listener{
 
         val p = e.player
 
-        //左クリックでいいね
+        //左クリックでブックマーク
         if (e.action == Action.LEFT_CLICK_BLOCK && !p.isSneaking){
             e.isCancelled = true
-            p.performCommand("mre good $id")
+            p.performCommand("mre bookmark $id")
             return
         }
 
@@ -207,7 +207,7 @@ object Event :Listener{
         sendMessage(p,"§a値段:${format(rg.price)}")
         sendMessage(p,"§a==========================================")
 
-        sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id","いいねをすると、/mreメニューから テレポートをすることができます")
+        sendClickMessage(p,"§d§lブックマークする！＝＞[ブックマーク！]","mre good $id","ブックマークをすると、/mreメニューから テレポートをすることができます")
 
         if (rg.status == "OnSale"){
             sendClickMessage(p,"§a§l§n[土地を買う！]","mre buycheck $id","§e§l値段:${format(rg.price)}")
