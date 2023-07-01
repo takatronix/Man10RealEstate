@@ -87,3 +87,16 @@ CREATE TABLE `region_user` (
   KEY `uuid` (`uuid`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+create table bookmark
+(
+    id        int auto_increment
+        primary key,
+    player    varchar(16) null,
+    uuid      varchar(36) null,
+    region_id int         null
+);
+
+create index bookmark_uuid_index
+    on bookmark (uuid);
+

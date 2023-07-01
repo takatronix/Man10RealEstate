@@ -106,7 +106,7 @@ object Command:CommandExecutor {
                     return true
                 }
 
-                "good" ->{
+                "bookmark" ->{
 
                     if (args.size !=2)return false
 

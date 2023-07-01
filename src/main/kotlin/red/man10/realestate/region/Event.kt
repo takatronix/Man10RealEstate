@@ -19,6 +19,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.material.Colorable
 import org.bukkit.persistence.PersistentDataType
@@ -98,6 +99,11 @@ object Event :Listener{
         wand.itemMeta = meta
         sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
 
+    }
+
+    @EventHandler
+    fun joinEvent(e:PlayerJoinEvent){
+        Bookmark.asyncLoadBookmark(e.player)
     }
 
     /**
