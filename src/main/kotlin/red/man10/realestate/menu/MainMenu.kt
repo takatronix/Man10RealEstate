@@ -27,7 +27,7 @@ class MainMenu(p: Player) : MenuFramework(p,9, "メインメニュー") {
         taxButton.setClickAction{
 
         }
-        setButton(bookmarkButton,7)
+        setButton(taxButton,7)
     }
 
 }

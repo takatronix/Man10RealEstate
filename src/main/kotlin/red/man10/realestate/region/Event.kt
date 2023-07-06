@@ -16,6 +16,7 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -373,7 +374,18 @@ object Event :Listener{
 
     }
 
-    fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun armorStand(e:PlayerArmorStandManipulateEvent){
+        val p = e.player
+
+        if (!hasPermission(p, e.rightClicked.location,BLOCK)){
+            sendMessage(p,"§cこのアーマースタンドを触ることはできません！")
+            e.isCancelled = true
+        }
+
+    }
+
+    private fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
 
         if (p.hasPermission(Command.OP))return true
 

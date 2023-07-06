@@ -44,6 +44,7 @@ class Plugin : JavaPlugin(), Listener {
         vault = VaultManager(this)
         bank = BankAPI(this)
         plugin = this
+        MenuFramework.setup(this)
 
         server.pluginManager.registerEvents(this, this)
         server.pluginManager.registerEvents(Event, this)

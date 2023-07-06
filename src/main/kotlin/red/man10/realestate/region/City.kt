@@ -141,6 +141,9 @@ class City {
     fun asyncSave(){
 
         Plugin.async.execute {
+
+            cityData[name] = this
+
             try {
                 val file = File("${Plugin.plugin.dataFolder}/${name}.json")
 
