@@ -110,11 +110,11 @@ class Region {
                 data.forEach {
                     val city = City.where(it.value.teleport)!!
                     if (city.ownerScore>score){
-                        //スコアが足りなくなった場合
+                        it.value.status = "Lock"
+                    }else{
+                        it.value.status = "Protected"
                     }
                 }
-
-
             }
         }
 
@@ -182,7 +182,7 @@ class Region {
     var name = "RegionName"
     var ownerUUID : UUID? = null
     var ownerName : String? = if (ownerUUID == null)null else Bukkit.getOfflinePlayer(ownerUUID!!).name
-    var status = "OnSale" //Danger,Free,OnSale,Protected
+    var status = "OnSale" //Lock,Danger,Free,OnSale,Protected
     var taxStatus = "SUCCESS" //SUCCESS,WARN
 
     var world = "builder"
