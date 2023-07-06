@@ -26,7 +26,22 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         val statusButton = Button(Material.COMPASS)
         statusButton.title("§e土地のステータスを設定する")
         statusButton.lore(mutableListOf("§f現在のステータス:${Region.formatStatus(rg.status)}"))
-        statusButton.setClickAction{RegionStatusMenu(p,id).open()}
+        statusButton.setClickAction{
+            if (rg.status == "Protected"){
+                rg.status = "OnSale"
+                rg.asyncSave()
+                sendMessage(p,"§e土地のステータスを販売中に変更しました")
+                p.closeInventory()
+                return@setClickAction
+            }
+            if (rg.status == "OnSale"){
+                rg.status = "Protected"
+                rg.asyncSave()
+                sendMessage(p,"§e土地のステータスを保護に変更しました")
+                p.closeInventory()
+                return@setClickAction
+            }
+        }
         setButton(statusButton,2)
 
         val priceButton = Button(Material.DIAMOND)
