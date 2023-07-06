@@ -31,14 +31,14 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
                 rg.status = "OnSale"
                 rg.asyncSave()
                 sendMessage(p,"§e土地のステータスを販売中に変更しました")
-                p.closeInventory()
+                ManageRegionMenu(p,id).open()
                 return@setClickAction
             }
             if (rg.status == "OnSale"){
                 rg.status = "Protected"
                 rg.asyncSave()
                 sendMessage(p,"§e土地のステータスを保護に変更しました")
-                p.closeInventory()
+                ManageRegionMenu(p,id).open()
                 return@setClickAction
             }
         }
