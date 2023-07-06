@@ -50,7 +50,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         priceButton.lore(mutableListOf("§e現在の値段:${Utility.format(rg.price)}"))
         priceButton.setClickAction{
             p.sendMessage(text(Plugin.prefix).append(text("§b§l§n[ここをクリック]")
-                .clickEvent(ClickEvent.suggestCommand("/mre setprice $id "))))
+                .clickEvent(ClickEvent.suggestCommand("mre setprice $id "))))
             p.closeInventory()
         }
         setButton(priceButton,4)
@@ -76,15 +76,15 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         ownerButton.title("§7土地の持ち主を変える(コマンドを使います)")
         ownerButton.setClickAction{
             p.sendMessage(text(Plugin.prefix).append(text("§b§l§n[ここをクリック]")
-                .clickEvent(ClickEvent.suggestCommand("/mre setowner $id "))))
+                .clickEvent(ClickEvent.suggestCommand("mre setowner $id "))))
             p.closeInventory()
         }
         setButton(ownerButton,22)
 
         val initButton = Button(Material.BARRIER)
         initButton.title("§c§l土地を手放す(一月分の税金が必要)")
-        ownerButton.setClickAction{
-            p.performCommand("/mre confirminit $id")
+        initButton.setClickAction{
+            p.performCommand("mre confirminit $id")
             p.closeInventory()
         }
         setButton(initButton,24)

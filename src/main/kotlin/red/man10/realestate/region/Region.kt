@@ -276,6 +276,7 @@ class Region {
         price = city.defaultPrice
         this.status = status
         User.asyncDeleteFromRegion(id)
+        asyncSave()
     }
 
     fun asyncDelete(){

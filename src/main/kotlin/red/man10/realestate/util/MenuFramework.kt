@@ -25,7 +25,7 @@ import java.util.*
  * このクラスを継承させて使用する。
  * 起動時にsetup関数を呼んでPluginインスタンスを渡す
  *
- * (最終更新 2023/04/06) created by Jin Morikawa
+ * (最終更新 2023/07/07) created by Jin Morikawa
  */
 open class MenuFramework(val p:Player,private val menuSize: Int, private val title: String){
 
@@ -117,6 +117,9 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
         if (e.reason == InventoryCloseEvent.Reason.PLAYER){
             pop(p)//ひとつ前のメニューに戻るためにスタックを一個削除
             pop(p)?.open()
+        }
+        if (e.reason == InventoryCloseEvent.Reason.PLUGIN){
+            menuStack.remove(e.player.uniqueId)
         }
     }
 
