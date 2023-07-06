@@ -28,6 +28,15 @@ class Region {
             }
         }
 
+        fun formatSpan(span:Int):String{
+            return when(span){
+                0 -> "1ヶ月"
+                1 -> "1週間"
+                2 -> "毎日"
+                else -> "不明"
+            }
+        }
+
         fun asyncLoad(){
 
             Plugin.async.execute {

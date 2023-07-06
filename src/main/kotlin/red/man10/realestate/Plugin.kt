@@ -9,7 +9,6 @@ import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
-import red.man10.realestate.menu.InventoryListener
 import red.man10.realestate.region.*
 import red.man10.realestate.util.MenuFramework
 import red.man10.realestate.util.MySQLManager
