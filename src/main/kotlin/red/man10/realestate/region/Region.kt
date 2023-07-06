@@ -143,14 +143,16 @@ class Region {
                     "${pos2.first}, " +
                     "${pos2.second}, " +
                     "${pos2.third}, " +
-                    "${gson.toJson(data)}); "
+                    "'${gson.toJson(data)}'); "
 
             val mysql = MySQLManager(Plugin.plugin,"Man10RealEstate CreateRegion")
 
             mysql.execute(query)
 
-            val rs = mysql.query("SELECT t.* FROM region t ORDER BY id DESC LIMIT 1;")?:return -1
-            rs.next()
+            val rs = mysql.query("SELECT * FROM region ORDER BY id DESC LIMIT 1;")?:return -1
+
+            if (!rs.next())return -1
+
             val id = rs.getInt("id")
 
             rs.close()
@@ -159,7 +161,7 @@ class Region {
             val rg = Region()
 
             rg.name = name
-
+            rg.id = id
             rg.startPosition = pos1
             rg.endPosition = pos2
             rg.teleport = tp
@@ -181,7 +183,7 @@ class Region {
     var id = 0
     var name = "RegionName"
     var ownerUUID : UUID? = null
-    var ownerName : String? = if (ownerUUID == null)null else Bukkit.getOfflinePlayer(ownerUUID!!).name
+    var ownerName : String? = if (ownerUUID == null) "サーバー" else Bukkit.getOfflinePlayer(ownerUUID!!).name
     var status = "OnSale" //Lock,Danger,Free,OnSale,Protected
     var taxStatus = "SUCCESS" //SUCCESS,WARN
 
@@ -220,7 +222,7 @@ class Region {
                 "price = ${price}, " +
                 "profit = 0, " +
                 "span = ${span}," +
-                "data = ${gson.toJson(data)} " +
+                "data = '${gson.toJson(data)}' " +
                 "WHERE id = $id")
 
     }
@@ -261,7 +263,9 @@ class Region {
         }
 
         ownerUUID = p.uniqueId
+        ownerName = p.name
         status = "Protected"
+        asyncSave()
 
         Utility.sendMessage(p, "§a§l土地の購入成功！")
     }

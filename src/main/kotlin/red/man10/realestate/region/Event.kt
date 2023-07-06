@@ -211,10 +211,10 @@ object Event :Listener{
         sendMessage(p,"§a値段:${format(rg.price)}")
         sendMessage(p,"§a==========================================")
 
-        sendClickMessage(p,"§d§lブックマークする！＝＞[ブックマーク！]","mre good $id","ブックマークをすると、/mreメニューから テレポートをすることができます")
+        sendClickMessage(p,"§d§lブックマークする！＝＞[ブックマーク！]","mre bookmark $id","ブックマークをすると、/mreメニューから テレポートをすることができます")
 
         if (rg.status == "OnSale"){
-            sendClickMessage(p,"§a§l§n[土地を買う！]","mre buycheck $id","§e§l値段:${format(rg.price)}")
+            sendClickMessage(p,"§a§l§n[土地を買う！]","mre buyconfirm $id","§e§l値段:${format(rg.price)}")
         }
 
         updateSign(sign,id)

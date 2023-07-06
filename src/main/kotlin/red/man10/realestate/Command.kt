@@ -60,7 +60,7 @@ object Command:CommandExecutor {
 
             when(args[0]){
 
-                "buyconfirm" ->{
+                "buy" ->{
 
                     if (!hasPermission(sender,USER))return false
 
@@ -78,7 +78,7 @@ object Command:CommandExecutor {
                     return true
                 }
 
-                "buy" ->{
+                "buyconfirm" ->{
 
                     if (!hasPermission(sender,USER))return false
 
@@ -103,7 +103,7 @@ object Command:CommandExecutor {
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
 
                     sender.sendMessage(text(prefix).append(text("§a§l[購入する]")
-                        .clickEvent(ClickEvent.runCommand("mre buyconfirm")))
+                        .clickEvent(ClickEvent.runCommand("/mre buy")))
                         .hoverEvent(HoverEvent.showText(text("§6§l電子マネー${format(rg.price)}円")
                     )))
 
@@ -628,6 +628,8 @@ object Command:CommandExecutor {
 
                             val city = City()
                             city.name = args[2]
+                            city.world = sender.world.name
+                            city.server = Plugin.serverName
                             city.setStart(startPosition)
                             city.setEnd(endPosition)
                             city.tax = amount
@@ -753,6 +755,10 @@ object Command:CommandExecutor {
                     val loc = sender.location
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
+
+                        sendMessage(sender,"土地数:${Region.regionData.size}")
+                        sendMessage(sender,"都市数:${City.cityData.size}")
+
                         sendMessage(sender, "§e§l=====================================")
 
                         for (rg in Region.regionData.values) {
@@ -765,6 +771,7 @@ object Command:CommandExecutor {
                                 sendMessage(sender,"§8Tax:${(City.where(rg.teleport))?.getTax(rg.id)}")
                             }
                         }
+
 
                         for (c in City.cityData){
 

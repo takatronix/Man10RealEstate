@@ -22,7 +22,7 @@ class RegionSpanMenu(p:Player,val id:Int) : MenuFramework(p,9,"スパンの変�
         daily.title("§a毎日支払い")
         setButton(daily,2)
         daily.setClickAction{
-            p.performCommand("/mre span $id 2")
+            p.performCommand("mre span $id 2")
             p.closeInventory()
         }
 
@@ -31,7 +31,7 @@ class RegionSpanMenu(p:Player,val id:Int) : MenuFramework(p,9,"スパンの変�
         weekly.title("§a毎週支払い")
         setButton(weekly,4)
         weekly.setClickAction{
-            p.performCommand("/mre span $id 1")
+            p.performCommand("mre span $id 1")
             p.closeInventory()
         }
 
@@ -40,7 +40,7 @@ class RegionSpanMenu(p:Player,val id:Int) : MenuFramework(p,9,"スパンの変�
         monthly.title("§a毎月支払い")
         setButton(monthly,6)
         monthly.setClickAction{
-            p.performCommand("/mre span $id 0")
+            p.performCommand("mre span $id 0")
             p.closeInventory()
         }
     }
