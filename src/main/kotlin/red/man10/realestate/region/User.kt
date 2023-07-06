@@ -2,6 +2,7 @@ package red.man10.realestate.region
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.MySQLManager
 import java.time.LocalDateTime
@@ -50,6 +51,19 @@ class User(val uuid: UUID,val id:Int) {
 
         fun asyncDeleteFromRegion(id: Int){
             MySQLManager.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$id;")
+        }
+
+        fun asyncLoginProcess(p:Player){
+            Plugin.async.execute {
+                val data = userMap.filterValues { it.uuid == p.uniqueId }
+                val score = ScoreDatabase.getScore(p.uniqueId)
+
+                data.forEach {
+                    val id = it.key.second
+                    val city = City.where(Region.regionData[id]!!.teleport)!!
+                    if (city.liveScore>score){ it.value.asyncDelete() }
+                }
+            }
         }
 
     }
@@ -103,7 +117,6 @@ class User(val uuid: UUID,val id:Int) {
 
         asyncSave()
     }
-
     enum class Permission{
         ALL,
         BLOCK,

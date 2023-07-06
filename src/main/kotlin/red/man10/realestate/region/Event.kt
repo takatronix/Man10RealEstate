@@ -103,7 +103,10 @@ object Event :Listener{
 
     @EventHandler
     fun joinEvent(e:PlayerJoinEvent){
-        Bookmark.asyncLoadBookmark(e.player)
+        val p = e.player
+        Bookmark.asyncLoadBookmark(p)
+        Region.asyncLoginProcess(p)
+        User.asyncLoginProcess(p)
     }
 
     /**

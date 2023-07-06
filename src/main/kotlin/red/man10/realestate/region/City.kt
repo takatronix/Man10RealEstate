@@ -109,7 +109,7 @@ class City {
 
     var maxUser = 100
 
-    var buyScore = 0
+    var ownerScore = 0
     var liveScore = 0
 
     var defaultPrice = 0.0

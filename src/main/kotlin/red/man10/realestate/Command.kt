@@ -143,15 +143,6 @@ object Command:CommandExecutor {
                         return false
                     }
 
-//                    val rent = if (args.size == 4) args[3].toDoubleOrNull()?:0.0 else 0.0
-//
-//                    val spanDisplay = when(data.span){
-//                        0 -> "一ヶ月ごと"
-//                        1 -> "一週間ごと"
-//                        2 -> "毎日"
-//                        else -> "不明"
-//                    }
-
                     val user = Bukkit.getPlayer(args[2])
 
                     if (user == null){
@@ -281,6 +272,11 @@ object Command:CommandExecutor {
                     if (p == null){
                         sendMessage(sender,"§c§lオンラインのユーザーを入力してください")
                         return true
+                    }
+
+                    if (city.ownerScore > ScoreDatabase.getScore(p.uniqueId)){
+                        sendMessage(sender,"ユーザーのスコアが足りません")
+                        return false
                     }
 
                     sendMessage(sender,"現在承認待ち・・・")
@@ -923,7 +919,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"存在しない都市")
                         return false
                     }
-                    city.buyScore = score
+                    city.ownerScore = score
                     city.asyncSave()
 
                     sendMessage(sender,"§a§l設定完了！")

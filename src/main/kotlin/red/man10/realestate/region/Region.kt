@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.scoreboard.Score
 import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.MySQLManager
@@ -98,6 +99,22 @@ class Region {
                 }
                 rs.close()
                 sql.close()
+            }
+        }
+
+
+        fun asyncLoginProcess(p:Player){
+            Plugin.async.execute {
+                val data = regionData.filterValues { it.ownerUUID == p.uniqueId }
+                val score = ScoreDatabase.getScore(p.uniqueId)
+                data.forEach {
+                    val city = City.where(it.value.teleport)!!
+                    if (city.ownerScore>score){
+                        //スコアが足りなくなった場合
+                    }
+                }
+
+
             }
         }
 
@@ -229,7 +246,7 @@ class Region {
             return
         }
 
-        if (city.buyScore > score){
+        if (city.ownerScore > score){
             Utility.sendMessage(p, "§c§lあなたにはこの土地を買うためのスコアが足りません！")
             return
         }
