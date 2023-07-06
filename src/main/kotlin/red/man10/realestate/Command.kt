@@ -19,6 +19,7 @@ import red.man10.realestate.Plugin.Companion.async
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.prefix
+import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.menu.MainMenu
 import red.man10.realestate.region.Bookmark
 import red.man10.realestate.region.City
@@ -465,6 +466,73 @@ object Command:CommandExecutor {
                     return true
 
                 }
+
+                "confirminit" -> {
+                    if (!hasPermission(sender, USER))return false
+
+                    if (args.size < 2)return false
+
+                    val id = args[1].toIntOrNull()
+
+                    if (id == null){
+                        sendMessage(sender,"§c§l数字を入力してください")
+                        return true
+                    }
+                    val rg = Region.regionData[id]
+
+                    if (rg==null){
+                        sendMessage(sender,"§c§l指定したIDの土地は存在しません")
+                        return true
+                    }
+
+                    if (rg.ownerUUID != sender.uniqueId){
+                        sendMessage(sender,"§c§l持ち主以外は使用できません")
+                        return false
+                    }
+
+                    sendMessage(sender,"§c§l=============土地を手放します==============")
+                    sendMessage(sender,"§c§l手放すと買い直さないと元に戻りません！")
+                    sendMessage(sender,"§c§l手放すときに１ヶ月分の税金の支払いが必要です")
+                    sender.sendMessage(text(prefix).append(text("§c§l§n[土地を手放す]")
+                        .clickEvent(ClickEvent.runCommand("/mre init $id"))))
+
+                }
+
+                "init" -> {
+                    if (!hasPermission(sender, USER))return false
+
+                    if (args.size < 2)return false
+
+                    val id = args[1].toIntOrNull()
+
+                    if (id == null){
+                        sendMessage(sender,"§c§l数字を入力してください")
+                        return true
+                    }
+                    val rg = Region.regionData[id]
+
+                    if (rg==null){
+                        sendMessage(sender,"§c§l指定したIDの土地は存在しません")
+                        return true
+                    }
+
+                    if (rg.ownerUUID != sender.uniqueId){
+                        sendMessage(sender,"§c§l持ち主以外は使用できません")
+                        return false
+                    }
+
+                    val tax = City.where(rg.teleport)!!.getTax(id)
+
+                    if (!vault.withdraw(sender.uniqueId,tax)){
+                        sendMessage(sender,"§c§l所持金が足りません！(必要額:${format(tax)}円)")
+                        return false
+                    }
+
+                    rg.init()
+
+                    sendMessage(sender,"§c§l手放しました")
+                }
+
 
                 "balance" ->{
 

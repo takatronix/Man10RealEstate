@@ -55,7 +55,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         spanButton.setClickAction{
             RegionSpanMenu(p,id).open()
         }
-        setButton(spanButton,21)
+        setButton(spanButton,20)
 
         val ownerButton = Button(Material.PLAYER_HEAD)
         ownerButton.title("§7土地の持ち主を変える(コマンドを使います)")
@@ -64,6 +64,14 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
                 .clickEvent(ClickEvent.suggestCommand("/mre setowner $id "))))
             p.closeInventory()
         }
-        setButton(ownerButton,23)
+        setButton(ownerButton,22)
+
+        val initButton = Button(Material.BARRIER)
+        initButton.title("§c§l土地を手放す(一月分の税金が必要)")
+        ownerButton.setClickAction{
+            p.performCommand("/mre confirminit $id")
+            p.closeInventory()
+        }
+        setButton(initButton,24)
     }
 }

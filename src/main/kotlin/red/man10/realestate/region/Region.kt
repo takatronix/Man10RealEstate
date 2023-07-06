@@ -23,7 +23,7 @@ class Region {
             return when(status){
                 "Protected" -> "保護されています"
                 "OnSale" -> "販売中"
-                "Lock" -> "ロック"
+                "Lock" -> "ロック(使用不可)"
                 "Free" -> "フリー"
                 else -> status
             }
