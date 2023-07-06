@@ -38,9 +38,6 @@ class Plugin : JavaPlugin(), Listener {
 
     }
 
-    private var lastTax = Date()
-    private var lastRent = Date()
-
     override fun onEnable() { // Plugin startup logic
         saveDefaultConfig()
 
@@ -75,10 +72,7 @@ class Plugin : JavaPlugin(), Listener {
 
         disableWorld = config.getStringList("disableWorld")
         serverName = config.getString("server","paper")!!
-        lastTax.time = config.getLong("lastTax")
-        lastRent.time = config.getLong("lastRent")
         Event.maxContainers = config.getInt("containerAmount",24)
-
         saveResource("config.yml", false)
     }
 

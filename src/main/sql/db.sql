@@ -1,28 +1,3 @@
-create table city
-(
-	id int auto_increment,
-	name varchar(16) not null,
-	x double default 0.0 null,
-	y double default 0.0 null,
-	z double default 0.0 null,
-	pitch float default 0.0 null,
-	yaw float default 0.0 null,
-	server varchar(16) null,
-	world varchar(16) null,
-	sx int default 0 null,
-	sy int default 0 null,
-	sz int default 0 null,
-	ex int default 0 null,
-	ey int default 0 null,
-	ez int default 0 null,
-	tax double default 0.0 null,
-	max_user int default 0 null,
-	buy_score int default 0 null,
-	live_score int default 0 null,
-	default_price double default 0 null,
-	constraint city_pk
-		primary key (id)
-);
 
 create table region
 (
@@ -56,17 +31,6 @@ OnSale状態になったときに販売価格
     data       varchar(256) null
 );
 
-
-CREATE TABLE `liked_index` (
-  `region_id` int unsigned NOT NULL COMMENT 'いいねしたリージョンのデータ',
-  `player` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `uuid` varchar(36) DEFAULT NULL,
-  `score` double NOT NULL DEFAULT '0' COMMENT 'スコア',
-  `is_like` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0:いいね解除 1:いいね',
-  `date` DATETIME NOT NULL DEFAULT now(),
-  KEY `uuid` (`uuid`),
-  KEY `region_id` (`region_id`)
-)
 
 CREATE TABLE `region_user` (
 
