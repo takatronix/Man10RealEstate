@@ -286,7 +286,7 @@ object Command:CommandExecutor {
                     sendMessage(p,"§a§l現在のオーナー:${sender.name}")
                     sendMessage(p,"§a§lID:${id}")
                     sendMessage(p,"§a§l都市名:${city.name}")
-                    sendMessage(p,"§a§l税額:${city.getTax(id)}円")
+                    sendMessage(p,"§a§l税額:${City.getTax(id)}円")
                     p.sendMessage(text(prefix).append(text("§b§l§n[変更を受け入れる]").clickEvent(ClickEvent.runCommand("mre acceptowner"))))
 
                     ownerConfirmKey[p.uniqueId] = id
@@ -521,7 +521,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    val tax = City.where(rg.teleport)!!.getTax(id)
+                    val tax = City.getTax(id)
 
                     if (!vault.withdraw(sender.uniqueId,tax)){
                         sendMessage(sender,"§c§l所持金が足りません！(必要額:${format(tax)}円)")
@@ -538,6 +538,10 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender, USER))return false
 
+                    sendMessage(sender,"§e§l支払う税金")
+                    Region.regionData.filterValues { it.ownerUUID == sender.uniqueId }.forEach {
+                        sendMessage(sender,"§eID:${it.key}:税額:${City.getTax(it.key)}")
+                    }
 
                 }
 
@@ -768,7 +772,7 @@ object Command:CommandExecutor {
                                 sendMessage(sender, "§7Name:${rg.name}")
                                 sendMessage(sender, "§8Price:${rg.price}")
                                 sendMessage(sender, "§7Owner:${rg.ownerName}")
-                                sendMessage(sender,"§8Tax:${(City.where(rg.teleport))?.getTax(rg.id)}")
+                                sendMessage(sender,"§8Tax:${City.getTax(rg.id)}")
                             }
                         }
 

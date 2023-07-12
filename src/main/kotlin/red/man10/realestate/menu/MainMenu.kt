@@ -25,7 +25,8 @@ class MainMenu(p: Player) : MenuFramework(p,9, "メインメニュー") {
         taxButton.title("§e§l税金情報などを確認する")
         taxButton.cmd(2)
         taxButton.setClickAction{
-
+            p.closeInventory()
+            p.performCommand("mre balance")
         }
         setButton(taxButton,7)
     }

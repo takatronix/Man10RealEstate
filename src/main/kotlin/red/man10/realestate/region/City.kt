@@ -71,8 +71,7 @@ class City {
 
             for (rg in rgList){
                 if (rg.taxStatus == "FREE" || rg.ownerUUID == null)continue
-                val city = where(rg.teleport)?:continue
-                val amount = city.getTax(rg.id)
+                val amount = getTax(rg.id)
 
                 if (rg.taxStatus == "FREE")continue
 
@@ -97,6 +96,17 @@ class City {
             }
 
             Bukkit.getLogger().warning("税金の支払い完了")
+        }
+
+        fun getTax(rgID:Int):Double{
+            val rg = Region.regionData[rgID]?:return 0.0
+            if (rg.taxStatus == "FREE")return 0.0
+            val city = where(rg.teleport)?:return 0.0
+
+            val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first) + 1
+            val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third) + 1
+
+            return width * height * city.tax
         }
     }
 
@@ -181,17 +191,4 @@ class City {
         }
     }
 
-    fun getTax(rgID:Int):Double{
-        val rg = Region.regionData[rgID]?:return 0.0
-        if (rg.status == "FREE")return 0.0
-
-        val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first) + 1
-        val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third) + 1
-
-        return width * height * tax
-    }
-
-    fun searchCityFromRegion(rgId:Int):City?{
-        return where(Region.regionData[rgId]?.teleport?:return null)
-    }
 }
