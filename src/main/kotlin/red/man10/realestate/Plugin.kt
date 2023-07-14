@@ -89,8 +89,8 @@ class Plugin : JavaPlugin(), Listener {
                 val tax = Calendar.getInstance()
                 tax.time = lastTax
 
-                Bukkit.getLogger().info("前回の税金処理時刻:${LocalDateTime
-                    .ofInstant(lastTax.toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)}")
+//                Bukkit.getLogger().info("前回の税金処理時刻:${LocalDateTime
+//                    .ofInstant(lastTax.toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)}")
 
                 //税金の支払い処理、月が変わったタイミングで走る
                 if (now.get(Calendar.MONTH) != tax.get(Calendar.MONTH)){
