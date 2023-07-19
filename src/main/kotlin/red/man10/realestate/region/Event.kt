@@ -33,6 +33,10 @@ import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.format
 import red.man10.realestate.util.Utility.sendClickMessage
 import red.man10.realestate.util.Utility.sendMessage
+import tororo1066.itemframeprotector.api.event.IFPAddEvent
+import tororo1066.itemframeprotector.api.event.IFPCause
+import tororo1066.itemframeprotector.api.event.IFPInteractEvent
+import tororo1066.itemframeprotector.api.event.IFPRemoveEvent
 
 object Event :Listener{
 
@@ -383,6 +387,28 @@ object Event :Listener{
             e.isCancelled = true
         }
 
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun itemFrameInteractEvent(e:IFPInteractEvent){
+        val p = e.entity
+        if (p !is Player)return
+        if (e.ifpCause == IFPCause.OP_STAFF)return
+        if (!hasPermission(p,e.data.loc,INVENTORY)){
+            sendMessage(p,"§cこの額縁を触ることはできません！")
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun itemFrameRemoveEvent(e:IFPRemoveEvent){
+        val p = e.remover
+        if (p !is Player)return
+        if (e.ifpCause == IFPCause.OP_STAFF)return
+        if (!hasPermission(p,e.data.loc,BLOCK)){
+            sendMessage(p,"§cこの額縁を触ることはできません！")
+            e.isCancelled = true
+        }
     }
 
     private fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
