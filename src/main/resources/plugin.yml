@@ -10,7 +10,7 @@ softdepend:
 depend:
   - Vault
   - Man10Bank
-  - ItemFrameProtect
+  - ItemFrameProtector
 commands:
   mre:
     default: op

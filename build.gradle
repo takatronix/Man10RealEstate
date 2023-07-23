@@ -26,7 +26,7 @@ dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT'
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
-    compileOnly 'com.github.tororo1066.ItemFrameProtector:API:0b23d3169e'
+    compileOnly 'com.github.tororo1066.ItemFrameProtector:API:555ef90df2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 }
