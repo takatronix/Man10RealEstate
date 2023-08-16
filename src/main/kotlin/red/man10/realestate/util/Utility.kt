@@ -5,6 +5,7 @@ import net.kyori.adventure.text.event.ClickEvent.runCommand
 import net.kyori.adventure.text.event.ClickEvent.suggestCommand
 import net.kyori.adventure.text.event.HoverEvent.showText
 import org.bukkit.Location
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.prefix
@@ -36,14 +37,13 @@ object Utility {
         p.sendMessage(text("$prefix$text").clickEvent(runCommand("/$command")).hoverEvent(showText(text(hoverText))))
     }
 
-    //サジェストメッセージ
-    fun sendSuggest(p: Player, text: String?, command: String,hoverText: String) {
-        p.sendMessage(text("${prefix}$text§a§n[ここをクリック！]").clickEvent(suggestCommand("/$command")).hoverEvent(showText(text(hoverText))))
-    }
-
     //prefix付きのメッセージ
     fun sendMessage(player: Player, message: String) {
         player.sendMessage("$prefix$message")
+    }
+
+    fun sendDebug(sender:CommandSender,message: String){
+        sender.sendMessage("$prefix§c§l[DEBUG]$message")
     }
 
     fun format(double: Double):String{

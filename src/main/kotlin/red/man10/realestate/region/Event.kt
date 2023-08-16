@@ -1,6 +1,7 @@
 package red.man10.realestate.region
 
 import net.kyori.adventure.text.Component.text
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -412,6 +413,8 @@ object Event :Listener{
     }
 
     private fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
+
+        Utility.sendDebug(p,"Called Listener perm:$perm")
 
         if (p.hasPermission(Command.OP))return true
 
