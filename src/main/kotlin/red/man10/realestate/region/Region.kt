@@ -94,7 +94,7 @@ class Region {
 
                     if (Bukkit.getWorld(rg.world) == null){
                         rg.asyncDelete()
-                        Bukkit.getLogger().warning("id:${id}は存在しない土地だったので、削除しました!")
+                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
                     }
                 }
                 rs.close()
