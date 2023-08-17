@@ -283,7 +283,6 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, p.location, BLOCK)) {
-
             sendMessage(p,"§cここに水などを置くことはできません！")
             e.isCancelled = true
 
@@ -414,17 +413,15 @@ object Event :Listener{
 
     private fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
 
-        Utility.sendDebug(p,"Called Listener perm:$perm")
-
         if (p.hasPermission(Command.OP))return true
 
         if (disableWorld.contains(loc.world.name)){ return true }
 
         if (City.where(loc) == null)return false
 
-        for (id in Region.regionData.keys){
-
-            val rg = Region.regionData[id]?:continue
+        Region.regionData.forEach{ entry ->
+            val rg = entry.value
+            val id = entry.key
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
