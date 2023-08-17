@@ -103,6 +103,8 @@ class City {
             if (rg.taxStatus == "FREE")return 0.0
             val city = where(rg.teleport)?:return 0.0
 
+            if (rg.data.tax != 0.0) return rg.data.tax
+
             val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first) + 1
             val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third) + 1
 
