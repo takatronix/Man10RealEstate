@@ -462,6 +462,13 @@ object Command:CommandExecutor {
                         return true
                     }
 
+                    if (rg.server != Plugin.serverName){
+                        sender.performCommand("warpsystem:tp" +
+                                " ${sender.name} ${rg.teleport.x} ${rg.teleport.y} ${rg.teleport.z} ${rg.teleport.yaw} ${rg.teleport.pitch}" +
+                                " ${rg.server} ${rg.teleport.world.name}")
+                        return true
+                    }
+
                     sender.teleport(rg.teleport)
                     return true
 

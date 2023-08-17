@@ -45,7 +45,7 @@ class Region {
 
                 val sql = MySQLManager(Plugin.plugin,"Man10RealEstate Loading")
 
-                val rs = sql.query("SELECT * FROM region WHERE server='${Plugin.serverName}';")?:return@execute
+                val rs = sql.query("SELECT * FROM region;")?:return@execute
 
                 while (rs.next()){
 
@@ -56,7 +56,7 @@ class Region {
                     rg.id = id
                     rg.name = rs.getString("name")
                     rg.world = rs.getString("world")
-                    rg.server = Plugin.serverName
+                    rg.server = rs.getString("server")
                     if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
                         rg.ownerUUID = null
                     }else{
