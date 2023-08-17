@@ -28,7 +28,7 @@ object Bookmark {
     }
 
     fun changeBookmark(p:Player,id:Int){
-        if (bookmarkMap[p.uniqueId] == null){
+        if (bookmarkMap[p.uniqueId]?.contains(id) == false){
             Utility.sendMessage(p,"ブックマークしました！")
             addBookmark(p,id)
         }else{
