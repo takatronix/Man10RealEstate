@@ -185,7 +185,7 @@ class Region {
     var ownerUUID : UUID? = null
     var ownerName : String? = if (ownerUUID == null) "サーバー" else Bukkit.getOfflinePlayer(ownerUUID!!).name
     var status = "OnSale" //Lock,Danger,Free,OnSale,Protected
-    var taxStatus = "SUCCESS" //SUCCESS,WARN
+    var taxStatus = "SUCCESS" //SUCCESS,WARN,FREE
 
     var world = "builder"
     var server = "server"

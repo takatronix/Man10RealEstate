@@ -28,7 +28,7 @@ class RegionListMenu(p:Player, val page:Int = 0) : MenuFramework(p, LARGE_CHEST_
                 "§b§l右クリック:住民の設定",
                 "§7ステータス:${Region.formatStatus(rg.status)}",
                 "§7価格:${format(rg.price)}円",
-                "§7税額:${if (rg.data.tax!=0.0) format(rg.data.tax) else format(City.getTax(rg.id))}円"))
+                "§7税額:${format(City.getTax(rg.id))}円"))
             button.setClickAction{
                 if (it.isLeftClick){
                     ManageRegionMenu(p,rg.id).open()

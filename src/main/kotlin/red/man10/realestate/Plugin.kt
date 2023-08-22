@@ -35,6 +35,7 @@ class Plugin : JavaPlugin(), Listener {
         var disableWorld = mutableListOf<String>()
 
         var serverName = "paper"
+        var penalty = 2.5 //税金の支払いに失敗した時のペナルティ
 
     }
 
@@ -73,6 +74,7 @@ class Plugin : JavaPlugin(), Listener {
 
         disableWorld = config.getStringList("disableWorld")
         serverName = config.getString("server","paper")!!
+        penalty = config.getDouble("penalty",2.5)
         Event.maxContainers = config.getInt("containerAmount",24)
         saveResource("config.yml", false)
     }
