@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import org.bukkit.scoreboard.Score
 import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.MySQLManager
@@ -19,13 +18,13 @@ class Region {
         val regionData = ConcurrentHashMap<Int, Region>()
         val gson = Gson()
 
-        fun formatStatus(status:String):String{
+        fun formatStatus(status: Status):String{
             return when(status){
-                "Protected" -> "保護されています"
-                "OnSale" -> "販売中"
-                "Lock" -> "ロック(使用不可)"
-                "Free" -> "フリー"
-                else -> status
+                Status.PROTECTED -> "保護されています"
+                Status.ON_SALE -> "販売中"
+                Status.LOCK -> "ロック(使用不可)"
+                Status.FREE -> "フリー"
+                else -> status.value
             }
         }
 
@@ -62,8 +61,8 @@ class Region {
                     }else{
                         rg.ownerUUID = UUID.fromString(rs.getString("owner_uuid"))
                     }
-                    rg.status = rs.getString("status")
-                    rg.taxStatus = rs.getString("tax_status")
+                    rg.status = Status.valueOf(rs.getString("status"))
+                    rg.taxStatus = TaxStatus.valueOf(rs.getString("tax_status"))
                     rg.price = rs.getDouble("price")
 
                     rg.span = rs.getInt("span")
@@ -111,9 +110,9 @@ class Region {
                 data.forEach {
                     val city = City.where(it.value.teleport)!!
                     if (city.ownerScore>score){
-                        it.value.status = "Lock"
+                        it.value.status = Status.LOCK
                     }else{
-                        it.value.status = "Protected"
+                        it.value.status = Status.PROTECTED
                     }
                 }
             }
@@ -185,8 +184,8 @@ class Region {
     var name = "RegionName"
     var ownerUUID : UUID? = null
     var ownerName : String? = if (ownerUUID == null) "サーバー" else Bukkit.getOfflinePlayer(ownerUUID!!).name
-    var status = "OnSale" //Lock,Danger,Free,OnSale,Protected
-    var taxStatus = "SUCCESS" //SUCCESS,WARN,FREE
+    var status : Status = Status.ON_SALE //Lock,Danger,Free,OnSale,Protected
+    var taxStatus : TaxStatus = TaxStatus.SUCCESS //SUCCESS,WARN,FREE
 
     var world = "builder"
     var server = "server"
@@ -239,7 +238,7 @@ class Region {
             return
         }
 
-        if (status != "OnSale"){
+        if (status != Status.ON_SALE){
             Utility.sendMessage(p, "§c§lこの土地は販売されていません！")
             return
         }
@@ -265,18 +264,18 @@ class Region {
 
         ownerUUID = p.uniqueId
         ownerName = p.name
-        status = "Protected"
+        status = Status.PROTECTED
         asyncSave()
 
         Utility.sendMessage(p, "§a§l土地の購入成功！")
     }
 
-    fun init(status: String = "OnSale"){
+    fun init(status: Status = Status.ON_SALE){
         val city = City.where(teleport)?:return
         ownerUUID = null
         price = city.defaultPrice
         this.status = status
-        this.taxStatus = "SUCCESS"
+        this.taxStatus = TaxStatus.SUCCESS
         User.asyncDeleteFromRegion(id)
         asyncSave()
     }
@@ -301,4 +300,18 @@ class Region {
         var defaultPrice : Double,
         var tax : Double
     )
+
+    enum class TaxStatus(val value : String){
+        SUCCESS("SUCCESS"),
+        WARN("WARN"),
+        FREE("FREE")
+    }
+
+    enum class Status(val value : String){
+        ON_SALE("OnSale"),
+        PROTECTED("Protected"),
+        LOCK("Lock"),
+        FREE("Free"),
+        DANGER("Danger")
+    }
 }

@@ -90,7 +90,7 @@ object Command:CommandExecutor {
 
                     val rg = Region.regionData[id]?:return false
 
-                    if (rg.status != "OnSale"){
+                    if (rg.status != Region.Status.ON_SALE){
                         sendMessage(sender,"§c§lこの土地は販売されていません！")
                         return false
                     }
@@ -388,10 +388,10 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,OP) && status=="Lock"){ return true }
 
-                    rg.status = status
+                    rg.status = Region.Status.valueOf(status)
                     rg.asyncSave()
 
-                    sendMessage(sender,"§a§l${id}の土地の状態を${formatStatus(status)}に変更しました")
+                    sendMessage(sender,"§a§l${id}の土地の状態を${formatStatus(rg.status)}に変更しました")
                     return true
 
                 }
@@ -1026,15 +1026,15 @@ object Command:CommandExecutor {
                     val id = args[1].toIntOrNull()?:return false
 
                     val rg = Region.regionData[id]?:return false
-                    if (rg.taxStatus == "FREE"){
-                        rg.taxStatus = "SUCCESS"
+                    if (rg.taxStatus == Region.TaxStatus.FREE){
+                        rg.taxStatus = Region.TaxStatus.SUCCESS
                     }else{
-                        rg.taxStatus = "FREE"
+                        rg.taxStatus = Region.TaxStatus.FREE
                     }
 
                     rg.asyncSave()
 
-                    if (rg.taxStatus == "FREE"){
+                    if (rg.taxStatus == Region.TaxStatus.FREE){
                         sendMessage(sender,"§a§l$id の税金を免除するようにしました")
                     }else{
                         sendMessage(sender,"§a§l$id の税金を免除を解除しました")
@@ -1163,7 +1163,7 @@ object Command:CommandExecutor {
 
         val data = Region.regionData[id]?:return false
 
-        if (data.status == "Lock")return false
+        if (data.status == Region.Status.LOCK)return false
 
         if (data.ownerUUID == p.uniqueId)return true
 

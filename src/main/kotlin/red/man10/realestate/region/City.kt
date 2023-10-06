@@ -70,7 +70,7 @@ class City {
             Bukkit.getLogger().warning("税金の支払いを行います")
 
             for (rg in rgList){
-                if (rg.taxStatus == "FREE" || rg.ownerUUID == null){
+                if (rg.taxStatus == Region.TaxStatus.FREE || rg.ownerUUID == null){
                     Bukkit.getLogger().info("ID:${rg.id} Status:NO_TAX Tax:0")
                     continue
                 }
@@ -78,7 +78,7 @@ class City {
 
 //                if (rg.taxStatus == "FREE")continue
 
-                if (rg.taxStatus == "WARN"){
+                if (rg.taxStatus == Region.TaxStatus.WARN){
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*Plugin.penalty,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
 //                        rg.asyncDelete()
@@ -88,17 +88,17 @@ class City {
                         continue
                     }
                 }
-                if (rg.taxStatus == "SUCCESS"){
+                if (rg.taxStatus == Region.TaxStatus.SUCCESS){
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い")){
-                        rg.taxStatus = "WARN"
+                        rg.taxStatus = Region.TaxStatus.WARN
                         rg.asyncSave()
                         Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                         continue
                     }
                 }
 
-                rg.taxStatus = "SUCCESS"
+                rg.taxStatus = Region.TaxStatus.SUCCESS
                 Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                 rg.asyncSave()
             }
@@ -108,7 +108,7 @@ class City {
 
         fun getTax(rgID:Int):Double{
             val rg = Region.regionData[rgID]?:return 0.0
-            if (rg.taxStatus == "FREE")return 0.0
+            if (rg.taxStatus == Region.TaxStatus.FREE)return 0.0
             val city = where(rg.teleport)?:return 0.0
 
             if (rg.data.tax != 0.0) return rg.data.tax
@@ -116,7 +116,7 @@ class City {
             val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first) + 1
             val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third) + 1
 
-            return if (rg.taxStatus == "WARN") width * height * city.tax * Plugin.penalty else width * height * city.tax
+            return if (rg.taxStatus == Region.TaxStatus.WARN) width * height * city.tax * Plugin.penalty else width * height * city.tax
         }
     }
 
