@@ -3,6 +3,7 @@ package red.man10.realestate.util
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent.runCommand
 import net.kyori.adventure.text.event.HoverEvent.showText
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -17,12 +18,18 @@ object Utility {
     ////////////////////////////////////////////////////////////
     fun isWithinRange(loc: Location, start:Triple<Int,Int,Int>, end:Triple<Int,Int,Int>, world:String,server:String):Boolean{
 
-        if (Plugin.serverName !=server)return false
-        if (loc.world.name != world)return false
+        if (Plugin.serverName !=server){
+            return false
+        }
+        if (loc.world.name != world){
+            return false
+        }
 
         if (abs((start.first+end.first)-2*loc.blockX) > abs(start.first-end.first) ||
             abs((start.third+end.third)-2*loc.blockZ) > abs(start.third-end.third) ||
-            abs((start.second+end.second)-2*loc.blockY) > abs(start.second-end.second))return false
+            abs((start.second+end.second)-2*loc.blockY) > abs(start.second-end.second)){
+            return false
+        }
 
         return true
 

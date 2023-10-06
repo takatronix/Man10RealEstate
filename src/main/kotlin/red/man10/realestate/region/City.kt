@@ -76,7 +76,7 @@ class City {
                 if (rg.taxStatus == "FREE")continue
 
                 if (rg.taxStatus == "WARN"){
-                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*2.5,
+                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*Plugin.penalty,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
 //                        rg.asyncDelete()
                         Bukkit.getLogger().info("ID:${rg.id} 警告後の滞納のため土地を初期化")
@@ -105,10 +105,12 @@ class City {
             if (rg.taxStatus == "FREE")return 0.0
             val city = where(rg.teleport)?:return 0.0
 
+            if (rg.data.tax != 0.0) return rg.data.tax
+
             val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first) + 1
             val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third) + 1
 
-            return width * height * city.tax
+            return if (rg.taxStatus == "WARN") width * height * city.tax * Plugin.penalty else width * height * city.tax
         }
     }
 

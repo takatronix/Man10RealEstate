@@ -45,7 +45,7 @@ class Region {
 
                 val sql = MySQLManager(Plugin.plugin,"Man10RealEstate Loading")
 
-                val rs = sql.query("SELECT * FROM region WHERE server='${Plugin.serverName}';")?:return@execute
+                val rs = sql.query("SELECT * FROM region;")?:return@execute
 
                 while (rs.next()){
 
@@ -56,7 +56,7 @@ class Region {
                     rg.id = id
                     rg.name = rs.getString("name")
                     rg.world = rs.getString("world")
-                    rg.server = Plugin.serverName
+                    rg.server = rs.getString("server")
                     if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
                         rg.ownerUUID = null
                     }else{
@@ -94,7 +94,7 @@ class Region {
 
                     if (Bukkit.getWorld(rg.world) == null){
                         rg.asyncDelete()
-                        Bukkit.getLogger().warning("id:${id}は存在しない土地だったので、削除しました!")
+                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
                     }
                 }
                 rs.close()
@@ -186,7 +186,7 @@ class Region {
     var ownerUUID : UUID? = null
     var ownerName : String? = if (ownerUUID == null) "サーバー" else Bukkit.getOfflinePlayer(ownerUUID!!).name
     var status = "OnSale" //Lock,Danger,Free,OnSale,Protected
-    var taxStatus = "SUCCESS" //SUCCESS,WARN
+    var taxStatus = "SUCCESS" //SUCCESS,WARN,FREE
 
     var world = "builder"
     var server = "server"

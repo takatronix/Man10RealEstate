@@ -422,25 +422,6 @@ object Command:CommandExecutor {
 
                 }
 
-                "denytp" ->{
-                    if (!hasPermission(sender,USER))return false
-
-                    if (args.size != 3)return false
-
-                    if (!NumberUtils.isNumber(args[2]))return false
-
-                    val id = args[1].toIntOrNull()?:return false
-                    val rg = Region.regionData[id]?:return false
-
-                    if (!hasRegionPermission(sender,id))return false
-
-                    rg.data.denyTeleport != rg.data.denyTeleport
-                    rg.asyncSave()
-
-                    sendMessage(sender,"§a§l${id}テレポート拒否設定を${if (rg.data.denyTeleport) "有効" else "無効"}にしました")
-                }
-
-
                 "tp" ->{
                     if (!hasPermission(sender, USER))return false
 
@@ -461,6 +442,13 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id) && rg.data.denyTeleport){
                         sendMessage(sender,"この土地はテレポートを許可されていません")
+                        return true
+                    }
+
+                    if (rg.server != Plugin.serverName){
+                        sender.performCommand("warpsystem:tp" +
+                                " ${sender.name} ${rg.teleport.x} ${rg.teleport.y} ${rg.teleport.z} ${rg.teleport.yaw} ${rg.teleport.pitch}" +
+                                " ${rg.server} ${rg.teleport.world.name}")
                         return true
                     }
 
@@ -661,6 +649,60 @@ object Command:CommandExecutor {
                             sendMessage(sender,"§a§l”mre:$id”と記入した看板を置いてください！")
                         }
                     }
+                }
+
+                "editcity" ->{ //mreop editcity <id>
+
+                    if (args.size != 2){
+                        sendMessage(sender,"/mreop editcity <id>")
+                        return true
+                    }
+                    val name = args[1]
+
+                    sendMessage(sender,"${name}の設定")
+
+                    sender.sendMessage(text("§b§n税金")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop tax city $name ")))
+                    sender.sendMessage(text("§b§n都市内リージョン初期化時の金額を設定")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop defaultPrice city $name ")))
+                    sender.sendMessage(text("§b§n所有スコア")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop buyscore $name ")))
+                    sender.sendMessage(text("§b§n居住スコア")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop livescore $name ")))
+                    sender.sendMessage(text("§b§n最大居住人数")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop maxuser $name ")))
+                    sender.sendMessage(text("§c§n都市の削除")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop delete city $name")))
+
+
+                    return true
+                }
+
+                "editrg" -> {
+                    if (args.size != 2){
+                        sendMessage(sender,"/mreop editrg <id>")
+                        return true
+                    }
+
+                    val id = args[1].toInt()
+
+                    sendMessage(sender,"${id}の設定")
+                    sender.sendMessage(text("§b§n金額の設定")
+                        .clickEvent(ClickEvent.suggestCommand("/mre setprice $id ")))
+                    sender.sendMessage(text("§b§n初期化時の金額を設定(0にすると、都市で設定した金額になる)")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop defaultPrice rg $id ")))
+                    sender.sendMessage(text("§b§n税金(0にすると都市で設定した金額になる)")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop tax rg $id ")))
+                    sender.sendMessage(text("§b§nテレポート拒否")
+                        .clickEvent(ClickEvent.runCommand("/mreop denytp $id")))
+                    sender.sendMessage(text("§b§n免税")
+                        .clickEvent(ClickEvent.runCommand("/mreop remit $id")))
+                    sender.sendMessage(text("§c§n初期化")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop init $id ")))
+                    sender.sendMessage(text("§c§n削除")
+                        .clickEvent(ClickEvent.suggestCommand("/mreop delete rg $id")))
+
+                    return true
                 }
 
                 "delete" ->{
@@ -871,17 +913,26 @@ object Command:CommandExecutor {
                     sendMessage(sender,"設定完了")
                 }
 
-                "tax" ->{
+                "tax" ->{//mreop tax rg/city id tax
 
-                    if (args.size != 3){
-                        sendMessage(sender,"/mreop tax <city> <1ブロック当たりの税額>")
-                        return false
+                    if (args.size != 4)return false
+                    if (!NumberUtils.isNumber(args[3]))return false
+
+                    val tax= args[3].toDouble()
+
+                    if (args[1] == "rg"){
+                        val id = args[2].toInt()
+                        val rg = Region.regionData[id]?:return false
+                        val data = rg.data
+                        data.tax = tax
+                        rg.data = data
+                        rg.asyncSave()
+
+                        sendMessage(sender,"§a§l設定完了！")
+                        return true
                     }
 
-                    if (!NumberUtils.isNumber(args[2]))return false
-
-                    val city = City.cityData[args[1]]
-                    val tax= args[2].toDouble()
+                    val city = City.cityData[args[2]]
 
                     if (city == null){
                         sendMessage(sender,"存在しない都市")
@@ -1030,13 +1081,26 @@ object Command:CommandExecutor {
 
                 }
 
-                "defaultPrice" ->{//mreop defaultPrice id amount
+                "defaultPrice" ->{//mreop defaultPrice <rg/city> id amount
 
-                    if (args.size != 3)return false
-                    if (!NumberUtils.isNumber(args[2]))return false
+                    if (args.size != 4)return false
 
-                    val city = City.cityData[args[1]]
-                    val price = args[2].toDouble()
+                    if (args[1] == "rg"){
+                        val id = args[2].toIntOrNull()?:return false
+
+                        val rg = Region.regionData[id]?:return false
+                        val data = rg.data
+                        val price = args[3].toDoubleOrNull()?:return true
+                        data.defaultPrice = price
+                        rg.data = data
+                        rg.asyncSave()
+
+                        sendMessage(sender,"§a§l設定完了！")
+                        return true
+                    }
+
+                    val city = City.cityData[args[2]]
+                    val price = args[3].toDouble()
 
                     if (city == null){
                         sendMessage(sender,"存在しない都市")
@@ -1046,6 +1110,24 @@ object Command:CommandExecutor {
                     city.asyncSave()
 
                     sendMessage(sender,"§a§l設定完了！")
+                }
+
+                "denytp" -> { //mreop denytp <id>
+
+                    val id = args[1].toIntOrNull()?:return false
+
+                    val rg = Region.regionData[id]?:return false
+                    val data = rg.data
+
+                    data.denyTeleport = ! data.denyTeleport
+                    rg.data = data
+                    rg.asyncSave()
+
+                    if (data.denyTeleport){
+                        sendMessage(sender,"§a§l$id のテレポートを禁止しました")
+                    }else{
+                        sendMessage(sender,"§a§l$id のテレポートを許可しました")
+                    }
                 }
 
                 else ->{

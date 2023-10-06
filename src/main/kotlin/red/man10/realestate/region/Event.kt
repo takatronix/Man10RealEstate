@@ -252,7 +252,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location, BLOCK)){
-            sendMessage(p,"§cこのブロックは壊すことができません！")
+            sendMessage(p,"§7このブロックは壊すことができません！")
             e.isCancelled = true
         }
     }
@@ -269,10 +269,10 @@ object Event :Listener{
             return
         }
 
-        if (block.type==Material.CHEST){ sendMessage(p,"§c§lチェストより樽の使用をおすすめします！") }
+        if (block.type==Material.CHEST){ sendMessage(p,"§7§lチェストより樽の使用をおすすめします！") }
 
         if (containerList.contains(block.type) && countContainer(block)> maxContainers){
-            sendMessage(p,"§cこのチャンクには、これ以上このブロックは置けません！")
+            sendMessage(p,"§7このチャンクには、これ以上このブロックは置けません！")
             e.isCancelled = true
         }
 
@@ -283,8 +283,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, p.location, BLOCK)) {
-
-            sendMessage(p,"§cここに水などを置くことはできません！")
+            sendMessage(p,"§7ここに水などを置くことはできません！")
             e.isCancelled = true
 
         }
@@ -307,20 +306,20 @@ object Event :Listener{
         }
 
         if (!hasPermission(p,e.clickedBlock!!.location, DOOR)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
         }
 
         if (invList.contains(e.clickedBlock!!.type)){
             if (!hasPermission(p,e.clickedBlock!!.location, INVENTORY)){
-                sendMessage(p,"§cこのブロックを触ることはできません！")
+                sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
                 return
             }
         }else{
             if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
-                sendMessage(p,"§cこのブロックを触ることはできません！")
+                sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
                 return
             }
@@ -334,7 +333,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location,BLOCK)){
-            sendMessage(p,"§cここに看板を置くことができません！")
+            sendMessage(p,"§7ここに看板を置くことができません！")
             e.isCancelled = true
         }
 
@@ -347,7 +346,7 @@ object Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p,e.entity.location,BLOCK)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -359,7 +358,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, e.rightClicked.location,DOOR)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -373,7 +372,7 @@ object Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p, e.entity.location,DOOR)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -384,7 +383,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, e.rightClicked.location,BLOCK)){
-            sendMessage(p,"§cこのアーマースタンドを触ることはできません！")
+            sendMessage(p,"§7このアーマースタンドを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -396,7 +395,7 @@ object Event :Listener{
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
         if (!hasPermission(p,e.data.loc,INVENTORY)){
-            sendMessage(p,"§cこの額縁を触ることはできません！")
+            sendMessage(p,"§7この額縁を触ることはできません！")
             e.isCancelled = true
         }
     }
@@ -407,14 +406,12 @@ object Event :Listener{
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
         if (!hasPermission(p,e.data.loc,BLOCK)){
-            sendMessage(p,"§cこの額縁を触ることはできません！")
+            sendMessage(p,"§7この額縁を触ることはできません！")
             e.isCancelled = true
         }
     }
 
     private fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
-
-        Utility.sendDebug(p,"Called Listener perm:$perm")
 
         if (p.hasPermission(Command.OP))return true
 
@@ -422,9 +419,9 @@ object Event :Listener{
 
         if (City.where(loc) == null)return false
 
-        for (id in Region.regionData.keys){
-
-            val rg = Region.regionData[id]?:continue
+        Region.regionData.forEach{ entry ->
+            val rg = entry.value
+            val id = entry.key
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
