@@ -276,6 +276,7 @@ class Region {
         ownerUUID = null
         price = city.defaultPrice
         this.status = status
+        this.taxStatus = "SUCCESS"
         User.asyncDeleteFromRegion(id)
         asyncSave()
     }
