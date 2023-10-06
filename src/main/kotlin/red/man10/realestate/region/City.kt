@@ -70,10 +70,13 @@ class City {
             Bukkit.getLogger().warning("税金の支払いを行います")
 
             for (rg in rgList){
-                if (rg.taxStatus == "FREE" || rg.ownerUUID == null)continue
+                if (rg.taxStatus == "FREE" || rg.ownerUUID == null){
+                    Bukkit.getLogger().info("ID:${rg.id} Status:NO_TAX Tax:0")
+                    continue
+                }
                 val amount = getTax(rg.id)
 
-                if (rg.taxStatus == "FREE")continue
+//                if (rg.taxStatus == "FREE")continue
 
                 if (rg.taxStatus == "WARN"){
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*Plugin.penalty,
@@ -81,19 +84,22 @@ class City {
 //                        rg.asyncDelete()
                         Bukkit.getLogger().info("ID:${rg.id} 警告後の滞納のため土地を初期化")
                         rg.init()
+                        Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                         continue
                     }
                 }
                 if (rg.taxStatus == "SUCCESS"){
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い")){
-                        rg.status = "WARN"
+                        rg.taxStatus = "WARN"
                         rg.asyncSave()
+                        Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                         continue
                     }
                 }
 
                 rg.taxStatus = "SUCCESS"
+                Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                 rg.asyncSave()
             }
 
