@@ -46,9 +46,11 @@ object Command:CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
-        if (sender !is Player)return false
+//        if (sender !is Player)return false
 
         if (label == "mre"){
+
+            if (sender !is Player)return false
 
             if (args.isEmpty()){
 
@@ -555,7 +557,7 @@ object Command:CommandExecutor {
 
         if (label == "mreop"){
 
-            if (!hasPermission(sender,OP))return false
+            if (sender is Player && !hasPermission(sender,OP))return false
 
             if (args.isEmpty()){
 
@@ -566,16 +568,15 @@ object Command:CommandExecutor {
                     §e§l/mreop delete <rg/city> <id> : 指定idのリージョンを削除します
                     §e§l/mreop reload : 再読み込みをします
                     §e§l/mreop where : 現在地点がどのリージョンが確認します
-                    §e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します
+                    §e§l/mreop reset <rg/city> <id> : 指定idのrg/cityの範囲を再指定します
                     §e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します
-                    §e§l/mreop tax <id> <tax>: 指定都市の税額を変更します
+                    §e§l/mreop tax <city> <tax>: 指定都市の税額を変更します
                     §e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します
                     §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
                     §e§l/mreop init <id> <price> : 指定リージョンを初期化する
                     §e§l/mreop starttax : 手動で税金を徴収する
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
                     §e§l/mreop maxuser <id>: 都市の住める上限を設定する
-                    §e§l/mreop calctax <id> : 指定都市で徴収できる税額を計算する
                 """.trimIndent())
 
                 return true
@@ -586,6 +587,8 @@ object Command:CommandExecutor {
                 //mreop create city <name> <tax>
                 //mreop create rg <name> <tax>
                 "create" ->{
+
+                    if (sender !is Player)return false
 
                     if (args.size != 4)return false
 
@@ -704,10 +707,14 @@ object Command:CommandExecutor {
                 }
 
                 "wand" ->{
+
+                    if (sender !is Player)return false
+
                     val wand = ItemStack(Material.STICK)
                     val meta = wand.itemMeta
                     meta.displayName(text(WAND_NAME))
                     wand.itemMeta = meta
+                    sendMessage(sender,"範囲指定棒の取得")
                     sender.inventory.addItem(wand)
                     return true
 
@@ -756,6 +763,8 @@ object Command:CommandExecutor {
 
                 "where" ->{
 
+                    if (sender !is Player)return false
+
                     val loc = sender.location
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
@@ -796,6 +805,7 @@ object Command:CommandExecutor {
 
                 //都市の範囲の再設定
                 "reset" ->{//mreop reset city id
+                    if (sender !is Player)return false
 
                     if (args.size != 3)return false
 
@@ -863,7 +873,11 @@ object Command:CommandExecutor {
 
                 "tax" ->{
 
-                    if (args.size != 3)return false
+                    if (args.size != 3){
+                        sendMessage(sender,"/mreop tax <city> <1ブロック当たりの税額>")
+                        return false
+                    }
+
                     if (!NumberUtils.isNumber(args[2]))return false
 
                     val city = City.cityData[args[1]]
@@ -907,6 +921,8 @@ object Command:CommandExecutor {
                 }
 
                 "search" ->{
+
+                    if (sender !is Player)return false
 
                     val uuid = Bukkit.getPlayer(args[1])?.uniqueId
 
@@ -954,15 +970,6 @@ object Command:CommandExecutor {
                     sendMessage(sender,"§a§l設定完了！")
                 }
 
-                "calctax" ->{//mreop calctax <id>
-
-
-
-
-                    return true
-
-                }
-
                 "remit" ->{//mreop remit <id>
 
                     val id = args[1].toIntOrNull()?:return false
@@ -981,7 +988,6 @@ object Command:CommandExecutor {
                     }else{
                         sendMessage(sender,"§a§l$id の税金を免除を解除しました")
                     }
-
 
                     return true
                 }
