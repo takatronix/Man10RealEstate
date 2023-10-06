@@ -2,7 +2,6 @@ package red.man10.realestate.util
 
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent.runCommand
-import net.kyori.adventure.text.event.ClickEvent.suggestCommand
 import net.kyori.adventure.text.event.HoverEvent.showText
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
@@ -40,6 +39,9 @@ object Utility {
     //prefix付きのメッセージ
     fun sendMessage(player: Player, message: String) {
         player.sendMessage("$prefix$message")
+    }
+    fun sendMessage(sender: CommandSender, message: String) {
+        sender.sendMessage("$prefix$message")
     }
 
     fun sendDebug(sender:CommandSender,message: String){

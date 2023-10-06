@@ -21,6 +21,10 @@ class User(val uuid: UUID,val id:Int) {
             return userMap[Pair(p.uniqueId,id)]
         }
 
+        fun fromRegion(rg:Int): List<User> {
+            return userMap.filterKeys { it.second == rg }.values.toList()
+        }
+
         fun asyncLoad(){
             userMap.clear()
             Plugin.async.execute {

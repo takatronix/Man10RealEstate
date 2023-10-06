@@ -78,7 +78,9 @@ class City {
                 if (rg.taxStatus == "WARN"){
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*2.5,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
-                        rg.asyncDelete()
+//                        rg.asyncDelete()
+                        Bukkit.getLogger().info("ID:${rg.id} 警告後の滞納のため土地を初期化")
+                        rg.init()
                         continue
                     }
                 }

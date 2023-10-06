@@ -103,6 +103,7 @@ class Region {
         }
 
 
+        //ログイン時にスコアを確認
         fun asyncLoginProcess(p:Player){
             Plugin.async.execute {
                 val data = regionData.filterValues { it.ownerUUID == p.uniqueId }
@@ -287,6 +288,11 @@ class Region {
     //賃料の支払い
     fun payRent(){
         User.userMap.filterKeys { pair -> pair.second == id }.values.forEach { it.payRent() }
+    }
+
+    //住人の取得
+    fun getUser(): List<User> {
+        return User.fromRegion(id)
     }
 
     data class RegionData(
