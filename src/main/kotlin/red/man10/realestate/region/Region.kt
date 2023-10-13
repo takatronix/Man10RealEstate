@@ -6,6 +6,7 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.Plugin
+import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import java.util.*
@@ -38,6 +39,8 @@ class Region {
         }
 
         fun asyncLoad(){
+
+            Logger.logger("土地の読み込み開始")
 
             Plugin.async.execute {
                 regionData.clear()
@@ -92,8 +95,11 @@ class Region {
                     regionData[id] = rg
 
                     if (Bukkit.getWorld(rg.world) == null){
+                        Logger.logger("存在しないワールドの土地",id)
 //                        rg.asyncDelete()
 //                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
+                    }else {
+                        regionData[id] = rg
                     }
                 }
                 rs.close()
@@ -118,7 +124,7 @@ class Region {
             }
         }
 
-        fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location):Int{
+        fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location,p:Player):Int{
 
             val data = RegionData(false,0.0,0.0)
 
@@ -174,6 +180,8 @@ class Region {
             rg.data = data
 
             regionData[id] = rg
+
+            Logger.logger(p,"土地を作成",id)
 
             return id
 
@@ -267,6 +275,8 @@ class Region {
         status = Status.PROTECTED
         asyncSave()
 
+        Logger.logger(p,"土地を購入",id)
+
         Utility.sendMessage(p, "§a§l土地の購入成功！")
     }
 
@@ -283,11 +293,13 @@ class Region {
     fun asyncDelete(){
         MySQLManager.mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
         User.asyncDeleteFromRegion(id)
+        Logger.logger("土地を削除",id)
     }
 
     //賃料の支払い
     fun payRent(){
         User.userMap.filterKeys { pair -> pair.second == id }.values.forEach { it.payRent() }
+        Logger.logger("賃料の支払い",id)
     }
 
     //住人の取得

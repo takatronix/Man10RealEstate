@@ -64,3 +64,13 @@ create table bookmark
 create index bookmark_uuid_index
     on bookmark (uuid);
 
+create table log
+(
+    id        int auto_increment
+        primary key,
+    date      datetime default CURRENT_TIMESTAMP not null,
+    player    varchar(16)                        not null,
+    uuid      varchar(36)                        not null,
+    region_id int                                null,
+    log       varchar(256)                       null
+);

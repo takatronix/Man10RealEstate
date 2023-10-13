@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import red.man10.realestate.Plugin
+import red.man10.realestate.util.Logger
 import red.man10.realestate.util.Utility
 import java.io.File
 import java.io.FileReader
@@ -18,6 +19,8 @@ class City {
         val cityData = ConcurrentHashMap<String, City>()
         private val gson = Gson()
         fun asyncLoad(){
+
+            Logger.logger("都市の読み込み開始")
 
             Plugin.async.execute {
                 cityData.clear()
@@ -48,10 +51,14 @@ class City {
 
                     }catch (e: IOException){
                         Bukkit.getLogger().info(e.message)
+                        Logger.logger("エラー都市:${file.name}")
                     }catch (e:java.lang.Exception){
                         Bukkit.getLogger().info("Error")
+                        Logger.logger("エラー都市:${file.name}")
                     }
                 }
+
+                Logger.logger("都市の読み込み完了")
             }
         }
 
@@ -67,7 +74,7 @@ class City {
         fun payTax(){
             val rgList = Region.regionData.values
 
-            Bukkit.getLogger().warning("税金の支払いを行います")
+            Logger.logger("税金の徴収開始")
 
             for (rg in rgList){
                 if (rg.taxStatus == Region.TaxStatus.FREE || rg.ownerUUID == null){
@@ -82,7 +89,7 @@ class City {
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*Plugin.penalty,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
 //                        rg.asyncDelete()
-                        Bukkit.getLogger().info("ID:${rg.id} 警告後の滞納のため土地を初期化")
+                        Logger.logger("税金未払いで土地を初期化",rg.id)
                         rg.init()
                         Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                         continue
@@ -93,17 +100,19 @@ class City {
                             "Man10RealEstate Tax","税金の支払い")){
                         rg.taxStatus = Region.TaxStatus.WARN
                         rg.asyncSave()
+                        Logger.logger("税金未払いで土地を警告状態に変更",rg.id)
                         Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                         continue
                     }
                 }
 
                 rg.taxStatus = Region.TaxStatus.SUCCESS
+                Logger.logger("税金支払い成功",rg.id)
                 Bukkit.getLogger().info("ID:${rg.id} Status:${rg.taxStatus} Tax:${amount}")
                 rg.asyncSave()
             }
 
-            Bukkit.getLogger().warning("税金の支払い完了")
+            Logger.logger("税金の徴収完了")
         }
 
         fun getTax(rgID:Int):Double{
@@ -179,6 +188,8 @@ class City {
 
                 writer.write(jsonStr)
                 writer.close()
+
+                Logger.logger("都市の作成/設定:${name}")
             }catch (e:IOException){
                 Bukkit.getLogger().info(e.message)
                 Bukkit.getLogger().info(e.stackTraceToString())
@@ -192,10 +203,12 @@ class City {
             try {
                 val file = File("${Plugin.plugin.dataFolder}/${name}.json")
                 file.delete()
+                Logger.logger("都市の削除:${name}")
 
             }catch (e:IOException){
                 Bukkit.getLogger().info(e.message)
                 Bukkit.getLogger().info(e.stackTraceToString())
+                Logger.logger("都市の削除失敗:${name}")
             }
 
         }

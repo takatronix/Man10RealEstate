@@ -635,7 +635,7 @@ object Command:CommandExecutor {
                             return@execute
 
                         }else if (args[1] == "rg"){
-                            id = Region.create(startPosition,endPosition,args[2],amount,sender.location)
+                            id = Region.create(startPosition,endPosition,args[2],amount,sender.location,sender)
                         }
 
                         if (id == -1){
