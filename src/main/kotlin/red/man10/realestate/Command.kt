@@ -1,6 +1,8 @@
 package red.man10.realestate
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.event.ClickEvent
 import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -15,6 +17,7 @@ import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.plugin
+import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Utility.format
 import red.man10.realestate.Utility.sendClickMessage
 import red.man10.realestate.Utility.sendMessage
@@ -25,6 +28,7 @@ import red.man10.realestate.region.Region.formatStatus
 import red.man10.realestate.region.Region.getUsers
 import red.man10.realestate.region.User
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class AddUserData{
@@ -44,6 +48,7 @@ object Command:CommandExecutor {
     private val userMap = HashMap<Player,AddUserData>()
     // buycheck -> buyコマンドへの確認キー playerUUID, pair<landId, keyUUID>
     val buyConfirmationKey = HashMap<UUID, Pair<Int, UUID>>()
+    val ownerConfirmation = HashMap<UUID,Int>()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -292,12 +297,38 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    Region.setOwner(id,p)
+//                    Region.setOwner(id,p)
 
-                    sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
+
+                    sendMessage(sender,"現在承認待ち・・・")
+
+                    sendMessage(p,"§a§l土地のオーナー変更の依頼が来ています")
+                    sendMessage(p,"§a§l現在のオーナー:${sender.name}")
+                    sendMessage(p,"§a§lID:${id}")
+//                    sendMessage(p,"§a§l都市名:${city.name}")
+//                    sendMessage(p,"§a§l税額:${City.getTax(id)}円")
+                    p.sendMessage(text(prefix).append(text("§b§l§n[変更を受け入れる]").clickEvent(ClickEvent.runCommand("mre acceptowner"))))
+
+                    ownerConfirmation[p.uniqueId] = id
 
                     return true
 
+                }
+
+                "acceptowner" ->{
+                    if (!hasPermission(sender,USER))return false
+
+                    val id = ownerConfirmation[sender.uniqueId]
+
+                    if (id==null){
+                        sendMessage(sender,"§a§l承認待ちの依頼はありません")
+                        return true
+                    }
+
+                    ownerConfirmation.remove(sender.uniqueId)
+                    Region.setOwner(id,sender)
+
+                    sendMessage(sender,"§a§l${id}の土地のオーナーになりました")
                 }
 
                 "settp" ->{
@@ -589,7 +620,7 @@ object Command:CommandExecutor {
                 "wand" ->{
                     val wand = ItemStack(Material.STICK)
                     val meta = wand.itemMeta
-                    meta.displayName(Component.text(WAND_NAME))
+                    meta.displayName(text(WAND_NAME))
                     wand.itemMeta = meta
                     sender.inventory.addItem(wand)
                     return true
