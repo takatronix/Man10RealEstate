@@ -18,6 +18,7 @@ import red.man10.realestate.Plugin.Companion.bank
 import red.man10.realestate.Plugin.Companion.disableWorld
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.prefix
+import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.Utility.format
 import red.man10.realestate.Utility.sendClickMessage
 import red.man10.realestate.Utility.sendMessage
@@ -329,6 +330,42 @@ object Command:CommandExecutor {
                     Region.setOwner(id,sender)
 
                     sendMessage(sender,"§a§l${id}の土地のオーナーになりました")
+                }
+
+                "init" -> {
+                    if (!hasPermission(sender, USER))return false
+
+                    if (args.size < 2)return false
+
+                    val id = args[1].toIntOrNull()
+
+                    if (id == null){
+                        sendMessage(sender,"§c§l数字を入力してください")
+                        return true
+                    }
+                    val rg = Region.regionData[id]
+
+                    if (rg==null){
+                        sendMessage(sender,"§c§l指定したIDの土地は存在しません")
+                        return true
+                    }
+                    val city = City.get(City.where(rg.teleport)!!)!!
+
+                    if (rg.ownerUUID != sender.uniqueId){
+                        sendMessage(sender,"§c§l持ち主以外は使用できません")
+                        return false
+                    }
+
+                    val tax = City.getTax(city.name,id)
+
+                    if (!vault.withdraw(sender.uniqueId,tax)){
+                        sendMessage(sender,"§c§l所持金が足りません！(必要額:${format(tax)}円)")
+                        return false
+                    }
+
+                    Region.initRegion(id,city.defaultPrice)
+
+                    sendMessage(sender,"§c§l手放しました")
                 }
 
                 "settp" ->{
