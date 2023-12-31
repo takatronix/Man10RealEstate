@@ -378,12 +378,12 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    val tax = City.getTax(city.name,id)
-
-                    if (!vault.withdraw(sender.uniqueId,tax)){
-                        sendMessage(sender,"§c§l所持金が足りません！(必要額:${format(tax)}円)")
-                        return false
-                    }
+//                    val tax = City.getTax(city.name,id)
+//
+//                    if (!vault.withdraw(sender.uniqueId,tax)){
+//                        sendMessage(sender,"§c§l所持金が足りません！(必要額:${format(tax)}円)")
+//                        return false
+//                    }
 
                     Region.initRegion(id,city.defaultPrice)
 
