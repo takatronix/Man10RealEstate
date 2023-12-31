@@ -1,6 +1,5 @@
 package red.man10.realestate
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent
 import org.apache.commons.lang.math.NumberUtils
@@ -29,7 +28,6 @@ import red.man10.realestate.region.Region.formatStatus
 import red.man10.realestate.region.Region.getUsers
 import red.man10.realestate.region.User
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class AddUserData{
@@ -308,7 +306,9 @@ object Command:CommandExecutor {
                     sendMessage(p,"§a§lID:${id}")
 //                    sendMessage(p,"§a§l都市名:${city.name}")
 //                    sendMessage(p,"§a§l税額:${City.getTax(id)}円")
-                    p.sendMessage(text(prefix).append(text("§b§l§n[変更を受け入れる]").clickEvent(ClickEvent.runCommand("mre acceptowner"))))
+                    p.sendMessage(text(prefix).append(text("§b§l§n[受け入れる]")
+                        .clickEvent(ClickEvent.runCommand("/mre acceptowner"))).append(text(" §c§l[断る]")
+                            .clickEvent(ClickEvent.runCommand("/mre denyowner"))))
 
                     ownerConfirmation[p.uniqueId] = id
 
@@ -326,10 +326,32 @@ object Command:CommandExecutor {
                         return true
                     }
 
+                    val rg = Region.get(id)?:return true
+                    val owner = Bukkit.getOfflinePlayer(rg.ownerUUID!!)
+                    owner.player?.let { sendMessage(it,"§a§l承認されました") }
+                    sendMessage(sender,"§a§l${id}の土地のオーナーになりました")
+
                     ownerConfirmation.remove(sender.uniqueId)
                     Region.setOwner(id,sender)
+                }
 
-                    sendMessage(sender,"§a§l${id}の土地のオーナーになりました")
+                "denyowner" ->{
+                    if (!hasPermission(sender,USER))return false
+
+                    val id = ownerConfirmation[sender.uniqueId]
+
+                    if (id==null){
+                        sendMessage(sender,"§a§l承認待ちの依頼はありません")
+                        return true
+                    }
+
+                    val rg = Region.get(id)?:return true
+                    val owner = Bukkit.getOfflinePlayer(rg.ownerUUID!!)
+                    owner.player?.let { sendMessage(it,"§c§l承認がキャンセルされました") }
+                    sendMessage(sender,"§a§l${id}のオーナー譲渡を断りました")
+
+                    ownerConfirmation.remove(sender.uniqueId)
+
                 }
 
                 "init" -> {
