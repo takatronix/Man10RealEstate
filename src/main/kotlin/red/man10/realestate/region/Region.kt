@@ -21,8 +21,9 @@ class Region {
 
         fun formatStatus(status:String):String{
             return when(status){
-                "Protected" -> "保護されています"
+                "Protected" -> "保護"
                 "OnSale" -> "販売中"
+                "WARN" -> "税金未払い"
                 "Lock" -> "ロック(使用不可)"
                 "Free" -> "フリー"
                 else -> status
