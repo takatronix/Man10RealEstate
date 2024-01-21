@@ -77,9 +77,9 @@ class City {
 
                 if (rg.taxStatus == "WARN"){
                     //ここで支払い失敗したら土地を手放す
-                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*Plugin.penalty,
+                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
-                        rg.asyncDelete()
+                        rg.init()
                         continue
                     }
                     rg.taxStatus = "SUCCESS"
@@ -90,7 +90,7 @@ class City {
                     //ここでは渓谷のみ
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い")){
-                        rg.status = "WARN"
+                        rg.taxStatus = "WARN"
                         rg.asyncSave()
                         continue
                     }
@@ -104,6 +104,7 @@ class City {
             Bukkit.getLogger().warning("税金の支払い完了")
         }
 
+        //税額を取得 ペナルティなども考慮済みの額
         fun getTax(rgID:Int):Double{
             val rg = Region.regionData[rgID]?:return 0.0
             if (rg.taxStatus == "FREE")return 0.0

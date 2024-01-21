@@ -214,6 +214,10 @@ object Event :Listener{
         sendMessage(p,"§aステータス:${Region.formatStatus(rg.status)}")
         sendMessage(p,"§aオーナー:${rg.ownerName}")
         sendMessage(p,"§a値段:${format(rg.price)}")
+        sendMessage(p,"§a税額:${format(City.getTax(id))}")
+        if (rg.taxStatus == "WARN"){
+            sendMessage(p,"§c§l税金が未払いです")
+        }
         sendMessage(p,"§a==========================================")
 
         sendClickMessage(p,"§d§lブックマークする！＝＞[ブックマーク！]","mre bookmark $id","ブックマークをすると、/mreメニューから テレポートをすることができます")

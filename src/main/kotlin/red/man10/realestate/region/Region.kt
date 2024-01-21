@@ -23,7 +23,6 @@ class Region {
             return when(status){
                 "Protected" -> "保護"
                 "OnSale" -> "販売中"
-                "WARN" -> "税金未払い"
                 "Lock" -> "ロック(使用不可)"
                 "Free" -> "フリー"
                 else -> status
@@ -58,11 +57,19 @@ class Region {
                     rg.name = rs.getString("name")
                     rg.world = rs.getString("world")
                     rg.server = rs.getString("server")
-                    if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
-                        rg.ownerUUID = null
-                    }else{
-                        rg.ownerUUID = UUID.fromString(rs.getString("owner_uuid"))
+
+                    val uuid = rs.getString("owner_uuid")
+
+                    if (uuid!=null && uuid!="null"){
+                        rg.ownerUUID = UUID.fromString(uuid)
+                        rg.ownerName = Bukkit.getOfflinePlayer(UUID.fromString(uuid)).name
                     }
+
+//                    if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
+//                        rg.ownerUUID = null
+//                    }else{
+//                        rg.ownerUUID = UUID.fromString(rs.getString("owner_uuid"))
+//                    }
                     rg.status = rs.getString("status")
                     rg.taxStatus = rs.getString("tax_status")
                     rg.price = rs.getDouble("price")
