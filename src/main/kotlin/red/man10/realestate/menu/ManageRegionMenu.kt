@@ -27,15 +27,15 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         statusButton.title("§e土地のステータスを設定する")
         statusButton.lore(mutableListOf("§f現在のステータス:${Region.formatStatus(rg.status)}"))
         statusButton.setClickAction{
-            if (rg.status == "Protected"){
-                rg.status = "OnSale"
+            if (rg.status == Region.Status.PROTECTED){
+                rg.status = Region.Status.ON_SALE
                 rg.asyncSave()
                 sendMessage(p,"§e土地のステータスを販売中に変更しました")
                 ManageRegionMenu(p,id).open()
                 return@setClickAction
             }
-            if (rg.status == "OnSale"){
-                rg.status = "Protected"
+            if (rg.status == Region.Status.ON_SALE){
+                rg.status = Region.Status.PROTECTED
                 rg.asyncSave()
                 sendMessage(p,"§e土地のステータスを保護に変更しました")
                 ManageRegionMenu(p,id).open()

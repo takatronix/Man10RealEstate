@@ -107,7 +107,7 @@ class City {
         //税額を取得 ペナルティなども考慮済みの額
         fun getTax(rgID:Int):Double{
             val rg = Region.regionData[rgID]?:return 0.0
-            if (rg.taxStatus == "FREE")return 0.0
+            if (rg.taxStatus == Region.TaxStatus.FREE)return 0.0
             val city = where(rg.teleport)?:return 0.0
 
             if (rg.data.tax != 0.0) return rg.data.tax
@@ -115,7 +115,7 @@ class City {
             val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first) + 1
             val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third) + 1
 
-            return if (rg.taxStatus == "WARN") width * height * city.tax * Plugin.penalty else width * height * city.tax
+            return if (rg.taxStatus == Region.TaxStatus.WARN) width * height * city.tax * Plugin.penalty else width * height * city.tax
         }
     }
 

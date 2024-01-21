@@ -17,7 +17,6 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
-import java.awt.Menu
 import java.util.*
 
 /**
@@ -160,7 +159,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             }
         }
 
-        fun fromItemStack(item:ItemStack): Button {
+        fun setIcon(item:ItemStack): Button {
             buttonItem = item.clone()
             val meta = buttonItem.itemMeta
             meta.persistentDataContainer.set(NamespacedKey.fromString("key")!!

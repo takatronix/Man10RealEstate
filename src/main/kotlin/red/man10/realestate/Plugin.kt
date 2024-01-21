@@ -10,6 +10,7 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.region.*
+import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MenuFramework
 import red.man10.realestate.util.MySQLManager
 import java.time.DayOfWeek
@@ -57,15 +58,17 @@ class Plugin : JavaPlugin(), Listener {
         loadConfig()
         MySQLManager.mysqlQueue(this)
 
+        Logger.logger("プラグイン起動")
+
         City.asyncLoad()
         Region.asyncLoad()
         User.asyncLoad()
 
         runDailyTask()
-
     }
 
     override fun onDisable() { // Plugin shutdown logic
+        Logger.logger("プラグイン終了")
         async.shutdown()
     }
 
@@ -94,20 +97,20 @@ class Plugin : JavaPlugin(), Listener {
 
                 //日変更
                 if (isChangeDay){
-                    Bukkit.getLogger().info("日付の変更を検知！")
+                    Logger.logger("日付の変更を検知")
                     lastDay = LocalDateTime.now()
                     Region.regionData.filterValues { it.span == 2 }.values.forEach { it.payRent() }
                 }
 
                 //週変更(月曜日)
                 if (isChangeDay && now.dayOfWeek == DayOfWeek.MONDAY){
-                    Bukkit.getLogger().info("週の変更を検知！")
+                    Logger.logger("週の変更を検知")
                     Region.regionData.filterValues { it.span == 1 }.values.forEach { it.payRent() }
                 }
 
                 //月変更
                 if (isChangeMonth){
-                    Bukkit.getLogger().info("月の変更を検知！")
+                    Logger.logger("月の変更を検知")
                     lastMonth = LocalDateTime.now()
                     Region.regionData.filterValues { it.span == 0 }.values.forEach { it.payRent() }
                     City.payTax()

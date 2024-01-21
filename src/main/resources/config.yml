@@ -6,3 +6,5 @@ mysql:
   db: man10realestate
 disableWorld:
   -
+containerAmount: 24
+server: paper

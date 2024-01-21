@@ -46,9 +46,11 @@ object Command:CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
-        if (sender !is Player)return false
+//        if (sender !is Player)return false
 
         if (label == "mre"){
+
+            if (sender !is Player)return false
 
             if (args.isEmpty()){
 
@@ -88,7 +90,7 @@ object Command:CommandExecutor {
 
                     val rg = Region.regionData[id]?:return false
 
-                    if (rg.status != "OnSale"){
+                    if (rg.status != Region.Status.ON_SALE){
                         sendMessage(sender,"§c§lこの土地は販売されていません！")
                         return false
                     }
@@ -386,10 +388,10 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,OP) && status=="Lock"){ return true }
 
-                    rg.status = status
+                    rg.status = Region.Status.valueOf(status)
                     rg.asyncSave()
 
-                    sendMessage(sender,"§a§l${id}の土地の状態を${formatStatus(status)}に変更しました")
+                    sendMessage(sender,"§a§l${id}の土地の状態を${formatStatus(rg.status)}に変更しました")
                     return true
 
                 }
@@ -543,7 +545,7 @@ object Command:CommandExecutor {
 
         if (label == "mreop"){
 
-            if (!hasPermission(sender,OP))return false
+            if (sender is Player && !hasPermission(sender,OP))return false
 
             if (args.isEmpty()){
 
@@ -554,8 +556,12 @@ object Command:CommandExecutor {
                     §e§l/mreop delete <rg/city> <id> : 指定idのリージョンを削除します
                     §e§l/mreop reload : 再読み込みをします
                     §e§l/mreop where : 現在地点がどのリージョンが確認します
-                    §e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します
+                    §e§l/mreop reset <rg/city> <id> : 指定idのrg/cityの範囲を再指定します
                     §e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します
+                    §e§l/mreop tax <city> <tax>: 指定都市の税額を変更します
+                    §e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します
+                    §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
+                    §e§l/mreop init <id> <price> : 指定リージョンを初期化する
                     §e§l/mreop starttax : 手動で税金を徴収する
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
                     §e§l/mreop editcity <city> : 指定都市の編集をする"
@@ -570,6 +576,8 @@ object Command:CommandExecutor {
                 //mreop create city <name> <tax>
                 //mreop create rg <name> <tax>
                 "create" ->{
+
+                    if (sender !is Player)return false
 
                     if (args.size != 4)return false
 
@@ -628,7 +636,7 @@ object Command:CommandExecutor {
                             return@execute
 
                         }else if (args[1] == "rg"){
-                            id = Region.create(startPosition,endPosition,args[2],amount,sender.location)
+                            id = Region.create(startPosition,endPosition,args[2],amount,sender.location,sender)
                         }
 
                         if (id == -1){
@@ -742,10 +750,14 @@ object Command:CommandExecutor {
                 }
 
                 "wand" ->{
+
+                    if (sender !is Player)return false
+
                     val wand = ItemStack(Material.STICK)
                     val meta = wand.itemMeta
                     meta.displayName(text(WAND_NAME))
                     wand.itemMeta = meta
+                    sendMessage(sender,"範囲指定棒の取得")
                     sender.inventory.addItem(wand)
                     return true
 
@@ -794,6 +806,8 @@ object Command:CommandExecutor {
 
                 "where" ->{
 
+                    if (sender !is Player)return false
+
                     val loc = sender.location
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
@@ -834,6 +848,7 @@ object Command:CommandExecutor {
 
                 //都市の範囲の再設定
                 "reset" ->{//mreop reset city id
+                    if (sender !is Player)return false
 
                     if (args.size != 3)return false
 
@@ -959,6 +974,8 @@ object Command:CommandExecutor {
 
                 "search" ->{
 
+                    if (sender !is Player)return false
+
                     val uuid = Bukkit.getPlayer(args[1])?.uniqueId
 
                     if (uuid==null){
@@ -1010,20 +1027,19 @@ object Command:CommandExecutor {
                     val id = args[1].toIntOrNull()?:return false
 
                     val rg = Region.regionData[id]?:return false
-                    if (rg.taxStatus == "FREE"){
-                        rg.taxStatus = "SUCCESS"
+                    if (rg.taxStatus == Region.TaxStatus.FREE){
+                        rg.taxStatus = Region.TaxStatus.SUCCESS
                     }else{
-                        rg.taxStatus = "FREE"
+                        rg.taxStatus = Region.TaxStatus.FREE
                     }
 
                     rg.asyncSave()
 
-                    if (rg.taxStatus == "FREE"){
+                    if (rg.taxStatus == Region.TaxStatus.FREE){
                         sendMessage(sender,"§a§l$id の税金を免除するようにしました")
                     }else{
                         sendMessage(sender,"§a§l$id の税金を免除を解除しました")
                     }
-
 
                     return true
                 }
@@ -1148,7 +1164,7 @@ object Command:CommandExecutor {
 
         val data = Region.regionData[id]?:return false
 
-        if (data.status == "Lock")return false
+        if (data.status == Region.Status.LOCK)return false
 
         if (data.ownerUUID == p.uniqueId)return true
 

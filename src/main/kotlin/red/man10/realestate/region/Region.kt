@@ -4,9 +4,9 @@ import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import org.bukkit.scoreboard.Score
 import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.Plugin
+import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import java.util.*
@@ -19,13 +19,13 @@ class Region {
         val regionData = ConcurrentHashMap<Int, Region>()
         val gson = Gson()
 
-        fun formatStatus(status:String):String{
+        fun formatStatus(status: Status):String{
             return when(status){
-                "Protected" -> "保護"
-                "OnSale" -> "販売中"
-                "Lock" -> "ロック(使用不可)"
-                "Free" -> "フリー"
-                else -> status
+                Status.PROTECTED -> "保護されています"
+                Status.ON_SALE -> "販売中"
+                Status.LOCK -> "ロック(使用不可)"
+                Status.FREE -> "フリー"
+                else -> status.value
             }
         }
 
@@ -39,6 +39,8 @@ class Region {
         }
 
         fun asyncLoad(){
+
+            Logger.logger("土地の読み込み開始")
 
             Plugin.async.execute {
                 regionData.clear()
@@ -64,14 +66,8 @@ class Region {
                         rg.ownerUUID = UUID.fromString(uuid)
                         rg.ownerName = Bukkit.getOfflinePlayer(UUID.fromString(uuid)).name
                     }
-
-//                    if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
-//                        rg.ownerUUID = null
-//                    }else{
-//                        rg.ownerUUID = UUID.fromString(rs.getString("owner_uuid"))
-//                    }
-                    rg.status = rs.getString("status")
-                    rg.taxStatus = rs.getString("tax_status")
+                    rg.status = Status.valueOf(rs.getString("status"))
+                    rg.taxStatus = TaxStatus.valueOf(rs.getString("tax_status"))
                     rg.price = rs.getDouble("price")
 
                     rg.span = rs.getInt("span")
@@ -101,8 +97,11 @@ class Region {
                     regionData[id] = rg
 
                     if (Bukkit.getWorld(rg.world) == null){
-                        rg.asyncDelete()
-                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
+                        Logger.logger("存在しないワールドの土地",id)
+//                        rg.asyncDelete()
+//                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
+                    }else {
+                        regionData[id] = rg
                     }
                 }
                 rs.close()
@@ -111,6 +110,7 @@ class Region {
         }
 
 
+        //ログイン時にスコアを確認
         fun asyncLoginProcess(p:Player){
             Plugin.async.execute {
                 val data = regionData.filterValues { it.ownerUUID == p.uniqueId }
@@ -118,15 +118,15 @@ class Region {
                 data.forEach {
                     val city = City.where(it.value.teleport)!!
                     if (city.ownerScore>score){
-                        it.value.status = "Lock"
+                        it.value.status = Status.LOCK
                     }else{
-                        it.value.status = "Protected"
+                        it.value.status = Status.PROTECTED
                     }
                 }
             }
         }
 
-        fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location):Int{
+        fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location,p:Player):Int{
 
             val data = RegionData(false,0.0,0.0)
 
@@ -183,6 +183,8 @@ class Region {
 
             regionData[id] = rg
 
+            Logger.logger(p,"土地を作成",id)
+
             return id
 
         }
@@ -192,8 +194,8 @@ class Region {
     var name = "RegionName"
     var ownerUUID : UUID? = null
     var ownerName : String? = if (ownerUUID == null) "サーバー" else Bukkit.getOfflinePlayer(ownerUUID!!).name
-    var status = "OnSale" //Lock,Danger,Free,OnSale,Protected
-    var taxStatus = "SUCCESS" //SUCCESS,WARN,FREE
+    var status : Status = Status.ON_SALE //Lock,Danger,Free,OnSale,Protected
+    var taxStatus : TaxStatus = TaxStatus.SUCCESS //SUCCESS,WARN,FREE
 
     var world = "builder"
     var server = "server"
@@ -246,7 +248,7 @@ class Region {
             return
         }
 
-        if (status != "OnSale"){
+        if (status != Status.ON_SALE){
             Utility.sendMessage(p, "§c§lこの土地は販売されていません！")
             return
         }
@@ -272,17 +274,20 @@ class Region {
 
         ownerUUID = p.uniqueId
         ownerName = p.name
-        status = "Protected"
+        status = Status.PROTECTED
         asyncSave()
+
+        Logger.logger(p,"土地を購入",id)
 
         Utility.sendMessage(p, "§a§l土地の購入成功！")
     }
 
-    fun init(status: String = "OnSale"){
+    fun init(status: Status = Status.ON_SALE){
         val city = City.where(teleport)?:return
         ownerUUID = null
         price = city.defaultPrice
         this.status = status
+        this.taxStatus = TaxStatus.SUCCESS
         User.asyncDeleteFromRegion(id)
         asyncSave()
     }
@@ -290,11 +295,18 @@ class Region {
     fun asyncDelete(){
         MySQLManager.mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
         User.asyncDeleteFromRegion(id)
+        Logger.logger("土地を削除",id)
     }
 
     //賃料の支払い
     fun payRent(){
         User.userMap.filterKeys { pair -> pair.second == id }.values.forEach { it.payRent() }
+        Logger.logger("賃料の支払い",id)
+    }
+
+    //住人の取得
+    fun getUser(): List<User> {
+        return User.fromRegion(id)
     }
 
     data class RegionData(
@@ -302,4 +314,18 @@ class Region {
         var defaultPrice : Double,
         var tax : Double
     )
+
+    enum class TaxStatus(val value : String){
+        SUCCESS("SUCCESS"),
+        WARN("WARN"),
+        FREE("FREE")
+    }
+
+    enum class Status(val value : String){
+        ON_SALE("OnSale"),
+        PROTECTED("Protected"),
+        LOCK("Lock"),
+        FREE("Free"),
+        DANGER("Danger")
+    }
 }

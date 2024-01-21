@@ -222,7 +222,7 @@ object Event :Listener{
 
         sendClickMessage(p,"§d§lブックマークする！＝＞[ブックマーク！]","mre bookmark $id","ブックマークをすると、/mreメニューから テレポートをすることができます")
 
-        if (rg.status == "OnSale"){
+        if (rg.status == Region.Status.ON_SALE){
             sendClickMessage(p,"§a§l§n[土地を買う！]","mre buyconfirm $id","§e§l値段:${format(rg.price)}")
         }
 
@@ -429,11 +429,11 @@ object Event :Listener{
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
-                if (rg.status == "Lock")return false
+                if (rg.status == Region.Status.LOCK)return false
                 if (rg.ownerUUID == p.uniqueId)return true
-                if (rg.status == "Danger")return true
+                if (rg.status == Region.Status.DANGER)return true
 
-                if (perm != BLOCK &&rg.status == "Free")return true
+                if (perm != BLOCK &&rg.status == Region.Status.FREE)return true
 
                 val data = User.get(p,id) ?:return false
 
