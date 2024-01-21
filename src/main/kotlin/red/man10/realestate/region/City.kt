@@ -70,31 +70,31 @@ class City {
             Bukkit.getLogger().warning("税金の支払いを行います")
 
             for (rg in rgList){
-                if (rg.taxStatus == "FREE" || rg.ownerUUID == null)continue
+                if (rg.taxStatus == Region.TaxStatus.FREE || rg.ownerUUID == null)continue
                 val amount = getTax(rg.id)
 
-                if (rg.taxStatus == "FREE")continue
+                if (rg.taxStatus == Region.TaxStatus.FREE)continue
 
-                if (rg.taxStatus == "WARN"){
+                if (rg.taxStatus == Region.TaxStatus.WARN){
                     //ここで支払い失敗したら土地を手放す
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
                         rg.init()
                         continue
                     }
-                    rg.taxStatus = "SUCCESS"
+                    rg.taxStatus = Region.TaxStatus.SUCCESS
                     rg.asyncSave()
                     continue
                 }
-                if (rg.taxStatus == "SUCCESS"){
+                if (rg.taxStatus == Region.TaxStatus.SUCCESS){
                     //ここでは渓谷のみ
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い")){
-                        rg.taxStatus = "WARN"
+                        rg.taxStatus = Region.TaxStatus.WARN
                         rg.asyncSave()
                         continue
                     }
-                    rg.taxStatus = "SUCCESS"
+                    rg.taxStatus = Region.TaxStatus.SUCCESS
                     rg.asyncSave()
                     continue
                 }

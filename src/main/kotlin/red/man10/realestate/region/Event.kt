@@ -215,7 +215,7 @@ object Event :Listener{
         sendMessage(p,"§aオーナー:${rg.ownerName}")
         sendMessage(p,"§a値段:${format(rg.price)}")
         sendMessage(p,"§a税額:${format(City.getTax(id))}")
-        if (rg.taxStatus == "WARN"){
+        if (rg.taxStatus == Region.TaxStatus.WARN){
             sendMessage(p,"§c§l税金が未払いです")
         }
         sendMessage(p,"§a==========================================")
