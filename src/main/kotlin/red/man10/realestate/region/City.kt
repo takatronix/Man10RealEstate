@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import red.man10.realestate.Plugin
+import red.man10.realestate.util.Logger
 import red.man10.realestate.util.Utility
 import java.io.File
 import java.io.FileReader
@@ -79,6 +80,7 @@ class City {
                     //ここで支払い失敗したら土地を手放す
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
+                        Logger.logger(rg.ownerUUID!!,"税金の支払い失敗 初期化",rg.id)
                         rg.init()
                         continue
                     }
@@ -90,6 +92,7 @@ class City {
                     //ここでは渓谷のみ
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い")){
+                        Logger.logger(rg.ownerUUID!!,"税金の支払い失敗",rg.id)
                         rg.taxStatus = Region.TaxStatus.WARN
                         rg.asyncSave()
                         continue
