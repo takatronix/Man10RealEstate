@@ -76,23 +76,29 @@ class City {
                 if (rg.taxStatus == "FREE")continue
 
                 if (rg.taxStatus == "WARN"){
+                    //ここで支払い失敗したら土地を手放す
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount*Plugin.penalty,
                             "Man10RealEstate Tax","税金の支払い(延滞)")){
                         rg.asyncDelete()
                         continue
                     }
+                    rg.taxStatus = "SUCCESS"
+                    rg.asyncSave()
+                    continue
                 }
                 if (rg.taxStatus == "SUCCESS"){
+                    //ここでは渓谷のみ
                     if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                             "Man10RealEstate Tax","税金の支払い")){
                         rg.status = "WARN"
                         rg.asyncSave()
                         continue
                     }
+                    rg.taxStatus = "SUCCESS"
+                    rg.asyncSave()
+                    continue
                 }
 
-                rg.taxStatus = "SUCCESS"
-                rg.asyncSave()
             }
 
             Bukkit.getLogger().warning("税金の支払い完了")
