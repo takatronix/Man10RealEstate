@@ -556,13 +556,10 @@ object Command:CommandExecutor {
                     §e§l/mreop where : 現在地点がどのリージョンが確認します
                     §e§l/mreop reset <rg/city> <id> : 指定idのリージョンを再指定します
                     §e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します
-                    §e§l/mreop tax <id> <tax>: 指定都市の税額を変更します
-                    §e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します
-                    §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
-                    §e§l/mreop init <id> <price> : 指定リージョンを初期化する
                     §e§l/mreop starttax : 手動で税金を徴収する
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
-                    §e§l/mreop maxuser <id>: 都市の住める上限を設定する
+                    §e§l/mreop editcity <city> : 指定都市の編集をする"
+                    §e§l/mreop editrg <city> : 指定リージョンの編集をする"
                 """.trimIndent())
 
                 return true
