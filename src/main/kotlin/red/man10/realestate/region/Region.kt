@@ -9,6 +9,7 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,7 +22,7 @@ class Region {
 
         fun formatStatus(status: Status):String{
             return when(status){
-                Status.PROTECTED -> "保護されています"
+                Status.PROTECTED -> "保護"
                 Status.ON_SALE -> "販売中"
                 Status.LOCK -> "ロック(使用不可)"
                 Status.FREE -> "フリー"
@@ -66,8 +67,17 @@ class Region {
                         rg.ownerUUID = UUID.fromString(uuid)
                         rg.ownerName = Bukkit.getOfflinePlayer(UUID.fromString(uuid)).name
                     }
-                    rg.status = Status.valueOf(rs.getString("status"))
-                    rg.taxStatus = TaxStatus.valueOf(rs.getString("tax_status"))
+                    try {
+                        rg.status = Status.valueOf(rs.getString("status"))
+                    }catch (e:Exception){
+                        Bukkit.getLogger().info("$id ${rs.getString("status")}")
+                    }
+                    try {
+                        rg.taxStatus = TaxStatus.valueOf(rs.getString("tax_status"))
+                    }catch (e:Exception){
+                        Bukkit.getLogger().info("$id ${rs.getString("tax_status")}")
+                    }
+
                     rg.price = rs.getDouble("price")
 
                     rg.span = rs.getInt("span")
@@ -285,6 +295,7 @@ class Region {
     fun init(status: Status = Status.ON_SALE){
         val city = City.where(teleport)?:return
         ownerUUID = null
+        ownerName = null
         price = city.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
