@@ -112,6 +112,7 @@ class User(val uuid: UUID,val regionId:Int) {
 
     fun asyncDelete(){
         MySQLManager.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$regionId AND `uuid`='${uuid}';")
+        userMap.remove(Pair(uuid,regionId))
     }
 
     fun payRent(){
