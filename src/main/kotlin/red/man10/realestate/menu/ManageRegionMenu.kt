@@ -60,7 +60,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         teleportButton.setClickAction{
 //            rg.teleport = p.location
 //            rg.asyncSave()
-            p.performCommand("/mre settp ${id}")
+            p.performCommand("mre settp ${id}")
             p.closeInventory()
 //            sendMessage(p,"§a§l設定完了")
         }
@@ -86,7 +86,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         val initButton = Button(Material.BARRIER)
         initButton.title("§c§l土地を手放す(一月分の税金が必要)")
         initButton.setClickAction{
-            p.performCommand("/mre confirminit $id")
+            p.performCommand("mre confirminit $id")
             p.closeInventory()
         }
         setButton(initButton,24)
