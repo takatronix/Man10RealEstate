@@ -53,9 +53,10 @@ class User(val uuid: UUID,val regionId:Int) {
             }
         }
 
-        fun asyncDeleteFromRegion(id: Int){
-            MySQLManager.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$id;")
-            fromRegion(id).forEach { userMap.remove(Pair(it.uuid,it.regionId)) }
+        //指定リージョンの全ユーザーを削除
+        fun asyncDeleteAllRegionUser(regionId: Int){
+            MySQLManager.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$regionId;")
+            fromRegion(regionId).forEach { userMap.remove(Pair(it.uuid,it.regionId)) }
         }
 
         fun asyncLoginProcess(p:Player){

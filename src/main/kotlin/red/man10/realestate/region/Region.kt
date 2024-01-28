@@ -299,13 +299,13 @@ class Region {
         price = city.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
-        User.asyncDeleteFromRegion(id)
+        User.asyncDeleteAllRegionUser(id)
         asyncSave()
     }
 
     fun asyncDelete(){
         MySQLManager.mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
-        User.asyncDeleteFromRegion(id)
+        User.asyncDeleteAllRegionUser(id)
         Logger.logger("土地を削除",id)
     }
 
