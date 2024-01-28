@@ -354,7 +354,7 @@ object Command:CommandExecutor {
                     val rent = args[3].toDoubleOrNull()
                     val p = Bukkit.getPlayer(args[2])
 
-                    if (rent == null || rent< 0.0){
+                    if (rent == null || rent< 0.0 || rent == -0.0){
                         sendMessage(sender,"金額の設定に問題があります！")
                         return true
                     }
@@ -411,7 +411,7 @@ object Command:CommandExecutor {
 
                     val price = args[2].toDoubleOrNull()
 
-                    if (price==null || price <0.0){
+                    if (price==null || price <0.0 || price == -0.0){
                         sendMessage(sender,"§c§l金額の設定に問題があります！")
                         return false
                     }
