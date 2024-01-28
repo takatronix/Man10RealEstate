@@ -50,7 +50,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         priceButton.lore(mutableListOf("§e現在の値段:${Utility.format(rg.price)}"))
         priceButton.setClickAction{
             p.sendMessage(text(Plugin.prefix).append(text("§b§l§n[ここをクリック]")
-                .clickEvent(ClickEvent.suggestCommand("mre setprice $id "))))
+                .clickEvent(ClickEvent.suggestCommand("/mre setprice $id "))))
             p.closeInventory()
         }
         setButton(priceButton,4)
@@ -58,10 +58,11 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         val teleportButton = Button(Material.ENDER_PEARL)
         teleportButton.title("§a§l現在地点をテレポートポイントにする")
         teleportButton.setClickAction{
-            rg.teleport = p.location
-            rg.asyncSave()
+//            rg.teleport = p.location
+//            rg.asyncSave()
+            p.performCommand("/mre settp ${id}")
             p.closeInventory()
-            sendMessage(p,"§a§l設定完了")
+//            sendMessage(p,"§a§l設定完了")
         }
         setButton(teleportButton,6)
 
@@ -77,7 +78,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         ownerButton.title("§7土地の持ち主を変える(コマンドを使います)")
         ownerButton.setClickAction{
             p.sendMessage(text(Plugin.prefix).append(text("§b§l§n[ここをクリック]")
-                .clickEvent(ClickEvent.suggestCommand("mre setowner $id "))))
+                .clickEvent(ClickEvent.suggestCommand("/mre setowner $id "))))
             p.closeInventory()
         }
         setButton(ownerButton,22)
@@ -85,7 +86,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         val initButton = Button(Material.BARRIER)
         initButton.title("§c§l土地を手放す(一月分の税金が必要)")
         initButton.setClickAction{
-            p.performCommand("mre confirminit $id")
+            p.performCommand("/mre confirminit $id")
             p.closeInventory()
         }
         setButton(initButton,24)

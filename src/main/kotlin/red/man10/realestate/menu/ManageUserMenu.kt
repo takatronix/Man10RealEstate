@@ -11,7 +11,7 @@ import red.man10.realestate.region.User
 import red.man10.realestate.util.MenuFramework
 import red.man10.realestate.util.Utility.sendMessage
 
-class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, CHEST_SIZE,"${Bukkit.getOfflinePlayer(user.uuid).name}の管理"){
+class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, 9,"${Bukkit.getOfflinePlayer(user.uuid).name}の管理"){
 
     override fun init() {
         val rg = Region.regionData[user.regionId]
@@ -19,7 +19,7 @@ class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, CHEST_SIZE,"${Bu
 
         if (rg == null){
             val closeButton = Button(Material.BARRIER)
-            setButton(closeButton,13)
+            setButton(closeButton,4)
             sendMessage(p, "§c§l存在しない土地です")
             return
         }
@@ -34,7 +34,7 @@ class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, CHEST_SIZE,"${Bu
             p.sendMessage(
                 Component.text(Plugin.prefix).append(
                     Component.text("§b§l§n[ここをクリック]")
-                .clickEvent(ClickEvent.suggestCommand("mre setrent ${user.regionId} $name "))))
+                .clickEvent(ClickEvent.suggestCommand("/mre setrent ${user.regionId} $name "))))
             p.closeInventory()
         }
         setButton(rentButton,1)
@@ -67,7 +67,7 @@ class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, CHEST_SIZE,"${Bu
     }
 }
 
-class PermissionMenu(p:Player,val user: User) : MenuFramework(p, CHEST_SIZE,"${Bukkit.getOfflinePlayer(user.uuid).name}の権限"){
+class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.getOfflinePlayer(user.uuid).name}の権限"){
 
     override fun init() {
 
