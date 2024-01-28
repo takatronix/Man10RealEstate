@@ -290,7 +290,7 @@ object Command:CommandExecutor {
                     sendMessage(p,"§a§lID:${id}")
                     sendMessage(p,"§a§l都市名:${city.name}")
                     sendMessage(p,"§a§l税額:${City.getTax(id)}円")
-                    p.sendMessage(text(prefix).append(text("§b§l§n[変更を受け入れる]").clickEvent(ClickEvent.runCommand("mre acceptowner"))))
+                    p.sendMessage(text(prefix).append(text("§b§l§n[変更を受け入れる]").clickEvent(ClickEvent.runCommand("/mre acceptowner"))))
 
                     ownerConfirmKey[p.uniqueId] = id
 
@@ -309,6 +309,8 @@ object Command:CommandExecutor {
                         oldOwner?.let { sendMessage(it,"承認されました") }
                         return false
                     }
+
+                    sendMessage(sender,"土地のオーナーになりました")
 
                     ownerConfirmKey.remove(sender.uniqueId)
 
