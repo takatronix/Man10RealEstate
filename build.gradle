@@ -26,7 +26,7 @@ dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT'
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compileOnly 'com.github.tororo1066.ItemFrameProtector:API:555ef90df2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 }
@@ -65,8 +65,3 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
-//maven { url "https://repo.dmulloy2.net/nexus/repository/public/" }
-//maven { url 'https://jitpack.io' }
-//maven { url "https://maven.enginehub.org/repo/" }
-//compileOnly fileTree(dir: 'libs', include: '*.jar')
-//implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

@@ -17,20 +17,27 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
-import org.bukkit.event.player.*
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent
+import org.bukkit.event.player.PlayerBucketEmptyEvent
+import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.material.Colorable
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Command
 import red.man10.realestate.Plugin.Companion.WAND_NAME
 import red.man10.realestate.Plugin.Companion.disableWorld
-import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.serverName
-import red.man10.realestate.Utility
-import red.man10.realestate.Utility.format
-import red.man10.realestate.Utility.sendClickMessage
-import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.region.User.Permission.*
+import red.man10.realestate.util.Utility
+import red.man10.realestate.util.Utility.format
+import red.man10.realestate.util.Utility.sendClickMessage
+import red.man10.realestate.util.Utility.sendMessage
+import tororo1066.itemframeprotector.api.event.IFPAddEvent
+import tororo1066.itemframeprotector.api.event.IFPCause
+import tororo1066.itemframeprotector.api.event.IFPInteractEvent
+import tororo1066.itemframeprotector.api.event.IFPRemoveEvent
 
 object Event :Listener{
 
@@ -41,12 +48,12 @@ object Event :Listener{
      */
     private fun updateSign(sign: Sign, id:Int){
 
-        val data = Region.get(id)?:return
+        val rg = Region.regionData[id]?:return
 
         sign.line(0, text("§eID:$id"))
-        sign.line(1, text(data.name))
-        sign.line(2, text("§d§l${Region.getOwner(data)}"))
-        sign.line(3, text("§b§l${Region.formatStatus(data.status)}"))
+        sign.line(1, text(rg.name))
+        sign.line(2, text("§d§l${rg.ownerName}"))
+        sign.line(3, text("§b§l${Region.formatStatus(rg.status)}"))
 
         sign.update()
 
@@ -98,6 +105,14 @@ object Event :Listener{
         wand.itemMeta = meta
         sendMessage(p,"§e§lSet End:§f§lX:${loc.blockX},Y:${loc.blockY},Z:${loc.blockZ}")
 
+    }
+
+    @EventHandler
+    fun joinEvent(e:PlayerJoinEvent){
+        val p = e.player
+        Bookmark.asyncLoadBookmark(p)
+        Region.asyncLoginProcess(p)
+        User.asyncLoginProcess(p)
     }
 
     /**
@@ -153,18 +168,18 @@ object Event :Listener{
                 return
             }
 
-            val data = Region.get(id)?:return
-            if (!Utility.isWithinRange(e.block.location ,data.startPosition,data.endPosition,data.world,data.server) && !hasPermission(e.player, e.block.location, BLOCK)){
+            val rg = Region.regionData[id]?:return
+            if (!Utility.isWithinRange(e.block.location ,rg.startPosition,rg.endPosition,rg.world,rg.server) && !hasPermission(e.player, e.block.location, BLOCK)){
                 sendMessage(e.player,"§c土地の外に看板を設置することはできません")
                 return
             }
 
             e.line(0, text("§eID:$id"))
-            e.line(1, text(data.name))
-            e.line(2, text("§d§l${Region.getOwner(data)}"))
-            e.line(3, text("§b§l${Region.formatStatus(data.status)}"))
+            e.line(1, text(rg.name))
+            e.line(2, text("§d§l${rg.ownerName}"))
+            e.line(3, text("§b§l${Region.formatStatus(rg.status)}"))
 
-            sendMessage(p,"§a§l作成完了！ id:$id name:${data.name}")
+            sendMessage(p,"§a§l作成完了！ id:$id name:${rg.name}")
         }
     }
 
@@ -183,28 +198,32 @@ object Event :Listener{
 
         val id = lines[0].replace("§eID:","").toIntOrNull()?:return
 
-        val data = Region.get(id)?:return
+        val rg = Region.regionData[id]?:return
 
         val p = e.player
 
-        //左クリックでいいね
+        //左クリックでブックマーク
         if (e.action == Action.LEFT_CLICK_BLOCK && !p.isSneaking){
             e.isCancelled = true
-            p.performCommand("mre good $id")
+            p.performCommand("mre bookmark $id")
             return
         }
 
-        sendMessage(p,"§a==========${data.name}§a§lの情報==========")
+        sendMessage(p,"§a==========${rg.name}§a§lの情報==========")
         sendMessage(p,"§aID:$id")
-        sendMessage(p,"§aステータス:${Region.formatStatus(data.status)}")
-        sendMessage(p,"§aオーナー:${Region.getOwner(data)}")
-        sendMessage(p,"§a値段:${format(data.price)}")
+        sendMessage(p,"§aステータス:${Region.formatStatus(rg.status)}")
+        sendMessage(p,"§aオーナー:${rg.ownerName}")
+        sendMessage(p,"§a値段:${format(rg.price)}")
+        sendMessage(p,"§a税額:${format(City.getTax(id))}")
+        if (rg.taxStatus == Region.TaxStatus.WARN){
+            sendMessage(p,"§c§l税金が未払いです")
+        }
         sendMessage(p,"§a==========================================")
 
-        sendClickMessage(p,"§d§lいいねする！＝＞[いいね！]","mre good $id","いいねをすると、/mreメニューから テレポートをすることができます")
+        sendClickMessage(p,"§d§lブックマークする！＝＞[ブックマーク！]","mre bookmark $id","ブックマークをすると、/mreメニューから テレポートをすることができます")
 
-        if (data.status == "OnSale"){
-            sendClickMessage(p,"§a§l§n[土地を買う！]","mre buycheck $id","§e§l値段:${format(data.price)}")
+        if (rg.status == Region.Status.ON_SALE){
+            sendClickMessage(p,"§a§l§n[土地を買う！]","mre buyconfirm $id","§e§l値段:${format(rg.price)}")
         }
 
         updateSign(sign,id)
@@ -231,21 +250,13 @@ object Event :Listener{
             Material.TRAPPED_CHEST
     )
 
-    @EventHandler
-    fun playerJoin(e:PlayerJoinEvent){
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
-            Thread.sleep(5000)
-            User.load(e.player)
-        })
-    }
-
     @EventHandler(priority = EventPriority.LOWEST)
     fun blockBreakEvent(e: BlockBreakEvent){
 
         val p = e.player
 
         if (!hasPermission(p,e.block.location, BLOCK)){
-            sendMessage(p,"§cこのブロックは壊すことができません！")
+            sendMessage(p,"§7このブロックは壊すことができません！")
             e.isCancelled = true
         }
     }
@@ -262,10 +273,10 @@ object Event :Listener{
             return
         }
 
-        if (block.type==Material.CHEST){ sendMessage(p,"§c§lチェストより樽の使用をおすすめします！") }
+        if (block.type==Material.CHEST){ sendMessage(p,"§7§lチェストより樽の使用をおすすめします！") }
 
         if (containerList.contains(block.type) && countContainer(block)> maxContainers){
-            sendMessage(p,"§cこのチャンクには、これ以上このブロックは置けません！")
+            sendMessage(p,"§7このチャンクには、これ以上このブロックは置けません！")
             e.isCancelled = true
         }
 
@@ -276,8 +287,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, p.location, BLOCK)) {
-
-            sendMessage(p,"§cここに水などを置くことはできません！")
+            sendMessage(p,"§7ここに水などを置くことはできません！")
             e.isCancelled = true
 
         }
@@ -300,20 +310,20 @@ object Event :Listener{
         }
 
         if (!hasPermission(p,e.clickedBlock!!.location, DOOR)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
         }
 
         if (invList.contains(e.clickedBlock!!.type)){
             if (!hasPermission(p,e.clickedBlock!!.location, INVENTORY)){
-                sendMessage(p,"§cこのブロックを触ることはできません！")
+                sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
                 return
             }
         }else{
             if (!hasPermission(p,e.clickedBlock!!.location,DOOR)){
-                sendMessage(p,"§cこのブロックを触ることはできません！")
+                sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
                 return
             }
@@ -327,7 +337,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p,e.block.location,BLOCK)){
-            sendMessage(p,"§cここに看板を置くことができません！")
+            sendMessage(p,"§7ここに看板を置くことができません！")
             e.isCancelled = true
         }
 
@@ -340,7 +350,7 @@ object Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p,e.entity.location,BLOCK)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -352,7 +362,7 @@ object Event :Listener{
         val p = e.player
 
         if (!hasPermission(p, e.rightClicked.location,DOOR)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
 
@@ -366,23 +376,46 @@ object Event :Listener{
         if (p !is Player)return
 
         if (!hasPermission(p, e.entity.location,DOOR)){
-            sendMessage(p,"§cこのブロックを触ることはできません！")
+            sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
 
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    fun armorStand(e: PlayerArmorStandManipulateEvent){
+    fun armorStand(e:PlayerArmorStandManipulateEvent){
         val p = e.player
 
         if (!hasPermission(p, e.rightClicked.location,BLOCK)){
             sendMessage(p,"§7このアーマースタンドを触ることはできません！")
             e.isCancelled = true
         }
+
     }
 
-    fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun itemFrameInteractEvent(e:IFPInteractEvent){
+        val p = e.entity
+        if (p !is Player)return
+        if (e.ifpCause == IFPCause.OP_STAFF)return
+        if (!hasPermission(p,e.data.loc,INVENTORY)){
+            sendMessage(p,"§7この額縁を触ることはできません！")
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun itemFrameRemoveEvent(e:IFPRemoveEvent){
+        val p = e.remover
+        if (p !is Player)return
+        if (e.ifpCause == IFPCause.OP_STAFF)return
+        if (!hasPermission(p,e.data.loc,BLOCK)){
+            sendMessage(p,"§7この額縁を触ることはできません！")
+            e.isCancelled = true
+        }
+    }
+
+    private fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{
 
         if (p.hasPermission(Command.OP))return true
 
@@ -390,19 +423,19 @@ object Event :Listener{
 
         if (City.where(loc) == null)return false
 
-        for (id in Region.regionData.keys){
-
-            val rg = Region.get(id)?:continue
+        Region.regionData.forEach{ entry ->
+            val rg = entry.value
+            val id = entry.key
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
-                if (rg.status == "Lock")return false
+                if (rg.status == Region.Status.LOCK)return false
                 if (rg.ownerUUID == p.uniqueId)return true
-                if (rg.status == "Danger")return true
+                if (rg.status == Region.Status.DANGER)return true
 
-                if (perm != BLOCK &&rg.status == "Free")return true
+                if (perm != BLOCK &&rg.status == Region.Status.FREE)return true
 
-                val data = User.get(p,id)?:return false
+                val data = User.get(p,id) ?:return false
 
                 if (data.status == "Lock")return false
                 if (data.allowAll)return true

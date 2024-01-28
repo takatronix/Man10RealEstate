@@ -1,11 +1,13 @@
-package red.man10.realestate
+package red.man10.realestate.util
 
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent.runCommand
-import net.kyori.adventure.text.event.ClickEvent.suggestCommand
 import net.kyori.adventure.text.event.HoverEvent.showText
+import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.prefix
 import kotlin.math.abs
 
@@ -16,12 +18,18 @@ object Utility {
     ////////////////////////////////////////////////////////////
     fun isWithinRange(loc: Location, start:Triple<Int,Int,Int>, end:Triple<Int,Int,Int>, world:String,server:String):Boolean{
 
-        if (Plugin.serverName!=server)return false
-        if (loc.world.name != world)return false
+        if (Plugin.serverName !=server){
+            return false
+        }
+        if (loc.world.name != world){
+            return false
+        }
 
         if (abs((start.first+end.first)-2*loc.blockX) > abs(start.first-end.first) ||
             abs((start.third+end.third)-2*loc.blockZ) > abs(start.third-end.third) ||
-            abs((start.second+end.second)-2*loc.blockY) > abs(start.second-end.second))return false
+            abs((start.second+end.second)-2*loc.blockY) > abs(start.second-end.second)){
+            return false
+        }
 
         return true
 
@@ -35,14 +43,16 @@ object Utility {
         p.sendMessage(text("$prefix$text").clickEvent(runCommand("/$command")).hoverEvent(showText(text(hoverText))))
     }
 
-    //サジェストメッセージ
-    fun sendSuggest(p: Player, text: String?, command: String,hoverText: String) {
-        p.sendMessage(text("${prefix}$text§a§n[ここをクリック！]").clickEvent(suggestCommand("/$command")).hoverEvent(showText(text(hoverText))))
-    }
-
     //prefix付きのメッセージ
     fun sendMessage(player: Player, message: String) {
         player.sendMessage("$prefix$message")
+    }
+    fun sendMessage(sender: CommandSender, message: String) {
+        sender.sendMessage("$prefix$message")
+    }
+
+    fun sendDebug(sender:CommandSender,message: String){
+        sender.sendMessage("$prefix§c§l[DEBUG]$message")
     }
 
     fun format(double: Double):String{

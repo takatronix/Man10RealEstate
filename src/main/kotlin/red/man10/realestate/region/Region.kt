@@ -1,437 +1,343 @@
 package red.man10.realestate.region
 
+import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import red.man10.realestate.MySQLManager
-import red.man10.realestate.MySQLManager.Companion.escapeStringForMySQL
-import red.man10.realestate.MySQLManager.Companion.mysqlQueue
-import red.man10.realestate.Plugin.Companion.bank
-import red.man10.realestate.Plugin.Companion.plugin
-import red.man10.realestate.Plugin.Companion.serverName
-import red.man10.realestate.Plugin.Companion.vault
-import red.man10.realestate.Utility.format
-import red.man10.realestate.Utility.sendMessage
-import java.text.SimpleDateFormat
+import red.man10.man10score.ScoreDatabase
+import red.man10.realestate.Plugin
+import red.man10.realestate.util.Logger
+import red.man10.realestate.util.MySQLManager
+import red.man10.realestate.util.Utility
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.set
 
-object Region {
+class Region {
 
-    //idとリージョンデータの辞書
-    val regionData = ConcurrentHashMap<Int,RegionData>()
+    companion object{
 
-    fun get(id:Int):RegionData?{
-        return regionData[id]
-    }
+        val regionData = ConcurrentHashMap<Int, Region>()
+        val gson = Gson()
 
-    fun set(id: Int,region: RegionData){
-        regionData[id] = region
-        save(id,region)
-    }
-
-    fun delete(id:Int){
-        regionData.remove(id)
-
-        mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
-
-        User.removeAll(id)
-    }
-
-    /**
-     * create new region
-     *
-     * @param pos1 start position
-     * @param pos2 end position
-     * @param name region name
-     * @param price region price
-     * @param tp teleportation position (x,y,z,pitch,yaw
-     *
-     * @return region id
-     */
-    fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location):Int{
-
-        val query = "INSERT INTO region " +
-                "(server, world, name, status, price, " +
-                "x, y, z, pitch, yaw, " +
-                "sx, sy, sz, ex, ey, ez) " +
-                "VALUES(" +
-                "'$serverName', " +
-                "'${tp.world.name}', " +
-                "'${escapeStringForMySQL(name)}', " +
-                "'OnSale', " +
-                "$price, " +
-                "${tp.x}, " +
-                "${tp.y}, " +
-                "${tp.z}, " +
-                "${tp.pitch}, " +
-                "${tp.yaw}, " +
-                "${pos1.first}, " +
-                "${pos1.second}, " +
-                "${pos1.third}, " +
-                "${pos2.first}, " +
-                "${pos2.second}, " +
-                "${pos2.third}); "
-
-        val mysql = MySQLManager(plugin,"Man10RealEstate CreateRegion")
-
-        mysql.execute(query)
-
-        val rs = mysql.query("SELECT t.* FROM region t ORDER BY id DESC LIMIT 1;")?:return -1
-        rs.next()
-        val id = rs.getInt("id")
-
-        rs.close()
-        mysql.close()
-
-        val data = RegionData()
-
-        data.name = name
-
-        data.startPosition = pos1
-        data.endPosition = pos2
-        data.teleport = tp
-
-        data.world = tp.world.name
-        data.server = serverName
-
-        data.price = price
-
-        set(id,data)
-
-        return id
-
-    }
-
-    /**
-     * set status
-     */
-    fun setStatus(id:Int,status:String){
-        val data = get(id)?:return
-        data.status = status
-        set(id,data)
-    }
-
-    /**
-     * set owner
-     */
-    fun setOwner(id:Int, p: Player?){
-        val data = get(id)?:return
-
-//        if (data.ownerUUID !=null){
-//            val old = Bukkit.getPlayer(data.ownerUUID!!)
-//
-//            if (old !=null){
-//                val list = User.ownerList[old]!!
-//                list.remove(id)
-//                User.ownerList[old] = list
-//            }
-//        }
-
-        if (p != null){
-            data.ownerUUID = p.uniqueId
-//            val list = User.ownerList[p]?: mutableListOf()
-//            list.add(id)
-//            User.ownerList[p] = list
-        }else{
-            data.ownerUUID = p
+        fun formatStatus(status: Status):String{
+            return when(status){
+                Status.PROTECTED -> "保護"
+                Status.ON_SALE -> "販売中"
+                Status.LOCK -> "ロック(使用不可)"
+                Status.FREE -> "フリー"
+                else -> status.value
+            }
         }
-        set(id,data)
+
+        fun formatSpan(span:Int):String{
+            return when(span){
+                0 -> "1ヶ月"
+                1 -> "1週間"
+                2 -> "毎日"
+                else -> "不明"
+            }
+        }
+
+        fun asyncLoad(){
+
+            Logger.logger("土地の読み込み開始")
+
+            Plugin.async.execute {
+                regionData.clear()
+
+                val sql = MySQLManager(Plugin.plugin,"Man10RealEstate Loading")
+
+                val rs = sql.query("SELECT * FROM region;")?:return@execute
+
+                while (rs.next()){
+
+                    val id = rs.getInt("id")
+
+                    val rg = Region()
+
+                    rg.id = id
+                    rg.name = rs.getString("name")
+                    rg.world = rs.getString("world")
+                    rg.server = rs.getString("server")
+
+                    val uuid = rs.getString("owner_uuid")
+
+                    if (uuid!=null && uuid!="null"){
+                        rg.ownerUUID = UUID.fromString(uuid)
+                        rg.ownerName = Bukkit.getOfflinePlayer(UUID.fromString(uuid)).name
+                    }
+                    try {
+                        rg.status = Status.valueOf(rs.getString("status"))
+                    }catch (e:Exception){
+                        Bukkit.getLogger().info("$id ${rs.getString("status")}")
+                    }
+                    try {
+                        rg.taxStatus = TaxStatus.valueOf(rs.getString("tax_status"))
+                    }catch (e:Exception){
+                        Bukkit.getLogger().info("$id ${rs.getString("tax_status")}")
+                    }
+
+                    rg.price = rs.getDouble("price")
+
+                    rg.span = rs.getInt("span")
+
+                    rg.startPosition = Triple(
+                        rs.getInt("sx"),
+                        rs.getInt("sy"),
+                        rs.getInt("sz")
+                    )
+                    rg.endPosition = Triple(
+                        rs.getInt("ex"),
+                        rs.getInt("ey"),
+                        rs.getInt("ez")
+                    )
+
+                    rg.teleport = Location(
+                        Bukkit.getWorld(rg.world),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getFloat("yaw"),
+                        rs.getFloat("pitch")
+                    )
+
+                    rg.data = gson.fromJson(rs.getString("data"),RegionData::class.java)
+
+                    regionData[id] = rg
+
+                    if (Bukkit.getWorld(rg.world) == null){
+                        Logger.logger("存在しないワールドの土地",id)
+//                        rg.asyncDelete()
+//                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
+                    }else {
+                        regionData[id] = rg
+                    }
+                }
+                rs.close()
+                sql.close()
+            }
+        }
+
+
+        //ログイン時にスコアを確認
+        fun asyncLoginProcess(p:Player){
+            Plugin.async.execute {
+                val data = regionData.filterValues { it.ownerUUID == p.uniqueId }
+                val score = ScoreDatabase.getScore(p.uniqueId)
+                data.forEach {
+                    val city = City.where(it.value.teleport)!!
+                    if (city.ownerScore>score){
+                        it.value.status = Status.LOCK
+                    }else{
+                        it.value.status = Status.PROTECTED
+                    }
+                }
+            }
+        }
+
+        fun create(pos1:Triple<Int,Int,Int>,pos2:Triple<Int,Int,Int>,name:String,price:Double,tp:Location,p:Player):Int{
+
+            val data = RegionData(false,0.0,0.0)
+
+            val query = "INSERT INTO region " +
+                    "(server, world, name, status, price, " +
+                    "x, y, z, pitch, yaw, " +
+                    "sx, sy, sz, ex, ey, ez, data) " +
+                    "VALUES(" +
+                    "'${Plugin.serverName}', " +
+                    "'${tp.world.name}', " +
+                    "'${MySQLManager.escapeStringForMySQL(name)}', " +
+                    "'OnSale', " +
+                    "$price, " +
+                    "${tp.x}, " +
+                    "${tp.y}, " +
+                    "${tp.z}, " +
+                    "${tp.pitch}, " +
+                    "${tp.yaw}, " +
+                    "${pos1.first}, " +
+                    "${pos1.second}, " +
+                    "${pos1.third}, " +
+                    "${pos2.first}, " +
+                    "${pos2.second}, " +
+                    "${pos2.third}, " +
+                    "'${gson.toJson(data)}'); "
+
+            val mysql = MySQLManager(Plugin.plugin,"Man10RealEstate CreateRegion")
+
+            mysql.execute(query)
+
+            val rs = mysql.query("SELECT * FROM region ORDER BY id DESC LIMIT 1;")?:return -1
+
+            if (!rs.next())return -1
+
+            val id = rs.getInt("id")
+
+            rs.close()
+            mysql.close()
+
+            val rg = Region()
+
+            rg.name = name
+            rg.id = id
+            rg.startPosition = pos1
+            rg.endPosition = pos2
+            rg.teleport = tp
+
+            rg.world = tp.world.name
+            rg.server = Plugin.serverName
+
+            rg.price = price
+
+            rg.data = data
+
+            regionData[id] = rg
+
+            Logger.logger(p,"土地を作成",id)
+
+            return id
+
+        }
     }
 
-    /**
-     * set price
-     */
-    fun setPrice(id: Int,price:Double){
-        val data = get(id)?:return
-        data.price = price
-        set(id,data)
-    }
+    var id = 0
+    var name = "RegionName"
+    var ownerUUID : UUID? = null
+    var ownerName : String? = if (ownerUUID == null) "サーバー" else Bukkit.getOfflinePlayer(ownerUUID!!).name
+    var status : Status = Status.ON_SALE //Lock,Danger,Free,OnSale,Protected
+    var taxStatus : TaxStatus = TaxStatus.SUCCESS //SUCCESS,WARN,FREE
 
-    /**
-     * set span
-     * 0:month 1:week 2:day
-     */
-    fun setSpan(id:Int,span:Int){
-        val data = get(id)?:return
-        data.span = span
-        set(id,data)
-    }
+    var world = "builder"
+    var server = "server"
 
-    fun setTeleport(id:Int, tp:Location){
+    var startPosition: Triple<Int,Int,Int> = Triple(0,0,0)
+    var endPosition: Triple<Int,Int,Int> = Triple(0,0,0)
+    lateinit var teleport : Location
 
-        val data = regionData[id]?:return
+    var price : Double = 0.0
+    var span = 0 //0:month 1:week 2:day
 
-        if (data.teleport.world.name != tp.world.name)return
+    lateinit var data : RegionData
 
-        data.teleport = tp.clone()
-        regionData[id] = data
 
-        save(id,data)
+    fun asyncSave(){
 
-    }
-
-    /**
-     * リージョンのデータをdbに保存する
-     */
-    private fun save(id:Int,data:RegionData){
-
-        mysqlQueue.add("UPDATE region SET " +
-                "owner_uuid = '${data.ownerUUID}', " +
-                "owner_name = '${if (data.ownerUUID == null)null
-                else{Bukkit.getOfflinePlayer(data.ownerUUID!!).name}}', " +
-                "x = ${data.teleport.x}," +
-                "y = ${data.teleport.y}, " +
-                "z = ${data.teleport.z}, " +
-                "pitch = ${data.teleport.pitch}, " +
-                "yaw = ${data.teleport.yaw}, " +
-                "sx = ${data.startPosition.first}, " +
-                "sy = ${data.startPosition.second}, " +
-                "sz = ${data.startPosition.third}, " +
-                "ex = ${data.endPosition.first}, " +
-                "ey = ${data.endPosition.second}, " +
-                "ez = ${data.endPosition.third}, " +
-                "status = '${escapeStringForMySQL(data.status)}', " +
-                "price = ${data.price}, " +
+        MySQLManager.mysqlQueue.add("UPDATE region SET " +
+                "owner_uuid = '${ownerUUID}', " +
+                "owner_name = '${if (ownerUUID == null)null
+                else{Bukkit.getOfflinePlayer(ownerUUID!!).name}}', " +
+                "x = ${teleport.x}," +
+                "y = ${teleport.y}, " +
+                "z = ${teleport.z}, " +
+                "pitch = ${teleport.pitch}, " +
+                "yaw = ${teleport.yaw}, " +
+                "sx = ${startPosition.first}, " +
+                "sy = ${startPosition.second}, " +
+                "sz = ${startPosition.third}, " +
+                "ex = ${endPosition.first}, " +
+                "ey = ${endPosition.second}, " +
+                "ez = ${endPosition.third}, " +
+                "status = '${status}', " +
+                "tax_status = '${taxStatus}'," +
+                "price = ${price}, " +
                 "profit = 0, " +
-                "span = ${data.span}," +
-                "remit_tax = ${if (data.isRemitTax) 1 else 0} " +
+                "span = ${span}," +
+                "data = '${gson.toJson(data)}' " +
                 "WHERE id = $id")
 
     }
 
-    /**
-     * 全リージョンデータを読み込み
-     */
-    fun load(){
-        regionData.clear()
-
-        val sql = MySQLManager(plugin,"Man10RealEstate Loading")
-
-        val rs = sql.query("SELECT * FROM region WHERE server='$serverName';")?:return
-
-        while (rs.next()){
-
-            val id = rs.getInt("id")
-
-            val data = RegionData()
-
-            data.name = rs.getString("name")
-            data.world = rs.getString("world")
-            data.server = serverName
-            if (rs.getString("owner_uuid") == null || rs.getString("owner_uuid") == "null"){
-                data.ownerUUID = null
-            }else{
-                data.ownerUUID = UUID.fromString(rs.getString("owner_uuid"))
-            }
-            data.status = rs.getString("status")
-            data.price = rs.getDouble("price")
-
-            data.span = rs.getInt("span")
-
-            data.startPosition = Triple(
-                    rs.getInt("sx"),
-                    rs.getInt("sy"),
-                    rs.getInt("sz")
-            )
-            data.endPosition = Triple(
-                    rs.getInt("ex"),
-                    rs.getInt("ey"),
-                    rs.getInt("ez")
-            )
-
-            data.teleport = Location(
-                Bukkit.getWorld(data.world),
-                rs.getDouble("x"),
-                rs.getDouble("y"),
-                rs.getDouble("z"),
-                rs.getFloat("yaw"),
-                rs.getFloat("pitch")
-            )
-
-            data.isRemitTax = rs.getInt("remit_tax") == 1
-
-            regionData[id] = data
-
-            if (Bukkit.getWorld(data.world) == null){
-                delete(id)
-                Bukkit.getLogger().info("id:${id}は存在しない土地だったので、削除しました!")
-            }
-
-        }
-
-        rs.close()
-        sql.close()
-    }
-
     @Synchronized
-    fun buy(p:Player,id:Int){
+    fun buy(p: Player){
 
-        val data = get(id)
+        val city = City.where(teleport)
+        val score = ScoreDatabase.getScore(p.uniqueId)
 
-        if (data == null){
-            sendMessage(p,"§c§l存在しない土地です！")
+        if (city == null){
+            Utility.sendMessage(p,"§c§l都市の外に土地があります。運営に報告してください")
             return
         }
 
-        if (data.status != "OnSale"){
-            sendMessage(p,"§4§lこの土地は販売されていません！")
+        if (status != Status.ON_SALE){
+            Utility.sendMessage(p, "§c§lこの土地は販売されていません！")
             return
         }
 
-        if (p.uniqueId == data.ownerUUID){
-            sendMessage(p,"§c§lあなたはこの土地のオーナーです！")
+        if (p.uniqueId == ownerUUID){
+            Utility.sendMessage(p, "§c§lあなたはこの土地のオーナーです！")
             return
         }
 
-        if (!City.setBuyScore(id,p)){
-            sendMessage(p,"§c§lあなたにはこの土地を買うためのスコアが足りません！")
+        if (city.ownerScore > score){
+            Utility.sendMessage(p, "§c§lあなたにはこの土地を買うためのスコアが足りません！")
             return
         }
 
-        if (vault.getBalance(p.uniqueId) < data.price){
-            sendMessage(p,"§c§l電子マネーが足りません！")
+        if (!Plugin.vault.withdraw(p.uniqueId,price)){
+            Utility.sendMessage(p, "§c§l電子マネーが足りません！")
             return
         }
 
-        vault.withdraw(p.uniqueId,data.price)
-
-        if (data.ownerUUID != null){
-            bank.deposit(data.ownerUUID!!,data.price,"Man10RealEstate RegionProfit")
+        if (ownerUUID != null){
+            Plugin.bank.deposit(ownerUUID!!,price,"Man10RealEstate RegionProfit","土地の売上")
         }
 
-        setOwner(id,p)
-        setStatus(id,"Protected")
+        ownerUUID = p.uniqueId
+        ownerName = p.name
+        status = Status.PROTECTED
+        asyncSave()
 
-        sendMessage(p,"§a§l土地の購入成功！")
+        Logger.logger(p,"土地を購入",id)
 
+        Utility.sendMessage(p, "§a§l土地の購入成功！")
     }
 
-    /**
-     * オーナー名を取得
-     */
-    fun getOwner(data:RegionData):String{
-
-        val uuid = data.ownerUUID
-
-        return if (uuid == null){
-            "サーバー運営"
-        }else{
-            Bukkit.getOfflinePlayer(uuid).name?:"不明なユーザー"
-        }
+    fun init(status: Status = Status.ON_SALE, default: Double? = null){
+        val city = City.where(teleport)?:return
+        ownerUUID = null
+        ownerName = null
+        price = default?:city.defaultPrice
+        this.status = status
+        this.taxStatus = TaxStatus.SUCCESS
+        this.data = RegionData(false,0.0,0.0)
+        User.asyncDeleteAllRegionUser(id)
+        asyncSave()
     }
 
-    fun initRegion(id: Int, price: Double){
-
-        setOwner(id,null)
-        setPrice(id,price)
-        setStatus(id,"OnSale")
-        User.removeAll(id)
-
+    fun asyncDelete(){
+        MySQLManager.mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
+        User.asyncDeleteAllRegionUser(id)
+        Logger.logger("土地を削除",id)
     }
 
-    //住人の数を数える
-    fun getUsers(id:Int):Int{
-        val mysql = MySQLManager(plugin,"mre")
-
-        val rs = mysql.query("select COUNT(region_id) from region_user where region_id=$id;")?:return 0
-        rs.next()
-        val users = rs.getInt(1)
-        rs.close()
-        mysql.close()
-        return users
+    //賃料の支払い
+    fun payRent(){
+        User.userMap.filterKeys { pair -> pair.second == id }.values.forEach { it.payRent() }
+        Logger.logger("賃料の支払い",id)
     }
 
-    fun showTaxAndRent(p:Player){
-        val db = MySQLManager(plugin,"realestate")
-
-        val rs1 = db.query("select id from region where owner_uuid='${p.name}' or owner_name='${p.name}';")?:return
-
-        var total = 0
-        var totalArea = 0
-        var totalTax = 0.0
-
-        while (rs1.next()){
-
-            val id = rs1.getInt("id")
-
-            val rg = get(id)!!
-
-            val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first)
-            val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third)
-
-            totalArea += (width*height)
-            totalTax += City.getTax(City.whereRegion(id),id)
-            total++
-
-        }
-
-        rs1.close()
-        db.close()
-
-        if (total!=0){
-            sendMessage(p,"§e§l土地の数:${total}")
-            sendMessage(p,"§e§l土地の総面積:${totalArea}ブロック")
-            sendMessage(p,"§e§l支払う税金:${format(totalTax)}")
-        }
-
-        val rs2 = db.query("select * from region_user where uuid='${p.uniqueId}' and is_rent=1 and rent>0;")?:return
-
-        while (rs2.next()){
-
-            val id = rs2.getInt("id")
-            val rent = rs2.getDouble("rent")
-            val paid = Calendar.getInstance()
-            paid.time = rs2.getDate("paid_date")
-
-            val rg = get(id)?:continue
-
-            when(rg.span){
-                0 ->{paid.add(Calendar.DAY_OF_YEAR,30)}
-                1 ->{paid.add(Calendar.DAY_OF_YEAR,7)}
-                2 ->{paid.add(Calendar.DAY_OF_YEAR,1)}
-            }
-
-            sendMessage(p,"§e§l=====================================================")
-
-            sendMessage(p,"§e§lID:${id} 支払う賃料:${format(rent)} 支払日:${SimpleDateFormat("yyyy-MM-dd").format(paid.time)}")
-
-        }
-
-        rs2.close()
-        db.close()
-
+    //住人の取得
+    fun getUser(): List<User> {
+        return User.fromRegion(id)
     }
 
-    fun formatStatus(status:String):String{
-        return when(status){
-            "Protected" -> "保護されています"
-            "OnSale" -> "販売中"
-            "Lock" -> "ロック"
-            "Free" -> "フリー"
-            else -> status
-        }
+    data class RegionData(
+        var denyTeleport : Boolean,
+        var defaultPrice : Double,
+        var tax : Double
+    )
+
+    enum class TaxStatus(val value : String){
+        SUCCESS("SUCCESS"),
+        WARN("WARN"),
+        FREE("FREE")
     }
 
-    class RegionData{
-
-        var name = "RegionName"
-        var ownerUUID : UUID? = null
-        var status = "OnSale" //Danger,Free,OnSale,Protected
-
-        var world = "builder"
-        var server = "server"
-
-        var startPosition: Triple<Int,Int,Int> = Triple(0,0,0)
-        var endPosition: Triple<Int,Int,Int> = Triple(0,0,0)
-        lateinit var teleport : Location
-
-        var price : Double = 0.0
-
-        var span = 0 //0:month 1:week 2:day
-
-        var isRemitTax = false
+    enum class Status(val value : String){
+        ON_SALE("OnSale"),
+        PROTECTED("Protected"),
+        LOCK("Lock"),
+        FREE("Free"),
+        DANGER("Danger")
     }
-
 }
