@@ -12,7 +12,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 //居住者に関するクラス
-class User(val uuid: UUID,val id:Int) {
+class User(val uuid: UUID,val regionId:Int) {
 
     companion object{
         val userMap = ConcurrentHashMap<Pair<UUID,Int>,User>()
@@ -85,14 +85,17 @@ class User(val uuid: UUID,val id:Int) {
 
     //辞書にデータがなかったら新規情報として保存
     fun asyncSave(){
-        if (!userMap.containsKey(Pair(uuid,id))){
+        //こっちは新規作成
+        if (!userMap.containsKey(Pair(uuid,regionId))){
             val name = Bukkit.getOfflinePlayer(uuid).name
             MySQLManager.mysqlQueue.add("INSERT INTO region_user " +
                     "(region_id, player, uuid, created_time, status, is_rent, paid_date, rent) " +
-                    "VALUES ($id, '${name}', '${uuid}', now(), 'Share', ${if (rentAmount>0) 1 else 0}, now(), ${rentAmount});")
+                    "VALUES ($regionId, '${name}', '${uuid}', now(), 'Share', ${if (rentAmount>0) 1 else 0}, now(), ${rentAmount});")
+            userMap[Pair(uuid,regionId)] = this
             return
         }
 
+        //存在する場合
         MySQLManager.mysqlQueue.add("UPDATE `region_user` " +
                 "SET " +
                 "`status`='${status}'," +
@@ -103,11 +106,11 @@ class User(val uuid: UUID,val id:Int) {
                 "`allow_inv`='${if (allowInv){1}else{0}}'," +
                 "`allow_door`='${if (allowDoor){1}else{0}}'," +
                 "`rent`='${rentAmount}'" +
-                " WHERE `uuid`='${uuid}' AND `region_id`='$id';")
+                " WHERE `uuid`='${uuid}' AND `region_id`='$regionId';")
     }
 
     fun asyncDelete(){
-        MySQLManager.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$id AND `uuid`='${uuid}';")
+        MySQLManager.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$regionId AND `uuid`='${uuid}';")
     }
 
     fun payRent(){
