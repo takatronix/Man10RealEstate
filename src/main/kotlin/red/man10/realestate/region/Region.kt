@@ -292,11 +292,11 @@ class Region {
         Utility.sendMessage(p, "§a§l土地の購入成功！")
     }
 
-    fun init(status: Status = Status.ON_SALE){
+    fun init(status: Status = Status.ON_SALE, default: Double? = null){
         val city = City.where(teleport)?:return
         ownerUUID = null
         ownerName = null
-        price = city.defaultPrice
+        price = default?:city.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
         this.data = RegionData(false,0.0,0.0)

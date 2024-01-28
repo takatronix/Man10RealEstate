@@ -957,9 +957,7 @@ object Command:CommandExecutor {
                     val price =  args[2].toDouble()
                     val rg = Region.regionData[id]?:return false
 
-                    rg.init()
-                    rg.price = price
-                    rg.asyncSave()
+                    rg.init(Region.Status.ON_SALE,price)
 
                     sendMessage(sender,"§a§l初期化完了")
 
