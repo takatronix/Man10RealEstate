@@ -40,7 +40,7 @@ object Command:CommandExecutor {
     private const val GUEST = "mre.guest"
     const val OP = "mre.op"
 
-    private val userMap = ConcurrentHashMap<UUID,Int>()
+    private val userConfirm = ConcurrentHashMap<UUID,Int>()
     private val buyConfirmKey = HashMap<UUID, Int>()
     private val ownerConfirmKey = HashMap<UUID,Int>()
 
@@ -185,6 +185,7 @@ object Command:CommandExecutor {
 
                         user.sendMessage(text(prefix).append(text("§b§l§n[住民になる]")
                             .clickEvent(ClickEvent.runCommand("/mre acceptuser"))))
+                        userConfirm[user.uniqueId] = id
                     }
 
                     return true
@@ -195,11 +196,11 @@ object Command:CommandExecutor {
 
                     if (!hasPermission(sender,GUEST))return false
 
-                    if (!userMap.keys.contains(sender.uniqueId))return false
+                    if (!userConfirm.keys.contains(sender.uniqueId))return false
 
-                    val id = userMap[sender.uniqueId]?:return false
+                    val id = userConfirm[sender.uniqueId]?:return false
                     val rg = Region.regionData[id]!!
-                    userMap.remove(sender.uniqueId)
+                    userConfirm.remove(sender.uniqueId)
 
                     val owner = Bukkit.getPlayer(rg.ownerUUID!!)
 

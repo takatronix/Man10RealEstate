@@ -61,6 +61,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
             rg.teleport = p.location
             rg.asyncSave()
             p.closeInventory()
+            sendMessage(p,"§a§l設定完了")
         }
         setButton(teleportButton,6)
 

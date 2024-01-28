@@ -13,9 +13,9 @@ class UserListMenu(p:Player,private val id:Int) : MenuFramework(p, LARGE_CHEST_S
 
     override fun init() {
 
-        val prepareButton = Button(Material.BARRIER)
-        prepareButton.title("§c§l準備中")
-        addButton(prepareButton)
+//        val prepareButton = Button(Material.BARRIER)
+//        prepareButton.title("§c§l準備中")
+//        addButton(prepareButton)
 
         val rg = Region.regionData[id]
 

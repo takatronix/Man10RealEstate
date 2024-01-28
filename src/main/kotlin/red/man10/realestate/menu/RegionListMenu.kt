@@ -25,7 +25,7 @@ class RegionListMenu(p:Player, val page:Int = 0) : MenuFramework(p, LARGE_CHEST_
             button.title("§e§lID:${rg.id}")
             button.lore(mutableListOf(
                 "§e§l左クリック:土地の詳細設定",
-                "§b§l右クリック:住民の設定",
+                "§b§l右クリック:住民の追加・設定",
                 "§7ステータス:${Region.formatStatus(rg.status)}",
                 "§7価格:${format(rg.price)}円",
                 "§7税額:${format(City.getTax(rg.id))}円"))
