@@ -15,7 +15,7 @@ class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, 9,"${Bukkit.getO
 
     override fun init() {
         val rg = Region.regionData[user.regionId]
-        val name = Bukkit.getOfflinePlayer(user.uuid)
+        val name = Bukkit.getOfflinePlayer(user.uuid).name
 
         if (rg == null){
             val closeButton = Button(Material.BARRIER)
