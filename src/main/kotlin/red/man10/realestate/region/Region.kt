@@ -299,6 +299,7 @@ class Region {
         price = city.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
+        this.data = RegionData(false,0.0,0.0)
         User.asyncDeleteAllRegionUser(id)
         asyncSave()
     }

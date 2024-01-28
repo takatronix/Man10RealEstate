@@ -36,7 +36,7 @@ class User(val uuid: UUID,val regionId:Int) {
                     val user = User(uuid, id)
 
                     user.status = rs.getString("status")
-                    user.paid = LocalDateTime.ofInstant(rs.getDate("paid_date").toInstant(), ZoneId.systemDefault())
+                    user.paid = rs.getTimestamp("paid_date").toLocalDateTime()
                     user.isRent = rs.getInt("is_rent") == 1
                     user.rentAmount = rs.getDouble("rent")
 
