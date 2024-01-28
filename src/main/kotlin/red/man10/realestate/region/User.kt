@@ -55,6 +55,7 @@ class User(val uuid: UUID,val regionId:Int) {
 
         fun asyncDeleteFromRegion(id: Int){
             MySQLManager.mysqlQueue.add("DELETE FROM `region_user` WHERE `region_id`=$id;")
+            fromRegion(id).forEach { userMap.remove(Pair(it.uuid,it.regionId)) }
         }
 
         fun asyncLoginProcess(p:Player){
