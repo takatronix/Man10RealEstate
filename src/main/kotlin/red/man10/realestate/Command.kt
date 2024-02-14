@@ -973,6 +973,14 @@ object Command:CommandExecutor {
                     }
                 }
 
+                "starttaxwarn" ->{
+                    async.execute{
+                        sender.sendMessage("税金の徴収開始")
+                        City.payTaxFromWarnRegion()
+                        sender.sendMessage("税金の徴収完了")
+                    }
+                }
+
                 "search" ->{
 
                     if (sender !is Player)return false

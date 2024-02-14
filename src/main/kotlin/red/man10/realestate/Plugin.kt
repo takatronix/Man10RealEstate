@@ -37,6 +37,7 @@ class Plugin : JavaPlugin(), Listener {
 
         var serverName = "paper"
         var penalty = 2.5 //税金の支払いに失敗した時のペナルティ
+        var limitDayOfMonth = 15 //滞納した時に、次に支払いを求める日付(15ならn月15日に)
 
     }
 
@@ -94,12 +95,19 @@ class Plugin : JavaPlugin(), Listener {
                 val now = LocalDateTime.now()
                 val isChangeDay = lastDay.dayOfYear != now.dayOfYear
                 val isChangeMonth = lastMonth.month != now.month
+                val isTaxDay = now.dayOfMonth == limitDayOfMonth
 
                 //日変更
                 if (isChangeDay){
                     Logger.logger("日付の変更を検知")
                     lastDay = LocalDateTime.now()
                     Region.regionData.filterValues { it.span == 2 }.values.forEach { it.payRent() }
+                }
+
+                //滞納支払日
+                if (isChangeDay && isTaxDay){
+                    Logger.logger("滞納日を検知")
+                    City.payTaxFromWarnRegion()
                 }
 
                 //週変更(月曜日)

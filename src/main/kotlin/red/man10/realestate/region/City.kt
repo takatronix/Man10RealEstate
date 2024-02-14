@@ -74,37 +74,49 @@ class City {
                 if (rg.taxStatus == Region.TaxStatus.FREE || rg.ownerUUID == null)continue
                 val amount = getTax(rg.id)
 
-                if (rg.taxStatus == Region.TaxStatus.FREE)continue
+                //税金支払いが必要でかつ、滞納してない土地
+                if (rg.taxStatus != Region.TaxStatus.SUCCESS)continue
 
-                if (rg.taxStatus == Region.TaxStatus.WARN){
-                    //ここで支払い失敗したら土地を手放す
-                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
-                            "Man10RealEstate Tax","税金の支払い(延滞)")){
-                        Logger.logger(rg.ownerUUID!!,"税金の支払い失敗 初期化",rg.id)
-                        rg.init()
-                        continue
-                    }
-                    rg.taxStatus = Region.TaxStatus.SUCCESS
+                if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
+                        "Man10RealEstate Tax","税金の支払い")){
+                    Logger.logger(rg.ownerUUID!!,"滞納税金の支払い失敗",rg.id)
+                    rg.taxStatus = Region.TaxStatus.WARN
                     rg.asyncSave()
                     continue
                 }
-                if (rg.taxStatus == Region.TaxStatus.SUCCESS){
-                    //ここでは渓谷のみ
-                    if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
-                            "Man10RealEstate Tax","税金の支払い")){
-                        Logger.logger(rg.ownerUUID!!,"税金の支払い失敗",rg.id)
-                        rg.taxStatus = Region.TaxStatus.WARN
-                        rg.asyncSave()
-                        continue
-                    }
-                    rg.taxStatus = Region.TaxStatus.SUCCESS
-                    rg.asyncSave()
-                    continue
-                }
+                rg.taxStatus = Region.TaxStatus.SUCCESS
+                rg.asyncSave()
+                continue
 
             }
 
             Bukkit.getLogger().warning("税金の支払い完了")
+        }
+
+        fun payTaxFromWarnRegion(){
+            val rgList = Region.regionData.values
+
+            Bukkit.getLogger().warning("滞納都市の税金の支払いを行います")
+
+            for (rg in rgList){
+                if (rg.taxStatus == Region.TaxStatus.FREE || rg.ownerUUID == null)continue
+                val amount = getTax(rg.id)
+
+                //警告を受けていない都市はスルー
+                if (rg.taxStatus != Region.TaxStatus.WARN)continue
+
+                //ここで支払い失敗したら土地を手放す
+                if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
+                        "Man10RealEstate Tax","税金の支払い(延滞)")){
+                    Logger.logger(rg.ownerUUID!!,"税金の支払い失敗 初期化",rg.id)
+                    rg.init()
+                    continue
+                }
+                rg.taxStatus = Region.TaxStatus.SUCCESS
+                rg.asyncSave()
+                continue
+            }
+
         }
 
         //税額を取得 ペナルティなども考慮済みの額
