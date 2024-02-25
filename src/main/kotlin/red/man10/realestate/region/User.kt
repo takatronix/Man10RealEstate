@@ -6,7 +6,6 @@ import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.MySQLManager
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -123,6 +122,10 @@ class User(val uuid: UUID,val regionId:Int) {
             status = "Lock"
         }else{
             paid = LocalDateTime.now()
+            val region = Region.regionData[regionId]
+            if (region?.ownerUUID != null){
+                Plugin.bank.deposit(region.ownerUUID!!,rentAmount,"Man10RealEstate Rent","賃料の支払い")
+            }
         }
 
         asyncSave()
