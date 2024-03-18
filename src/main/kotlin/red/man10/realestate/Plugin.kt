@@ -39,6 +39,8 @@ class Plugin : JavaPlugin(), Listener {
         var penalty = 2.5 //税金の支払いに失敗した時のペナルティ
         var limitDayOfMonth = 15 //滞納した時に、次に支払いを求める日付(15ならn月15日に)
 
+        private var payTax = true
+
     }
 
     override fun onEnable() { // Plugin startup logic
@@ -80,6 +82,7 @@ class Plugin : JavaPlugin(), Listener {
         serverName = config.getString("server","paper")!!
         penalty = config.getDouble("penalty",2.5)
         Event.maxContainers = config.getInt("containerAmount",24)
+        payTax = config.getBoolean("taxTimer",true)
         saveResource("config.yml", false)
     }
 
@@ -121,7 +124,8 @@ class Plugin : JavaPlugin(), Listener {
                     Logger.logger("月の変更を検知")
                     lastMonth = LocalDateTime.now()
                     Region.regionData.filterValues { it.span == 0 }.values.forEach { it.payRent() }
-                    City.payTax()
+                    if (payTax){City.payTax()}
+
                 }
 
                 Thread.sleep(1000*60)

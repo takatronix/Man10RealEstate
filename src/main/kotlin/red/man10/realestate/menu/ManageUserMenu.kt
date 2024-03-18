@@ -44,7 +44,7 @@ class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, 9,"${Bukkit.getO
         permissionButton.title("§f§l権限の設定")
         permissionButton.lore(mutableListOf(
             "§a§l現在の設定",
-            "§7§l全権限:${if (user.allowAll) "§a§lo" else "§c§lx"}",
+            "§7§l全権限(現在使用不可):${if (user.allowAll) "§a§lo" else "§c§lx"}",
             "§7§lブロック:${if (user.allowBlock) "§a§lo" else "§c§lx"}",
             "§7§lチェストや樽:${if (user.allowInv) "§a§lo" else "§c§lx"}",
             "§7§lドア:${if (user.allowDoor) "§a§lo" else "§c§lx"}"
