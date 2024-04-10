@@ -2,8 +2,8 @@
   <artifact type="jar" name="Man10RealEstate">
     <output-path>$PROJECT_DIR$/../../paper/plugins</output-path>
     <root id="archive" name="Man10RealEstate.jar">
-      <element id="module-output" name="Man10RealEstate.main" />
       <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources" />
+      <element id="module-output" name="red.man10.Man10RealEstate.main" />
     </root>
   </artifact>
 </component>

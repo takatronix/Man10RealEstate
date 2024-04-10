@@ -258,6 +258,11 @@ class Region {
             return
         }
 
+        if (taxStatus == TaxStatus.WARN){
+            Utility.sendMessage(p,"§c§lこの土地は税金滞納のため購入ができません")
+            return
+        }
+
         if (status != Status.ON_SALE){
             Utility.sendMessage(p, "§c§lこの土地は販売されていません！")
             return
