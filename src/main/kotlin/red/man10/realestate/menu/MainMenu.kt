@@ -19,7 +19,7 @@ class MainMenu(p: Player) : MenuFramework(p,9, "メインメニュー") {
         bookmarkButton.setClickAction{
             BookmarkMenu(p).open()
         }
-        setButton(bookmarkButton,4)
+        setButton(bookmarkButton,3)
 
         val taxButton = Button(Material.NETHERITE_INGOT)
         taxButton.title("§e§l税金情報などを確認する")
@@ -28,7 +28,15 @@ class MainMenu(p: Player) : MenuFramework(p,9, "メインメニュー") {
             p.closeInventory()
             p.performCommand("mre balance")
         }
-        setButton(taxButton,7)
+        setButton(taxButton,5)
+
+        val whereButton = Button(Material.OAK_SIGN)
+        whereButton.title("§6§l現在地点の土地情報を見る")
+        whereButton.setClickAction{
+            p.closeInventory()
+            p.performCommand("mre where")
+        }
+        setButton(whereButton,7)
     }
 
 }

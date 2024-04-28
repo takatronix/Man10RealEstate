@@ -543,6 +543,20 @@ object Command:CommandExecutor {
 
                 }
 
+                "where" ->{
+                    if (!hasPermission(sender,USER))return false
+
+                    val loc = sender.location
+
+                    for (rg in Region.regionData.values) {
+                        if(Utility.isWithinRange(loc, rg.startPosition, rg.endPosition, rg.world,rg.server)) {
+                            rg.showRegionData(sender)
+                            return true
+                        }
+                    }
+                    sendMessage(sender,"§7このエリアには土地がありませんでした")
+                }
+
                 else ->{
                     sendMessage(sender,"§c§l不明なコマンドです！")
                     return false

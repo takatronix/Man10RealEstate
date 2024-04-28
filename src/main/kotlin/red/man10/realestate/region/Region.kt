@@ -326,6 +326,35 @@ class Region {
         return User.fromRegion(id)
     }
 
+    fun showRegionData(p:Player){
+        Utility.sendMessage(p, "§a==========${name}§a§lの情報==========")
+        Utility.sendMessage(p, "§aID:$id")
+        Utility.sendMessage(p, "§aステータス:${formatStatus(status)}")
+        Utility.sendMessage(p, "§aオーナー:${ownerName}")
+        Utility.sendMessage(p, "§a値段:${Utility.format(price)}")
+        Utility.sendMessage(p, "§a税額:${Utility.format(City.getTax(id))}")
+        if (taxStatus == Region.TaxStatus.WARN){
+            Utility.sendMessage(p, "§c§l税金が未払いです")
+        }
+        Utility.sendMessage(p, "§a==========================================")
+
+        Utility.sendClickMessage(
+            p,
+            "§d§lブックマークする！＝＞[ブックマーク！]",
+            "mre bookmark $id",
+            "ブックマークをすると、/mreメニューから テレポートをすることができます"
+        )
+
+        if (status == Status.ON_SALE){
+            Utility.sendClickMessage(
+                p,
+                "§a§l§n[土地を買う！]",
+                "mre buyconfirm $id",
+                "§e§l値段:${Utility.format(price)}"
+            )
+        }
+    }
+
     data class RegionData(
         var denyTeleport : Boolean,
         var defaultPrice : Double,
