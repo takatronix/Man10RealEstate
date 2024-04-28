@@ -312,7 +312,6 @@ object Command:CommandExecutor {
                     if (rg.ownerUUID!=null){
                         val oldOwner = Bukkit.getPlayer(rg.ownerUUID!!)
                         oldOwner?.let { sendMessage(it,"承認されました") }
-                        return false
                     }
 
                     sendMessage(sender,"土地のオーナーになりました")
