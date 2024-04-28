@@ -66,16 +66,13 @@ class City {
         }
 
         fun payTax(){
-            val rgList = Region.regionData.values
+            //税金支払いが必要でかつ、滞納してない土地
+            val rgList = Region.regionData.values.filter { rg -> rg.taxStatus == Region.TaxStatus.SUCCESS && rg.ownerUUID != null }
 
             Bukkit.getLogger().warning("税金の支払いを行います")
 
             for (rg in rgList){
-                if (rg.taxStatus == Region.TaxStatus.FREE || rg.ownerUUID == null)continue
                 val amount = getTax(rg.id)
-
-                //税金支払いが必要でかつ、滞納してない土地
-                if (rg.taxStatus != Region.TaxStatus.SUCCESS)continue
 
                 if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,
                         "Man10RealEstate Tax","税金の支払い")){
@@ -94,16 +91,13 @@ class City {
         }
 
         fun payTaxFromWarnRegion(){
-            val rgList = Region.regionData.values
+            //警告つきの土地のみ
+            val rgList = Region.regionData.values.filter { rg -> rg.taxStatus == Region.TaxStatus.WARN && rg.ownerUUID != null }
 
             Bukkit.getLogger().warning("滞納都市の税金の支払いを行います")
 
             for (rg in rgList){
-                if (rg.taxStatus == Region.TaxStatus.FREE || rg.ownerUUID == null)continue
                 val amount = getTax(rg.id)
-
-                //警告を受けていない都市はスルー
-                if (rg.taxStatus != Region.TaxStatus.WARN)continue
 
                 //ここで支払い失敗したら土地を手放す
                 if (!Plugin.bank.withdraw(rg.ownerUUID!!,amount,

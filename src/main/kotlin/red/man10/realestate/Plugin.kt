@@ -124,6 +124,7 @@ class Plugin : JavaPlugin(), Listener {
                     Logger.logger("月の変更を検知")
                     lastMonth = LocalDateTime.now()
                     Region.regionData.filterValues { it.span == 0 }.values.forEach { it.payRent() }
+
                     if (payTax){City.payTax()}
 
                 }
