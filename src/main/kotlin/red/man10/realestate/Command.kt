@@ -38,6 +38,8 @@ object Command:CommandExecutor {
 
     private const val USER = "mre.user"
     private const val GUEST = "mre.guest"
+    private const val SET_OWNER="mre.user.setowner"
+    private const val SET_PRICE="mre.user.setprice"
     const val OP = "mre.op"
 
     private val userConfirm = ConcurrentHashMap<UUID,Int>()
@@ -263,6 +265,8 @@ object Command:CommandExecutor {
                 "setowner" ->{
                     if (!hasPermission(sender,USER))return false
 
+                    if(sender.isPermissionSet(SET_OWNER)&&!hasPermission(sender, SET_OWNER))return false
+
                     if (args.size != 3)return false
 
                     val id = args[1].toIntOrNull()?:return false
@@ -318,8 +322,7 @@ object Command:CommandExecutor {
 
                     ownerConfirmKey.remove(sender.uniqueId)
 
-                    rg.ownerUUID = sender.uniqueId
-                    rg.ownerName = sender.name
+                    rg.setOwner(sender)
                     rg.asyncSave()
 
                 }
@@ -405,6 +408,9 @@ object Command:CommandExecutor {
 
                 "setprice" ->{
                     if (!hasPermission(sender,USER))return false
+
+                    if(sender.isPermissionSet(SET_PRICE)&&!hasPermission(sender, SET_PRICE))return false
+
 
                     if (args.size != 3)return false
 
@@ -643,14 +649,18 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            val city = City()
-                            city.name = args[2]
-                            city.world = sender.world.name
-                            city.server = Plugin.serverName
-                            city.setStart(startPosition)
-                            city.setEnd(endPosition)
-                            city.tax = amount
+
+                            val city=City.newInstance(args[2],sender.world.name,Plugin.serverName,startPosition,endPosition,amount)
+                            city.registerCityForRegion()
                             city.asyncSave()
+//                            val city = City()
+//                            city.name = args[2]
+//                            city.world = sender.world.name
+//                            city.server = Plugin.serverName
+//                            city.setStart(startPosition)
+//                            city.setEnd(endPosition)
+//                            city.tax = amount
+//                            city.asyncSave()
 
                             sendMessage(sender,"§a§l登録処理終了")
 
@@ -766,6 +776,7 @@ object Command:CommandExecutor {
 
                     }
                     city.asyncDelete()
+                    City.cityData.remove(id)
                     sendMessage(sender,"§a§l削除完了！")
 
                 }
@@ -1014,7 +1025,7 @@ object Command:CommandExecutor {
 
                             while (rs.next()){
                                 val id = rs.getInt("id")
-                                sendClickMessage(sender,"§e§lID:$id","mreop tp $id","飛ぶ")
+                                sendClickMessage(sender,"§e§lID:$id","mre tp $id","飛ぶ")
                             }
 
                             rs.close()
@@ -1157,6 +1168,25 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§a§l$id のテレポートを許可しました")
                     }
                 }
+
+
+                "reloadCityData"->{
+
+                    Plugin.async.execute {
+                        sendMessage(sender,"再読み込み中...")
+
+                        for(region in Region.regionData.values) {
+                            region.reloadBelongingCity()
+                            region.asyncSave()
+                        }
+
+                        sendMessage(sender,"土地の所属都市の情報のリロードが完了しました")
+
+                    }
+
+                }
+
+
 
                 else ->{
                     sendMessage(sender,"§c§l不明なコマンドです！")

@@ -18,6 +18,19 @@ class City {
 
         val cityData = ConcurrentHashMap<String, City>()
         private val gson = Gson()
+
+        fun newInstance(name:String,worldName:String,serverName:String,startPosition: Triple<Int,Int,Int>,endPosition: Triple<Int,Int,Int>,tax:Double):City{
+            val city = City()
+            city.name = name
+            city.world = worldName
+            city.server = serverName
+            city.setStart(startPosition)
+            city.setEnd(endPosition)
+            city.tax = tax
+
+            return city
+        }
+
         fun asyncLoad(){
 
             Plugin.async.execute {
@@ -201,11 +214,26 @@ class City {
                 val file = File("${Plugin.plugin.dataFolder}/${name}.json")
                 file.delete()
 
+                Region.regionData.values.filter { region -> region.data.city==name }.forEach { region->
+                    region.data.city=null
+                    region.asyncSave()
+                }
+
             }catch (e:IOException){
                 Bukkit.getLogger().info(e.message)
                 Bukkit.getLogger().info(e.stackTraceToString())
             }
 
+        }
+    }
+
+    fun registerCityForRegion(){
+        //cityの重複は認めない構造になっているので、nullのもののみ見る
+        Region.regionData.filterValues { region -> region.data.city==null  }.values.forEach {region ->
+            if(Utility.isWithinRange(region.teleport,getStart(),getEnd(),world,server)){
+                region.data.city=name
+                region.asyncSave()
+            }
         }
     }
 

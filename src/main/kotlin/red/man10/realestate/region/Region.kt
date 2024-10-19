@@ -304,7 +304,7 @@ class Region {
         price = default?:city.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
-        this.data = RegionData(false,0.0,0.0)
+        this.data = RegionData(false,0.0,0.0, city.name)
         User.asyncDeleteAllRegionUser(id)
         asyncSave()
     }
@@ -324,6 +324,22 @@ class Region {
     //住人の取得
     fun getUser(): List<User> {
         return User.fromRegion(id)
+    }
+
+    fun setOwner(player:Player):Boolean{
+        ownerUUID=player.uniqueId
+        ownerName=player.name
+        return true
+    }
+
+    fun removeOwner():Boolean{
+        ownerUUID=null
+        ownerName=null
+        return true
+    }
+
+    fun reloadBelongingCity(){
+        data.city=City.where(teleport)?.name
     }
 
     fun showRegionData(p:Player){
@@ -358,7 +374,8 @@ class Region {
     data class RegionData(
         var denyTeleport : Boolean,
         var defaultPrice : Double,
-        var tax : Double
+        var tax : Double,
+        var city:String?=null
     )
 
     enum class TaxStatus(val value : String){
