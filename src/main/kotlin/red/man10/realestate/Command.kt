@@ -652,6 +652,10 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
+                            if(City.cityData.contains(args[2])){
+                                sendMessage(sender,"§c§l${args[2]}は既に存在します")
+                                return@execute
+                            }
 
                             val city=City.newInstance(args[2],sender.world.name,Plugin.serverName,startPosition,endPosition,amount)
                             city.registerCityForRegion()
