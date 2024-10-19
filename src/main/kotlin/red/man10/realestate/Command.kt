@@ -1172,16 +1172,35 @@ object Command:CommandExecutor {
 
                 "reloadCityData"->{
 
-                    Plugin.async.execute {
-                        sendMessage(sender,"再読み込み中...")
+                    if(args.size<2)return true
 
-                        for(region in Region.regionData.values) {
+                    if(args[1]=="all"){
+
+                        Plugin.async.execute {
+                            sendMessage(sender, "再読み込み中...")
+
+                            for (region in Region.regionData.values) {
+                                region.reloadBelongingCity()
+                                region.asyncSave()
+                            }
+
+                            sendMessage(sender, "土地の所属都市の情報のリロードが完了しました")
+
+                        }
+                    }
+                    else{
+                        val id=args[1].toIntOrNull()?:return true
+                        Plugin.async.execute {
+                            sendMessage(sender, "再読み込み中...")
+
+                            val region=Region.regionData[id]?: return@execute
                             region.reloadBelongingCity()
                             region.asyncSave()
+
+
+                            sendMessage(sender, "土地ID${id}の所属都市の情報のリロードが完了しました")
+
                         }
-
-                        sendMessage(sender,"土地の所属都市の情報のリロードが完了しました")
-
                     }
 
                 }

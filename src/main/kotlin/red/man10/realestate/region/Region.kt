@@ -287,8 +287,7 @@ class Region {
             Plugin.bank.deposit(ownerUUID!!,price,"Man10RealEstate RegionProfit","土地の売上")
         }
 
-        ownerUUID = p.uniqueId
-        ownerName = p.name
+        setOwner(p)
         status = Status.PROTECTED
         asyncSave()
 
