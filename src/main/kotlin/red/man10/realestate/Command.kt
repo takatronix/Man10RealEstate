@@ -21,11 +21,8 @@ import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.menu.MainMenu
-import red.man10.realestate.region.Bookmark
-import red.man10.realestate.region.City
-import red.man10.realestate.region.Region
+import red.man10.realestate.region.*
 import red.man10.realestate.region.Region.Companion.formatStatus
-import red.man10.realestate.region.User
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.format
@@ -63,6 +60,31 @@ object Command:CommandExecutor {
             }
 
             when(args[0]){
+
+                "dirt"->{
+                    val loc=sender.location
+                    if(loc.block.type!=Material.AIR){
+                        sendMessage(sender,"§c§l足元が空気ブロックではありません")
+                        return true
+                    }
+                    Region.regionData.forEach{ entry ->
+                        val rg = entry.value
+
+                        if (Utility.isWithinRange(sender.location,rg.startPosition,rg.endPosition,rg.world,rg.server)) {
+                            if (rg.ownerUUID == sender.uniqueId) {
+                                if(!vault.withdraw(sender.uniqueId,10.0)){
+                                    sendMessage(sender,"§c§lお金が足りません!")
+                                }
+                                else{
+                                    loc.block.type=Material.DIRT
+                                    sendMessage(sender,"§a§lブロックを設置しました")
+                                }
+                                return true
+                            }
+                        }
+                    }
+                    sendMessage(sender,"§c§l自分の土地以外に対して使用することはできません")
+                }
 
                 "buy" ->{
 
