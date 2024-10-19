@@ -595,6 +595,7 @@ object Command:CommandExecutor {
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
                     §e§l/mreop editcity <city> : 指定都市の編集をする"
                     §e§l/mreop editrg <city> : 指定リージョンの編集をする"
+                    §e§l/mreop reloadCityData <regionID/all> : 指定リージョンの所属している土地情報をリロードする"
                 """.trimIndent())
 
                 return true
