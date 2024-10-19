@@ -39,7 +39,7 @@ class Plugin : JavaPlugin(), Listener {
         var penalty = 2.5 //税金の支払いに失敗した時のペナルティ
         var limitDayOfMonth = 15 //滞納した時に、次に支払いを求める日付(15ならn月15日に)
 
-        var holdableCityNum=-1 //住める都市の数
+        var ownableCityNum=-1 //住める都市の数
 
         private var payTax = true
 
@@ -86,7 +86,7 @@ class Plugin : JavaPlugin(), Listener {
         Event.maxContainers = config.getInt("containerAmount",24)
         payTax = config.getBoolean("taxTimer",true)
         saveResource("config.yml", false)
-        holdableCityNum=config.getInt("holdableCityNum",-1)
+        ownableCityNum=config.getInt("ownableCityNum",-1)
     }
 
     private fun runDailyTask(){

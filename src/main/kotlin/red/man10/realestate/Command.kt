@@ -313,6 +313,8 @@ object Command:CommandExecutor {
                     val id = ownerConfirmKey[sender.uniqueId]?:return false
                     val rg = Region.regionData[id]?:return false
 
+                    if(!rg.canOwn(sender))return false
+
                     if (rg.ownerUUID!=null){
                         val oldOwner = Bukkit.getPlayer(rg.ownerUUID!!)
                         oldOwner?.let { sendMessage(it,"承認されました") }

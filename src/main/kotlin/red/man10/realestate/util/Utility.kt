@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import red.man10.realestate.Plugin
 import red.man10.realestate.Plugin.Companion.prefix
+import red.man10.realestate.region.Region
 import kotlin.math.abs
 
 object Utility {
@@ -57,6 +58,20 @@ object Utility {
 
     fun format(double: Double):String{
         return String.format("%,.0f",double)
+    }
+
+    //プレイヤーが所持している土地がある都市の名前を返す
+    fun playerLivedCities(player:Player):ArrayList<String>{
+        val cities=ArrayList<String>()
+        Region.regionData.values.filter { region -> region.ownerUUID==player.uniqueId}.forEach {region->
+            region.data.city?.let {
+                if(!cities.contains(it)){
+                    cities.add(it)
+                }
+            }
+        }
+
+        return cities
     }
 
 }

@@ -278,6 +278,8 @@ class Region {
             return
         }
 
+        if(!canOwn(p))return
+
         if (!Plugin.vault.withdraw(p.uniqueId,price)){
             Utility.sendMessage(p, "§c§l電子マネーが足りません！")
             return
@@ -325,10 +327,23 @@ class Region {
         return User.fromRegion(id)
     }
 
-    fun setOwner(player:Player):Boolean{
+    fun canOwn(player:Player):Boolean{
+        if(Plugin.ownableCityNum!=-1){
+            val cities=Utility.playerLivedCities(player)
+            println(cities)
+            if(cities.size>=Plugin.ownableCityNum&&!cities.contains(data.city)){
+
+                Utility.sendMessage(player,"§c§lこれ以上他の都市に住むことはできません")
+
+                return false
+            }
+        }
+        return true
+    }
+
+    fun setOwner(player:Player){
         ownerUUID=player.uniqueId
         ownerName=player.name
-        return true
     }
 
     fun removeOwner():Boolean{
