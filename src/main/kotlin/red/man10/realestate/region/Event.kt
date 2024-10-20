@@ -434,27 +434,9 @@ object Event :Listener{
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
 
-                if (rg.status == Region.Status.LOCK)return false
-                if (rg.ownerUUID == p.uniqueId)return true
-                if (rg.status == Region.Status.DANGER)return true
+                val user=User.get(p,id)?:return false
+                return user.hasPermission(perm)
 
-                if (perm != BLOCK &&rg.status == Region.Status.FREE)return true
-
-                val data = User.get(p,id) ?:return false
-
-                if (data.status == "Lock")return false
-                if (data.allowAll)return true
-
-                when(perm){
-
-                    BLOCK ->{ if (data.allowBlock)return true }
-                    INVENTORY ->{ if (data.allowInv)return true }
-                    DOOR ->{ if (data.allowDoor)return true }
-                    else->return false
-
-                }
-
-                return false
             }
         }
 

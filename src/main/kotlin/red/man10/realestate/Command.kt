@@ -413,14 +413,10 @@ object Command:CommandExecutor {
                     val status = args[2]
                     val rg = Region.regionData[id]?:return false
 
-                    if (!hasRegionPermission(sender,id))return false
 
-                    if (!hasPermission(sender,OP) && status=="Lock"){ return true }
-
-                    rg.status = Region.Status.valueOf(status)
+                    rg.setStatus(sender,Region.Status.valueOf(status))
                     rg.asyncSave()
 
-                    sendMessage(sender,"§a§l${id}の土地の状態を${formatStatus(rg.status)}に変更しました")
                     return true
 
                 }
@@ -612,6 +608,7 @@ object Command:CommandExecutor {
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
                     §e§l/mreop editcity <city> : 指定都市の編集をする"
                     §e§l/mreop editrg <city> : 指定リージョンの編集をする"
+                    §e§l/mreop denytp <regionID> : 指定リージョンのmre tpの規制を編集"
                     §e§l/mreop reloadCityData <regionID/all> : 指定リージョンの所属している土地情報をリロードする"
                 """.trimIndent())
 
@@ -1228,6 +1225,7 @@ object Command:CommandExecutor {
                     }
 
                 }
+                
 
 
 

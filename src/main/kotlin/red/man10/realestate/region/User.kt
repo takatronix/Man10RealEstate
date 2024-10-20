@@ -130,6 +130,30 @@ class User(val uuid: UUID,val regionId:Int) {
 
         asyncSave()
     }
+
+    fun hasPermission(permission: Permission):Boolean{
+        val region=Region.regionData[regionId]?:return false
+        if (region.status == Region.Status.LOCK)return false
+        if (region.ownerUUID == uuid)return true
+        if (region.status == Region.Status.DANGER)return true
+
+        if (permission != Permission.BLOCK &&region.status == Region.Status.FREE)return true
+
+        if (status == "Lock")return false
+        if (allowAll)return true
+
+        when(permission){
+
+            Permission.BLOCK ->{ if (allowBlock)return true }
+            Permission.INVENTORY ->{ if (allowInv)return true }
+            Permission.DOOR ->{ if (allowDoor)return true }
+            else->return false
+
+        }
+
+        return false
+    }
+
     enum class Permission{
         ALL,
         BLOCK,

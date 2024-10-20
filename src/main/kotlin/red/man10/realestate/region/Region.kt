@@ -5,6 +5,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.man10score.ScoreDatabase
+import red.man10.realestate.Command
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MySQLManager
@@ -219,6 +220,8 @@ class Region {
     var price : Double = 0.0
     var span = 0 //0:month 1:week 2:day
 
+    val userList=HashMap<UUID,User>()
+
     lateinit var data : RegionData
 
 
@@ -325,9 +328,10 @@ class Region {
     }
 
     //住人の取得
-    fun getUser(): List<User> {
+    fun getUsers(): List<User> {
         return User.fromRegion(id)
     }
+
 
     fun canOwn(player:Player):Boolean{
         if(Plugin.ownableCityNum!=-1){
@@ -345,7 +349,7 @@ class Region {
 
     fun addUser(player:Player){
 
-        if(getUser().size < (City.cityData[data.city]?.maxUser ?: -1)){
+        if(getUsers().size < (City.cityData[data.city]?.maxUser ?: -1)){
             User(player.uniqueId,id)
                     .asyncSave()
 
@@ -360,6 +364,46 @@ class Region {
         else{
             Utility.sendMessage(player, "§c§l土地の居住可能人数が上限に達しています")
         }
+
+    }
+
+    fun setStatus(player:Player,newStatus: Status){
+
+        if (player.hasPermission(Command.OP)){
+            Utility.sendMessage(player,"§a§l${id}の土地の状態を${newStatus}に変更しました")
+            this.status=newStatus
+            return
+        }
+
+
+        if (status ==Status.LOCK){
+            Utility.sendMessage(player,"§c§lロック状態の土地のステータス変更はできません")
+            return
+        }
+
+        if (ownerUUID == player.uniqueId) {
+            Utility.sendMessage(player,"§e§l土地のステータスを${Status.display(newStatus)}に変更しました")
+            this.status=newStatus
+            return
+        }
+
+        if(newStatus==Status.LOCK){//OP以外がlockにできないように
+            return
+        }
+
+        val user=User.get(player,id)?:run {
+            Utility.sendMessage(player,"§c§l権限がありません")
+            return
+        }
+
+        if(user.allowAll && user.status == "Share"){
+            Utility.sendMessage(player,"§e§l土地のステータスを${Status.display(newStatus)}に変更しました")
+            this.status=newStatus
+            return
+        }
+
+
+        Utility.sendMessage(player,"§c§l権限がありません")
 
     }
 
@@ -425,6 +469,18 @@ class Region {
         PROTECTED("Protected"),
         LOCK("Lock"),
         FREE("Free"),
-        DANGER("Danger")
+        DANGER("Danger");
+
+        companion object{
+            fun display(status: Status):String{
+                return when(status){
+                    ON_SALE->"販売中"
+                    PROTECTED->"保護"
+                    LOCK->"ロック"
+                    FREE->"フリー"
+                    DANGER->"無法地帯"
+                }
+            }
+        }
     }
 }
