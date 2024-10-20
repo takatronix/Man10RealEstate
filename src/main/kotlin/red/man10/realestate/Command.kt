@@ -233,12 +233,7 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    val data = User(sender.uniqueId,id)
-
-                    data.asyncSave()
-
-                    sendMessage(sender,"§a§lあなたは住人になりました！")
-                    sendMessage(owner,"§a§l${sender.name}が住人になりました！")
+                    rg.addUser(sender)
 
                     return true
 

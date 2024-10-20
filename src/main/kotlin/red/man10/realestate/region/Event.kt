@@ -7,6 +7,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
+import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -415,6 +416,8 @@ object Event :Listener{
             sendMessage(p,"§7この額縁を触ることはできません！")
             e.isCancelled = true
         }
+        e.isCancelled=false
+
     }
 
     private fun hasPermission(p:Player, loc: Location, perm:User.Permission):Boolean{

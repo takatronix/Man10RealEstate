@@ -130,7 +130,9 @@ class Region {
                     if (city.ownerScore>score){
                         it.value.status = Status.LOCK
                     }else{
+                        if(it.value.status==Status.LOCK){
                         it.value.status = Status.PROTECTED
+                        }
                     }
                 }
             }
@@ -339,6 +341,26 @@ class Region {
             }
         }
         return true
+    }
+
+    fun addUser(player:Player){
+
+        if(getUser().size < (City.cityData[data.city]?.maxUser ?: -1)){
+            User(player.uniqueId,id)
+                    .asyncSave()
+
+            Utility.sendMessage(player, "§a§lあなたは住人になりました！")
+
+            ownerUUID?.let { uuid ->
+                Bukkit.getPlayer(uuid)?.let { owner->
+                    Utility.sendMessage(owner, "§a§l${player.name}が住人になりました！")
+                }
+            }
+        }
+        else{
+            Utility.sendMessage(player, "§c§l土地の居住可能人数が上限に達しています")
+        }
+
     }
 
     fun setOwner(player:Player){
