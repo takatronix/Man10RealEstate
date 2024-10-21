@@ -5,17 +5,16 @@
 
 package red.man10.realestate
 
-import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.region.*
+import red.man10.realestate.region.user.User
 import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MenuFramework
 import red.man10.realestate.util.MySQLManager
 import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.util.*
 import java.util.concurrent.Executors
 
 
@@ -76,6 +75,7 @@ class Plugin : JavaPlugin(), Listener {
         Logger.logger("プラグイン終了")
         async.shutdown()
     }
+
 
     fun loadConfig(){
         reloadConfig()

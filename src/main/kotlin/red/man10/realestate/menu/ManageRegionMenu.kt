@@ -1,6 +1,5 @@
 package red.man10.realestate.menu
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Material
@@ -15,6 +14,7 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
 
     override fun init() {
         val rg = Region.regionData[id]
+
 
         if (rg == null){
             val closeButton = Button(Material.BARRIER)

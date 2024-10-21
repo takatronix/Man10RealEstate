@@ -22,7 +22,7 @@ import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.menu.MainMenu
 import red.man10.realestate.region.*
-import red.man10.realestate.region.Region.Companion.formatStatus
+import red.man10.realestate.region.user.User
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.format
@@ -604,6 +604,7 @@ object Command:CommandExecutor {
                     §e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します
                     §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
                     §e§l/mreop init <id> <price> : 指定リージョンを初期化する
+                    §e§l/mreop maxuser <city> <int> : 指定都市の上限人数を設定する
                     §e§l/mreop starttax : 手動で税金を徴収する
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
                     §e§l/mreop editcity <city> : 指定都市の編集をする"
@@ -878,6 +879,10 @@ object Command:CommandExecutor {
                                 sendMessage(sender, "§8Price:${rg.price}")
                                 sendMessage(sender, "§7Owner:${rg.ownerName}")
                                 sendMessage(sender,"§8Tax:${City.getTax(rg.id)}")
+                                sendMessage(sender,"§8User:")
+                                User.userMap.filterKeys { pair->pair.second==rg.id }.forEach {
+                                    sendMessage(sender,"§8${Bukkit.getOfflinePlayer(it.key.first).name}")
+                                }
                             }
                         }
 
@@ -1042,24 +1047,40 @@ object Command:CommandExecutor {
                         Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
                             val mysql = MySQLManager(plugin,"mre")
 
-                            val rs = mysql.query("select id from region where owner_name = '${args[1]}';")?:return@Runnable
-
-                            while (rs.next()){
-                                val id = rs.getInt("id")
-                                sendClickMessage(sender,"§e§lID:$id","mre tp $id","飛ぶ")
+                            mysql.query("select id from region where owner_name = '${args[1]}';")?.let {rs->
+                                sendMessage(sender,"オーナーの土地")
+                                while (rs.next()){
+                                    val id = rs.getInt("id")
+                                    sendClickMessage(sender,"§e§lID:$id","mre tp $id","飛ぶ")
+                                }
+                                rs.close()
                             }
 
-                            rs.close()
+                            mysql.query("select region_id from region_user where player = '${args[1]}';")?.let{userRs->
+
+                                sendMessage(sender,"住人の土地")
+                                while (userRs.next()){
+                                    val id = userRs.getInt("region_id")
+                                    sendClickMessage(sender,"§e§lID:$id","mre tp $id","飛ぶ")
+                                }
+                                userRs.close()
+                            }
+
                             mysql.close()
 
                         })
 
                         return true
                     }
+                    sendMessage(sender,"オーナーの土地")
                     for (rg in Region.regionData.filter { it.value.ownerUUID == uuid }.keys){
-                        sendClickMessage(sender,"§e§lID:${rg}","mreop tp $rg","飛ぶ")
-                    }
+                        sendClickMessage(sender,"§e§lID:${rg}","mre tp $rg","飛ぶ")
 
+                    }
+                    User.userMap.filterKeys { it.first==uuid }.values.forEach { user->
+                        sendMessage(sender, "住人の土地")
+                        sendClickMessage(sender, "§e§lID:${user.regionId}", "mre tp ${user.regionId}", "飛ぶ")
+                    }
                 }
 
                 "maxuser" ->{
@@ -1225,7 +1246,7 @@ object Command:CommandExecutor {
                     }
 
                 }
-                
+
 
 
 

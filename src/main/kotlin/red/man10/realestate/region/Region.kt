@@ -7,12 +7,15 @@ import org.bukkit.entity.Player
 import red.man10.man10score.ScoreDatabase
 import red.man10.realestate.Command
 import red.man10.realestate.Plugin
+import red.man10.realestate.region.user.Permission
+import red.man10.realestate.region.user.User
 import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 class Region {
 
@@ -20,6 +23,7 @@ class Region {
 
         val regionData = ConcurrentHashMap<Int, Region>()
         val gson = Gson()
+        var finishLoading=AtomicBoolean(false)
 
         fun formatStatus(status: Status):String{
             return when(status){
@@ -43,6 +47,7 @@ class Region {
         fun asyncLoad(){
 
             Logger.logger("土地の読み込み開始")
+            finishLoading.set(false)
 
             Plugin.async.execute {
                 regionData.clear()
@@ -117,6 +122,7 @@ class Region {
                 }
                 rs.close()
                 sql.close()
+                finishLoading.set(true)
             }
         }
 
@@ -220,7 +226,7 @@ class Region {
     var price : Double = 0.0
     var span = 0 //0:month 1:week 2:day
 
-    val userList=HashMap<UUID,User>()
+    val userList=HashMap<UUID, User>()
 
     lateinit var data : RegionData
 
@@ -350,7 +356,7 @@ class Region {
     fun addUser(player:Player){
 
         if(getUsers().size < (City.cityData[data.city]?.maxUser ?: -1)){
-            User(player.uniqueId,id)
+            User(player.uniqueId,this)
                     .asyncSave()
 
             Utility.sendMessage(player, "§a§lあなたは住人になりました！")
@@ -370,7 +376,7 @@ class Region {
     fun setStatus(player:Player,newStatus: Status){
 
         if (player.hasPermission(Command.OP)){
-            Utility.sendMessage(player,"§a§l${id}の土地の状態を${newStatus}に変更しました")
+            Utility.sendMessage(player,"§a§lID${id}の土地の状態を${Status.display(newStatus)}に変更しました")
             this.status=newStatus
             return
         }
@@ -391,12 +397,12 @@ class Region {
             return
         }
 
-        val user=User.get(player,id)?:run {
+        val user= User.get(player,id)?:run {
             Utility.sendMessage(player,"§c§l権限がありません")
             return
         }
 
-        if(user.allowAll && user.status == "Share"){
+        if(user.permissions.contains(Permission.ALL) && user.status == "Share"){
             Utility.sendMessage(player,"§e§l土地のステータスを${Status.display(newStatus)}に変更しました")
             this.status=newStatus
             return
