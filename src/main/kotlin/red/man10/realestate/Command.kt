@@ -22,6 +22,7 @@ import red.man10.realestate.Plugin.Companion.prefix
 import red.man10.realestate.Plugin.Companion.vault
 import red.man10.realestate.menu.MainMenu
 import red.man10.realestate.region.*
+import red.man10.realestate.region.user.Permission
 import red.man10.realestate.region.user.User
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
@@ -1079,7 +1080,7 @@ object Command:CommandExecutor {
                     }
                     User.userMap.filterKeys { it.first==uuid }.values.forEach { user->
                         sendMessage(sender, "住人の土地")
-                        sendClickMessage(sender, "§e§lID:${user.regionId}", "mre tp ${user.regionId}", "飛ぶ")
+                        sendClickMessage(sender, "§e§lID:${user.region.id}", "mre tp ${user.region.id}", "飛ぶ")
                     }
                 }
 
@@ -1289,6 +1290,6 @@ object Command:CommandExecutor {
 
         val userData = User.get(p,id)?:return false
 
-        return userData.allowAll && userData.status == "Share"
+        return userData.permissions.contains(Permission.ALL) && userData.status == "Share"
     }
 }
