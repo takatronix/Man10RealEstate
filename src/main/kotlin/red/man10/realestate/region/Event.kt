@@ -5,8 +5,11 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.block.Container
 import org.bukkit.block.Sign
+import org.bukkit.block.data.Openable
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -22,6 +25,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.material.Attachable
 import org.bukkit.material.Colorable
 import org.bukkit.persistence.PersistentDataType
 import red.man10.realestate.Command
@@ -309,8 +313,9 @@ object Event :Listener{
         }
 
         val block=e.clickedBlock?.type?:return
+        block.data is Attachable
 
-        if (!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
+        if (Permission.getAllowedBlocks(Permission.DOOR).contains(block)&&!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
@@ -396,6 +401,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun itemFrameInteractEvent(e:IFPInteractEvent){
+        if(disableWorld.contains(e.data.loc.world.name))return
         val p = e.entity
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
@@ -408,6 +414,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun itemFrameRemoveEvent(e:IFPRemoveEvent){
+        if(disableWorld.contains(e.data.loc.world.name))return
         val p = e.remover
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
