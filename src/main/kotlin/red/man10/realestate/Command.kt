@@ -608,8 +608,8 @@ object Command:CommandExecutor {
                     §e§l/mreop maxuser <city> <int> : 指定都市の上限人数を設定する
                     §e§l/mreop starttax : 手動で税金を徴収する
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
-                    §e§l/mreop editcity <city> : 指定都市の編集をする"
-                    §e§l/mreop editrg <city> : 指定リージョンの編集をする"
+                    §e§l/mreop editcity <city> : 指定都市の編集コマンド一覧を表示する"
+                    §e§l/mreop editrg <city> : 指定リージョンの編集コマンド一覧を表示する"
                     §e§l/mreop denytp <regionID> : 指定リージョンのmre tpの規制を編集"
                     §e§l/mreop reloadCityData <regionID/all> : 指定リージョンの所属している土地情報をリロードする"
                 """.trimIndent())
@@ -981,13 +981,21 @@ object Command:CommandExecutor {
                     val tax= args[3].toDouble()
 
                     if (args[1] == "rg"){
-                        val id = args[2].toInt()
-                        val rg = Region.regionData[id]?:return false
-                        val data = rg.data
-                        data.tax = tax
-                        rg.data = data
-                        rg.asyncSave()
-
+                        val id = args[2].toIntOrNull()
+                        if(id!=null){
+                            val rg = Region.regionData[id] ?: return false
+                            rg.data.tax = tax
+                            rg.asyncSave()
+                        }
+                        else{
+                            City.getPartialMatchCities(args[2]).forEach {city->
+                                Region.regionData.filter { it.value.data.city==city.name }.forEach { (i, region) ->
+                                    sender.sendMessage("§aID${i}の土地の税金を変更しました")
+                                    region.data.tax=tax
+                                    region.asyncSave()
+                                }
+                            }
+                        }
                         sendMessage(sender,"§a§l設定完了！")
                         return true
                     }
@@ -1002,6 +1010,7 @@ object Command:CommandExecutor {
                         }
 
                         cities.forEach {city->
+                            sender.sendMessage("§aID${city.name}の税金を変更しました")
                             city.tax=tax
                             city.asyncSave()
                         }
@@ -1018,12 +1027,20 @@ object Command:CommandExecutor {
 
                 "init" ->{
 
-                    val id = args[1].toInt()
+                    val id = args[1].toIntOrNull()
                     val price =  args[2].toDouble()
-                    val rg = Region.regionData[id]?:return false
-
-                    rg.init(Region.Status.ON_SALE,price)
-
+                    if(id!=null) {
+                        val rg = Region.regionData[id] ?: return false
+                        rg.init(Region.Status.ON_SALE, price)
+                    }
+                    else{
+                        City.getPartialMatchCities(args[2]).forEach { city->
+                            Region.regionData.filter { it.value.data.city==city.name }.forEach { (i,region) ->
+                                sender.sendMessage("§aID${i}の土地を初期化")
+                                region.init(Region.Status.ON_SALE,price)
+                            }
+                        }
+                    }
                     sendMessage(sender,"§a§l初期化完了")
 
                     return true
@@ -1118,21 +1135,44 @@ object Command:CommandExecutor {
 
                 "remit" ->{//mreop remit <id>
 
-                    val id = args[1].toIntOrNull()?:return false
+                    val id = args[1].toIntOrNull()
 
-                    val rg = Region.regionData[id]?:return false
-                    if (rg.taxStatus == Region.TaxStatus.FREE){
-                        rg.taxStatus = Region.TaxStatus.SUCCESS
-                    }else{
-                        rg.taxStatus = Region.TaxStatus.FREE
+                    if(id!=null) {
+
+                        val rg = Region.regionData[id] ?: return false
+                        if (rg.taxStatus == Region.TaxStatus.FREE) {
+                            rg.taxStatus = Region.TaxStatus.SUCCESS
+                        } else {
+                            rg.taxStatus = Region.TaxStatus.FREE
+                        }
+
+                        rg.asyncSave()
+
+                        if (rg.taxStatus == Region.TaxStatus.FREE) {
+                            sendMessage(sender, "§a§lID$id の税金を免除するようにしました")
+                        } else {
+                            sendMessage(sender, "§a§lID$id の税金を免除を解除しました")
+                        }
                     }
+                    else{
+                        City.getPartialMatchCities(args[1]).forEach { city->
+                            Region.regionData.filter { it.value.data.city==city.name }.forEach { (i,region)->
 
-                    rg.asyncSave()
+                                if (region.taxStatus == Region.TaxStatus.FREE) {
+                                    region.taxStatus = Region.TaxStatus.SUCCESS
+                                } else {
+                                    region.taxStatus = Region.TaxStatus.FREE
+                                }
 
-                    if (rg.taxStatus == Region.TaxStatus.FREE){
-                        sendMessage(sender,"§a§l$id の税金を免除するようにしました")
-                    }else{
-                        sendMessage(sender,"§a§l$id の税金を免除を解除しました")
+                                region.asyncSave()
+
+                                if (region.taxStatus == Region.TaxStatus.FREE) {
+                                    sendMessage(sender, "§a§lID${i}の税金を免除するようにしました")
+                                } else {
+                                    sendMessage(sender, "§a§lID${i}の税金を免除を解除しました")
+                                }
+                            }
+                        }
                     }
 
                     return true
@@ -1143,15 +1183,20 @@ object Command:CommandExecutor {
                     if (args.size != 3)return false
                     if (!NumberUtils.isNumber(args[2]))return false
 
-                    val city = City.cityData[args[1]]
+
+
+                    val cities = City.getPartialMatchCities(args[1])
                     val score= args[2].toInt()
 
-                    if (city == null){
+                    if (cities.isEmpty()){
                         sendMessage(sender,"存在しない都市")
                         return false
                     }
-                    city.ownerScore = score
-                    city.asyncSave()
+                    cities.forEach { city->
+                        city.ownerScore = score
+                        city.asyncSave()
+                        sendMessage(sender,"§a§l${city.name}の購入に必要なスコアを${score}に変更")
+                    }
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -1162,15 +1207,18 @@ object Command:CommandExecutor {
                     if (args.size != 3)return false
                     if (!NumberUtils.isNumber(args[2]))return false
 
-                    val city = City.cityData[args[1]]
+                    val cities = City.getPartialMatchCities(args[1])
                     val score= args[2].toInt()
 
-                    if (city == null){
+                    if (cities.isEmpty()){
                         sendMessage(sender,"存在しない都市")
                         return false
                     }
-                    city.liveScore = score
-                    city.asyncSave()
+                    cities.forEach { city->
+                        city.liveScore = score
+                        city.asyncSave()
+                        sendMessage(sender,"§a§l${city.name}の居住に必要なスコアを${score}に変更")
+                    }
 
                     sendMessage(sender,"§a§l設定完了！")
 
@@ -1180,31 +1228,47 @@ object Command:CommandExecutor {
 
                     if (args.size != 4)return false
 
+                    val price = args[3].toDoubleOrNull() ?: return true
                     if (args[1] == "rg"){
-                        val id = args[2].toIntOrNull()?:return false
+                        val id = args[2].toIntOrNull()
 
-                        val rg = Region.regionData[id]?:return false
-                        val data = rg.data
-                        val price = args[3].toDoubleOrNull()?:return true
-                        data.defaultPrice = price
-                        rg.data = data
-                        rg.asyncSave()
+                        if(id!=null) {
+                            val rg = Region.regionData[id] ?: return false
+                            rg.data.defaultPrice = price
+                            rg.asyncSave()
+                        }
+                        else{
+                            City.getPartialMatchCities(args[2]).forEach {city->
+                                Region.regionData.filter { it.value.data.city==city.name }.forEach { (i,region)->
+                                    region.data.defaultPrice = price
+                                    region.asyncSave()
+                                    sendMessage(sender,"§a§lID${i}の初期価格を${price}に変更")
+                                }
+                            }
+                        }
 
                         sendMessage(sender,"§a§l設定完了！")
                         return true
                     }
+                    if(args[1]=="city"){
 
-                    val city = City.cityData[args[2]]
-                    val price = args[3].toDouble()
+                        val cities = City.getPartialMatchCities(args[2])
 
-                    if (city == null){
-                        sendMessage(sender,"存在しない都市")
-                        return false
+                        if (cities.isEmpty()){
+                            sendMessage(sender,"存在しない都市")
+                            return false
+                        }
+
+                        cities.forEach { city->
+                            city.defaultPrice = price
+                            sendMessage(sender,"§a§l${city.name}の初期土地価格を${price}に変更")
+                            city.asyncSave()
+                        }
+
+                        sendMessage(sender,"§a§l設定完了！")
+                        return true
                     }
-                    city.defaultPrice = price
-                    city.asyncSave()
-
-                    sendMessage(sender,"§a§l設定完了！")
+                    sendMessage(sender,"/mreop defaultPrice <rg/city> id amount")
                 }
 
                 "denytp" -> { //mreop denytp <id>
