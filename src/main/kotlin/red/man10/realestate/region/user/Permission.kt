@@ -26,6 +26,7 @@ enum class Permission {
                     Material.TRAPPED_CHEST,
                     Material.DISPENSER,
                     Material.DROPPER,
+                    Material.BLAST_FURNACE,
                     Material.FURNACE,
                     Material.BARREL,
                     Material.SHULKER_BOX,

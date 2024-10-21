@@ -992,16 +992,25 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    val city = City.cityData[args[2]]
+                    if(args[1]=="city") {
 
-                    if (city == null){
-                        sendMessage(sender,"存在しない都市")
-                        return false
+                        val cities = City.getPartialMatchCities(args[2])
+
+                        if (cities.isEmpty()) {
+                            sendMessage(sender, "存在しない都市")
+                            return false
+                        }
+
+                        cities.forEach {city->
+                            city.tax=tax
+                            city.asyncSave()
+                        }
+
+                        sendMessage(sender, "§a§l設定完了！")
+                        return true
                     }
-                    city.tax = tax
-                    city.asyncSave()
 
-                    sendMessage(sender,"§a§l設定完了！")
+                    sendMessage(sender, "§c§l/mreop tax rg/city id tax")
 
                     return  true
                 }
@@ -1090,15 +1099,19 @@ object Command:CommandExecutor {
                     if (args.size != 3)return false
                     if (!NumberUtils.isNumber(args[2]))return false
 
-                    val city = City.cityData[args[1]]
+                    val cities=City.getPartialMatchCities(args[1])
                     val max= args[2].toInt()
 
-                    if (city == null){
+                    if (cities.isEmpty()){
                         sendMessage(sender,"存在しない都市")
                         return false
                     }
-                    city.maxUser = max
-                    city.asyncSave()
+
+                    cities.forEach { city ->
+
+                        city.maxUser = max
+                        city.asyncSave()
+                    }
 
                     sendMessage(sender,"§a§l設定完了！")
                 }

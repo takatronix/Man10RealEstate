@@ -19,6 +19,35 @@ class City {
         val cityData = ConcurrentHashMap<String, City>()
         private val gson = Gson()
 
+        fun getPartialMatchCities(str:String):List<City>{
+            val prefix=str.startsWith("%")
+            val suffix=str.endsWith("%")
+            val cityName=str.removePrefix("%").removeSuffix("%")
+            val cities=ArrayList<City>()
+
+            if(prefix&&suffix){
+                cityData.forEach{
+                    if(it.key.contains(cityName))cities.add(it.value)
+                }
+            }
+            else if(prefix){
+                cityData.forEach{
+                    if(it.key.startsWith(cityName))cities.add(it.value)
+                }
+
+            }
+            else if(suffix){
+                cityData.forEach{
+                    if(it.key.endsWith(cityName))cities.add(it.value)
+                }
+            }
+            else{
+                cityData[cityName]?.let { cities.add(it) }
+            }
+
+            return cities.toList()
+        }
+
         fun newInstance(name:String,worldName:String,serverName:String,startPosition: Triple<Int,Int,Int>,endPosition: Triple<Int,Int,Int>,tax:Double):City{
             val city = City()
             city.name = name
