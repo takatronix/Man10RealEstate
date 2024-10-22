@@ -6,7 +6,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import red.man10.realestate.Plugin
-import red.man10.realestate.region.Region
 import red.man10.realestate.region.user.Permission
 import red.man10.realestate.region.user.User
 import red.man10.realestate.util.MenuFramework

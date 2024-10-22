@@ -31,6 +31,7 @@ import red.man10.realestate.util.Utility.sendClickMessage
 import red.man10.realestate.util.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 object Command:CommandExecutor {
 
@@ -43,6 +44,8 @@ object Command:CommandExecutor {
     private val userConfirm = ConcurrentHashMap<UUID,Int>()
     private val buyConfirmKey = HashMap<UUID, Int>()
     private val ownerConfirmKey = HashMap<UUID,Int>()
+
+    private var isRunning=AtomicBoolean(false)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -986,17 +989,25 @@ object Command:CommandExecutor {
                             val rg = Region.regionData[id] ?: return false
                             rg.data.tax = tax
                             rg.asyncSave()
+                            sendMessage(sender,"§a§l設定完了！")
                         }
                         else{
-                            City.getPartialMatchCities(args[2]).forEach {city->
-                                Region.regionData.filter { it.value.data.city==city.name }.forEach { (i, region) ->
-                                    sender.sendMessage("§aID${i}の土地の税金を変更しました")
-                                    region.data.tax=tax
-                                    region.asyncSave()
+                            if(isRunning.get()){
+                                sendMessage(sender,"§c§l現在別の処理が走っています")
+                                return true
+                            }
+                            isRunning.set(true)
+                            async.execute {
+                                City.getPartialMatchCities(args[2]).forEach { city ->
+                                    Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                        region.data.tax = tax
+                                        region.asyncSave()
+                                    }
                                 }
+                                isRunning.set(false)
+                                sendMessage(sender,"§a§l設定完了！")
                             }
                         }
-                        sendMessage(sender,"§a§l設定完了！")
                         return true
                     }
 
@@ -1009,13 +1020,19 @@ object Command:CommandExecutor {
                             return false
                         }
 
-                        cities.forEach {city->
-                            sender.sendMessage("§aID${city.name}の税金を変更しました")
-                            city.tax=tax
-                            city.asyncSave()
+                        if(isRunning.get()){
+                            sendMessage(sender,"§c§l現在別の処理が走っています")
+                            return true
                         }
-
-                        sendMessage(sender, "§a§l設定完了！")
+                        isRunning.set(true)
+                        async.execute {
+                            cities.forEach { city ->
+                                city.tax = tax
+                                city.asyncSave()
+                            }
+                            isRunning.set(false)
+                            sendMessage(sender, "§a§l設定完了！")
+                        }
                         return true
                     }
 
@@ -1124,13 +1141,22 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    cities.forEach { city ->
-
-                        city.maxUser = max
-                        city.asyncSave()
+                    if(isRunning.get()){
+                        sendMessage(sender,"§c§l現在別の処理が走っています")
+                        return true
                     }
 
-                    sendMessage(sender,"§a§l設定完了！")
+                    isRunning.set(true)
+
+                    async.execute {
+                        cities.forEach { city ->
+
+                            city.maxUser = max
+                            city.asyncSave()
+                        }
+                        isRunning.set(false)
+                        sendMessage(sender, "§a§l設定完了！")
+                    }
                 }
 
                 "remit" ->{//mreop remit <id>
@@ -1155,23 +1181,33 @@ object Command:CommandExecutor {
                         }
                     }
                     else{
-                        City.getPartialMatchCities(args[1]).forEach { city->
-                            Region.regionData.filter { it.value.data.city==city.name }.forEach { (i,region)->
 
-                                if (region.taxStatus == Region.TaxStatus.FREE) {
-                                    region.taxStatus = Region.TaxStatus.SUCCESS
-                                } else {
-                                    region.taxStatus = Region.TaxStatus.FREE
-                                }
+                        if(isRunning.get()){
+                            sendMessage(sender,"§c§l現在別の処理が走っています")
+                            return true
+                        }
+                        isRunning.set(true)
+                        async.execute {
+                            City.getPartialMatchCities(args[1]).forEach { city ->
+                                Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
 
-                                region.asyncSave()
+                                    if (region.taxStatus == Region.TaxStatus.FREE) {
+                                        region.taxStatus = Region.TaxStatus.SUCCESS
+                                    } else {
+                                        region.taxStatus = Region.TaxStatus.FREE
+                                    }
 
-                                if (region.taxStatus == Region.TaxStatus.FREE) {
-                                    sendMessage(sender, "§a§lID${i}の税金を免除するようにしました")
-                                } else {
-                                    sendMessage(sender, "§a§lID${i}の税金を免除を解除しました")
+                                    region.asyncSave()
+
+                                    if (region.taxStatus == Region.TaxStatus.FREE) {
+                                        sendMessage(sender, "§a§lID${i}の税金を免除するようにしました")
+                                    } else {
+                                        sendMessage(sender, "§a§lID${i}の税金を免除を解除しました")
+                                    }
                                 }
                             }
+                            isRunning.set(false)
+                            sendMessage(sender,"§a§l設定完了")
                         }
                     }
 
@@ -1192,14 +1228,19 @@ object Command:CommandExecutor {
                         sendMessage(sender,"存在しない都市")
                         return false
                     }
-                    cities.forEach { city->
-                        city.ownerScore = score
-                        city.asyncSave()
-                        sendMessage(sender,"§a§l${city.name}の購入に必要なスコアを${score}に変更")
+                    if(isRunning.get()){
+                        sendMessage(sender,"§c§l現在別の処理が走っています")
+                        return true
                     }
-
-                    sendMessage(sender,"§a§l設定完了！")
-
+                    isRunning.set(true)
+                    async.execute {
+                        cities.forEach { city ->
+                            city.ownerScore = score
+                            city.asyncSave()
+                        }
+                        isRunning.set(false)
+                        sendMessage(sender, "§a§l設定完了！")
+                    }
                 }
 
                 "livescore" ->{
@@ -1214,14 +1255,19 @@ object Command:CommandExecutor {
                         sendMessage(sender,"存在しない都市")
                         return false
                     }
-                    cities.forEach { city->
-                        city.liveScore = score
-                        city.asyncSave()
-                        sendMessage(sender,"§a§l${city.name}の居住に必要なスコアを${score}に変更")
+                    if(isRunning.get()){
+                        sendMessage(sender,"§c§l現在別の処理が走っています")
+                        return true
                     }
-
-                    sendMessage(sender,"§a§l設定完了！")
-
+                    isRunning.set(true)
+                    async.execute {
+                        cities.forEach { city ->
+                            city.liveScore = score
+                            city.asyncSave()
+                        }
+                        isRunning.set(false)
+                        sendMessage(sender, "§a§l設定完了！")
+                    }
                 }
 
                 "defaultPrice" ->{//mreop defaultPrice <rg/city> id amount
@@ -1238,16 +1284,23 @@ object Command:CommandExecutor {
                             rg.asyncSave()
                         }
                         else{
-                            City.getPartialMatchCities(args[2]).forEach {city->
-                                Region.regionData.filter { it.value.data.city==city.name }.forEach { (i,region)->
-                                    region.data.defaultPrice = price
-                                    region.asyncSave()
-                                    sendMessage(sender,"§a§lID${i}の初期価格を${price}に変更")
+                            if(isRunning.get()){
+                                sendMessage(sender,"§c§l現在別の処理が走っています")
+                                return true
+                            }
+                            isRunning.set(true)
+                            async.execute {
+                                City.getPartialMatchCities(args[2]).forEach { city ->
+                                    Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                        region.data.defaultPrice = price
+                                        region.asyncSave()
+                                    }
                                 }
+                                isRunning.set(false)
+                                sendMessage(sender,"§a§l設定完了！")
                             }
                         }
 
-                        sendMessage(sender,"§a§l設定完了！")
                         return true
                     }
                     if(args[1]=="city"){
@@ -1258,14 +1311,21 @@ object Command:CommandExecutor {
                             sendMessage(sender,"存在しない都市")
                             return false
                         }
-
-                        cities.forEach { city->
-                            city.defaultPrice = price
-                            sendMessage(sender,"§a§l${city.name}の初期土地価格を${price}に変更")
-                            city.asyncSave()
+                        if(isRunning.get()){
+                            sendMessage(sender,"§c§l現在別の処理が走っています")
+                            return true
                         }
+                        isRunning.set(true)
 
-                        sendMessage(sender,"§a§l設定完了！")
+                        async.execute {
+                            cities.forEach { city ->
+                                city.defaultPrice = price
+                                city.asyncSave()
+                            }
+                            isRunning.set(false)
+
+                            sendMessage(sender, "§a§l設定完了！")
+                        }
                         return true
                     }
                     sendMessage(sender,"/mreop defaultPrice <rg/city> id amount")

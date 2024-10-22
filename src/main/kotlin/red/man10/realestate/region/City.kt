@@ -32,13 +32,13 @@ class City {
             }
             else if(prefix){
                 cityData.forEach{
-                    if(it.key.startsWith(cityName))cities.add(it.value)
+                    if(it.key.endsWith(cityName))cities.add(it.value)
                 }
 
             }
             else if(suffix){
                 cityData.forEach{
-                    if(it.key.endsWith(cityName))cities.add(it.value)
+                    if(it.key.startsWith(cityName))cities.add(it.value)
                 }
             }
             else{

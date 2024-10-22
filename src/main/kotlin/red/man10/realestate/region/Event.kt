@@ -313,7 +313,6 @@ object Event :Listener{
         }
 
         val block=e.clickedBlock?.type?:return
-        block.data is Attachable
 
         if (Permission.getAllowedBlocks(Permission.DOOR).contains(block)&&!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
             sendMessage(p,"§7このブロックを触ることはできません！")

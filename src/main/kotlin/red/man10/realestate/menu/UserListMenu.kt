@@ -27,7 +27,7 @@ class UserListMenu(p:Player,private val id:Int) : MenuFramework(p, LARGE_CHEST_S
             p.closeInventory()
             return
         }
-        val userList = rg.getUsers()
+        val userList=rg.getUsers()
 
         for (user in userList){
             val button = Button(Material.PLAYER_HEAD)
