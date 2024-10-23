@@ -338,6 +338,10 @@ class Region {
         return User.fromRegion(id)
     }
 
+    fun getUser(player:Player):User?{
+        return userList[player.uniqueId]
+    }
+
 
     fun canOwn(player:Player):Boolean{
         if(Plugin.ownableCityNum!=-1){
@@ -426,6 +430,10 @@ class Region {
 
     fun reloadBelongingCity(){
         data.city=City.where(teleport)?.name
+    }
+
+    fun isInRegion(location: Location):Boolean{//自前で作った方が良さそう
+        return Utility.isWithinRange(location,startPosition,endPosition,location.world.name,Plugin.serverName)
     }
 
     fun showRegionData(p:Player){

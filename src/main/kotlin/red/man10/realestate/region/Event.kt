@@ -431,7 +431,15 @@ object Event :Listener{
 
         if (disableWorld.contains(loc.world.name)){ return true }
 
-        if (City.where(loc) == null)return false
+        val city=City.where(loc)?:return false
+
+//        city.getBelongingRegions().forEach {region ->
+//            if(region.isInRegion(loc)){
+//                region.getUser(p)?.let {user->
+//                    user.hasPermission(perm)
+//                }?:return false
+//            }
+//        }
 
         Region.regionData.forEach{ entry ->
             val rg = entry.value

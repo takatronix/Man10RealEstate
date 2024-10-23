@@ -609,6 +609,7 @@ object Command:CommandExecutor {
                     §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
                     §e§l/mreop init <id> <price> : 指定リージョンを初期化する
                     §e§l/mreop maxuser <city> <int> : 指定都市の上限人数を設定する
+                    §e§l/mreop setprice <id/city名> <price> : 指定土地/都市内の土地全ての値段を変更する
                     §e§l/mreop starttax : 手動で税金を徴収する
                     §e§l/mreop search : 指定ユーザーの持っている土地を確認する"
                     §e§l/mreop editcity <city> : 指定都市の編集コマンド一覧を表示する"
@@ -997,6 +998,7 @@ object Command:CommandExecutor {
                                 return true
                             }
                             isRunning.set(true)
+                            sendMessage(sender,"§a§l設定変更中...")
                             async.execute {
                                 City.getPartialMatchCities(args[2]).forEach { city ->
                                     Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
@@ -1025,6 +1027,7 @@ object Command:CommandExecutor {
                             return true
                         }
                         isRunning.set(true)
+                        sendMessage(sender,"§a§l設定変更中...")
                         async.execute {
                             cities.forEach { city ->
                                 city.tax = tax
@@ -1147,6 +1150,7 @@ object Command:CommandExecutor {
                     }
 
                     isRunning.set(true)
+                    sendMessage(sender,"§a§l設定変更中...")
 
                     async.execute {
                         cities.forEach { city ->
@@ -1187,6 +1191,7 @@ object Command:CommandExecutor {
                             return true
                         }
                         isRunning.set(true)
+                        sendMessage(sender,"§a§l設定変更中...")
                         async.execute {
                             City.getPartialMatchCities(args[1]).forEach { city ->
                                 Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
@@ -1233,6 +1238,7 @@ object Command:CommandExecutor {
                         return true
                     }
                     isRunning.set(true)
+                    sendMessage(sender,"§a§l設定変更中...")
                     async.execute {
                         cities.forEach { city ->
                             city.ownerScore = score
@@ -1260,6 +1266,7 @@ object Command:CommandExecutor {
                         return true
                     }
                     isRunning.set(true)
+                    sendMessage(sender,"§a§l設定変更中...")
                     async.execute {
                         cities.forEach { city ->
                             city.liveScore = score
@@ -1289,6 +1296,7 @@ object Command:CommandExecutor {
                                 return true
                             }
                             isRunning.set(true)
+                            sendMessage(sender,"§a§l設定変更中...")
                             async.execute {
                                 City.getPartialMatchCities(args[2]).forEach { city ->
                                     Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
@@ -1316,6 +1324,7 @@ object Command:CommandExecutor {
                             return true
                         }
                         isRunning.set(true)
+                        sendMessage(sender,"§a§l設定変更中...")
 
                         async.execute {
                             cities.forEach { city ->
@@ -1347,6 +1356,46 @@ object Command:CommandExecutor {
                     }else{
                         sendMessage(sender,"§a§l$id のテレポートを許可しました")
                     }
+                }
+
+
+                "setprice"->{
+
+
+                    val id = args[1].toIntOrNull()
+                    val price = args[2].toDoubleOrNull()
+                    if (price==null || price <0.0 || price == -0.0) {
+                        sendMessage(sender, "§c§l金額の設定に問題があります！")
+                        return false
+                    }
+                    if(id!=null){
+                        val rg = Region.regionData[id]?:return false
+                        rg.price = price
+                        rg.asyncSave()
+                        sendMessage(sender,"§a§l${id}の金額を${args[2]}に変更しました")
+                    }
+                    else{
+                        if(isRunning.get()){
+                            sendMessage(sender,"§c§l現在別の処理が走っています")
+                            return true
+                        }
+                        isRunning.set(true)
+                        sendMessage(sender,"§a§l設定変更中...")
+                        async.execute {
+                            City.getPartialMatchCities(args[1]).forEach { city ->
+                                Region.regionData.filter { it.value.data.city == city.name }.forEach { (_, region) ->
+                                    region.price=price
+                                    region.asyncSave()
+                                }
+                            }
+                            isRunning.set(false)
+                            sendMessage(sender,"§a§l設定完了！")
+                        }
+
+                    }
+
+
+
                 }
 
 
