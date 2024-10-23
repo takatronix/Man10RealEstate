@@ -604,7 +604,7 @@ object Command:CommandExecutor {
                     §e§l/mreop where : 現在地点がどのリージョンが確認します
                     §e§l/mreop reset <rg/city> <id> : 指定idのrg/cityの範囲を再指定します
                     §e§l/mreop disableWorld <add/remove> <world> : 指定ワールドの保護を外します
-                    §e§l/mreop tax <rg/city> <city> <tax>: 指定都市の税額を変更します
+                    §e§l/mreop tax <rg/city> <id/city名> <tax>: 指定土地/都市の税額を変更します
                     §e§l/mreop buyscore <id> <score>: 指定都市の買うのに必要なスコアを変更します
                     §e§l/mreop livescore <id> <score>: 指定都市の住むのに必要なスコアを変更します
                     §e§l/mreop init <id> <price> : 指定リージョンを初期化する
