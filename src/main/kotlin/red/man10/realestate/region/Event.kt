@@ -19,6 +19,7 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
+import org.bukkit.event.hanging.HangingPlaceEvent
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
@@ -309,14 +310,14 @@ object Event :Listener{
             if (dye !is Colorable && e.item!!.type != Material.GLOW_INK_SAC)return
         }
 
-        if (BlockMaterialUtils.getAllowedBlocks(Permission.DOOR).contains(block.type)&&!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
+        if (BlockMaterialUtils.getAllowedBlocks(Permission.DOOR).contains(block.type)&&!hasPermission(p,block.location, Permission.DOOR)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
         }
 
         if (BlockMaterialUtils.getAllowedBlocks(Permission.INVENTORY).contains(e.clickedBlock!!.type)){
-            if (!hasPermission(p,e.clickedBlock!!.location, Permission.INVENTORY)){
+            if (!hasPermission(p,block.location, Permission.INVENTORY)){
                 sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
                 return
@@ -325,7 +326,7 @@ object Event :Listener{
 
         //お試し
         //うまくいかなかったら下にコメントアウトしてるやつに戻す
-        if(BlockMaterialUtils.isInteractive(block)){
+        if(BlockMaterialUtils.isInteractive(block)&&!hasPermission(p,block.location,Permission.ALL)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
@@ -350,6 +351,15 @@ object Event :Listener{
             e.isCancelled = true
         }
 
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun hangingPlace(e:HangingPlaceEvent){
+        val player=e.player?:return
+        if(!hasPermission(player,e.entity.location,Permission.BLOCK)){
+            sendMessage(player,"§7ここに額縁を置くことはできません！")//多分絵画でもここ通る
+            e.isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
