@@ -194,7 +194,7 @@ object Command:CommandExecutor {
                         val city = City.where(data.teleport)?:return@execute
                         val score = ScoreDatabase.getScore(user.uniqueId)
 
-                        if (city.liveScore>score){
+                        if (city.data.liveScore>score){
                             sendMessage(sender,"ユーザーのスコアが足りません")
                             return@execute
                         }
@@ -308,7 +308,7 @@ object Command:CommandExecutor {
                         return true
                     }
 
-                    if (city.ownerScore > ScoreDatabase.getScore(p.uniqueId)){
+                    if (city.data.ownerScore > ScoreDatabase.getScore(p.uniqueId)){
                         sendMessage(sender,"ユーザーのスコアが足りません")
                         return false
                     }
@@ -318,7 +318,7 @@ object Command:CommandExecutor {
                     sendMessage(p,"§a§l土地のオーナー変更の依頼が来ています")
                     sendMessage(p,"§a§l現在のオーナー:${sender.name}")
                     sendMessage(p,"§a§lID:${id}")
-                    sendMessage(p,"§a§l都市名:${city.name}")
+                    sendMessage(p,"§a§l都市名:${city.cityId}")
                     sendMessage(p,"§a§l税額:${City.getTax(id)}円")
                     p.sendMessage(text(prefix).append(text("§b§l§n[変更を受け入れる]").clickEvent(ClickEvent.runCommand("/mre acceptowner"))))
 
@@ -892,15 +892,12 @@ object Command:CommandExecutor {
                         }
 
 
-                        for (c in City.cityMap){
+                        for (city in City.cityMap.values){
 
-                            val data = c.value
-
-                            if(Utility.isWithinRange(loc, data.getStart(), data.getEnd(), data.world,data.server)) {
-                                sendMessage(sender, "§e§lCityID:${c.key}")
-                                sendMessage(sender, "§7Name:${c.value.name}")
-                                sendMessage(sender, "§8Tax:${c.value.tax}")
-                                sendMessage(sender, "§7MaxUser:${c.value.maxUser}")
+                            if(Utility.isWithinRange(loc, city.getStart(), city.getEnd(), city.data.world,city.data.server)) {
+                                sendMessage(sender, "§e§lCityID:${city.cityId}")
+                                sendMessage(sender, "§8Tax:${city.data.tax}")
+                                sendMessage(sender, "§7MaxUser:${city.data.maxUser}")
                             }
                         }
 
@@ -1001,7 +998,7 @@ object Command:CommandExecutor {
                             sendMessage(sender,"§a§l設定変更中...")
                             async.execute {
                                 City.getPartialMatchCities(args[2]).forEach { city ->
-                                    Region.regionMap.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                    Region.regionMap.filter { it.value.data.city == city.cityId }.forEach { (i, region) ->
                                         region.data.tax = tax
                                         region.asyncSave()
                                     }
@@ -1030,7 +1027,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§a§l設定変更中...")
                         async.execute {
                             cities.forEach { city ->
-                                city.tax = tax
+                                city.data.tax = tax
                                 city.asyncSave()
                             }
                             isRunning.set(false)
@@ -1055,7 +1052,7 @@ object Command:CommandExecutor {
                     }
                     else{
                         City.getPartialMatchCities(args[2]).forEach { city->
-                            Region.regionMap.filter { it.value.data.city==city.name }.forEach { (i,region) ->
+                            Region.regionMap.filter { it.value.data.city==city.cityId }.forEach { (i,region) ->
                                 sender.sendMessage("§aID${i}の土地を初期化")
                                 region.init(Region.Status.ON_SALE,price)
                             }
@@ -1155,7 +1152,7 @@ object Command:CommandExecutor {
                     async.execute {
                         cities.forEach { city ->
 
-                            city.maxUser = max
+                            city.data.maxUser = max
                             city.asyncSave()
                         }
                         isRunning.set(false)
@@ -1194,7 +1191,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§a§l設定変更中...")
                         async.execute {
                             City.getPartialMatchCities(args[1]).forEach { city ->
-                                Region.regionMap.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                Region.regionMap.filter { it.value.data.city == city.cityId }.forEach { (i, region) ->
 
                                     if (region.taxStatus == Region.TaxStatus.FREE) {
                                         region.taxStatus = Region.TaxStatus.SUCCESS
@@ -1241,7 +1238,7 @@ object Command:CommandExecutor {
                     sendMessage(sender,"§a§l設定変更中...")
                     async.execute {
                         cities.forEach { city ->
-                            city.ownerScore = score
+                            city.data.ownerScore = score
                             city.asyncSave()
                         }
                         isRunning.set(false)
@@ -1269,7 +1266,7 @@ object Command:CommandExecutor {
                     sendMessage(sender,"§a§l設定変更中...")
                     async.execute {
                         cities.forEach { city ->
-                            city.liveScore = score
+                            city.data.liveScore = score
                             city.asyncSave()
                         }
                         isRunning.set(false)
@@ -1299,7 +1296,7 @@ object Command:CommandExecutor {
                             sendMessage(sender,"§a§l設定変更中...")
                             async.execute {
                                 City.getPartialMatchCities(args[2]).forEach { city ->
-                                    Region.regionMap.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                    Region.regionMap.filter { it.value.data.city == city.cityId }.forEach { (i, region) ->
                                         region.data.defaultPrice = price
                                         region.asyncSave()
                                     }
@@ -1328,7 +1325,7 @@ object Command:CommandExecutor {
 
                         async.execute {
                             cities.forEach { city ->
-                                city.defaultPrice = price
+                                city.data.defaultPrice = price
                                 city.asyncSave()
                             }
                             isRunning.set(false)
@@ -1383,7 +1380,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§a§l設定変更中...")
                         async.execute {
                             City.getPartialMatchCities(args[1]).forEach { city ->
-                                Region.regionMap.filter { it.value.data.city == city.name }.forEach { (_, region) ->
+                                Region.regionMap.filter { it.value.data.city == city.cityId }.forEach { (_, region) ->
                                     region.price=price
                                     region.asyncSave()
                                 }

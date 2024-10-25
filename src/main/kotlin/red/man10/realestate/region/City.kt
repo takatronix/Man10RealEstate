@@ -3,6 +3,7 @@ package red.man10.realestate.region
 import com.google.gson.Gson
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Server
 import red.man10.realestate.Plugin
 import red.man10.realestate.util.Logger
 import red.man10.realestate.util.Utility
@@ -12,7 +13,7 @@ import java.io.FileWriter
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
-class City {
+class City(val cityId:String) {
 
     companion object{
 
@@ -49,13 +50,16 @@ class City {
         }
 
         fun newInstance(name:String,worldName:String,serverName:String,startPosition: Triple<Int,Int,Int>,endPosition: Triple<Int,Int,Int>,tax:Double):City{
-            val city = City()
-            city.name = name
-            city.world = worldName
-            city.server = serverName
-            city.setStart(startPosition)
-            city.setEnd(endPosition)
-            city.tax = tax
+            val city = City(name)
+            CityData(tax,worldName,serverName, startX = startPosition.first, startY = startPosition.second, startZ = startPosition.third
+            , endX = endPosition.first, endY = endPosition.second, endZ = endPosition.third)
+            return city
+        }
+
+        fun newInstance(name:String,data:CityData):City{
+            val city = City(name)
+
+            city.data=data
 
             return city
         }
@@ -83,11 +87,11 @@ class City {
 
                         reader.close()
 
-                        val data = gson.fromJson(jsonStr, City::class.java)
+                        val data = gson.fromJson(jsonStr, CityData::class.java)
+                        cityMap[name]= newInstance(jsonStr,data)
 
                         Bukkit.getLogger().info("load city : $name")
 
-                        cityMap[name] = data
 
                     }catch (e: IOException){
                         Bukkit.getLogger().info(e.message)
@@ -99,9 +103,9 @@ class City {
         }
 
         fun where(loc: Location):City?{
-            for (city in cityMap){
-                if (Utility.isWithinRange(loc,city.value.getStart(),city.value.getEnd(),city.value.world,city.value.server)){
-                    return city.value
+            for (city in cityMap.values){
+                if (Utility.isWithinRange(loc,city.getStart(),city.getEnd(),city.data.world,city.data.server)){
+                    return city
                 }
             }
             return null
@@ -166,56 +170,37 @@ class City {
             val width = rg.startPosition.first.coerceAtLeast(rg.endPosition.first) - rg.startPosition.first.coerceAtMost(rg.endPosition.first) + 1
             val height = rg.startPosition.third.coerceAtLeast(rg.endPosition.third) - rg.startPosition.third.coerceAtMost(rg.endPosition.third) + 1
 
-            return if (rg.taxStatus == Region.TaxStatus.WARN) width * height * city.tax * Plugin.penalty else width * height * city.tax
+            return if (rg.taxStatus == Region.TaxStatus.WARN) width * height * city.data.tax * Plugin.penalty else width * height * city.data.tax
         }
     }
 
-    var tax = 0.0
-
-    var world = "builder"
-    var server = "server"
-
-    var name = "CityName"
-
-    var maxUser = 100
-
-    var ownerScore = 0
-    var liveScore = 0
-
-    var defaultPrice = 0.0
-
-    private var startX = 0
-    private var startY = 0
-    private var startZ = 0
-    private var endX = 0
-    private var endY = 0
-    private var endZ = 0
+    lateinit var data:CityData
 
     fun getStart(): Triple<Int, Int, Int> {
-        return Triple(startX,startY,startZ)
+        return Triple(data.startX,data.startY,data.startZ)
     }
     fun getEnd(): Triple<Int, Int, Int> {
-        return Triple(endX,endY,endZ)
+        return Triple(data.endX,data.endY,data.endZ)
     }
     fun setStart(triple: Triple<Int,Int,Int>){
-        startX = triple.first
-        startY = triple.second
-        startZ = triple.third
+        data.startX = triple.first
+        data.startY = triple.second
+        data.startZ = triple.third
     }
     fun setEnd(triple: Triple<Int,Int,Int>){
-        endX = triple.first
-        endY = triple.second
-        endZ = triple.third
+        data.endX = triple.first
+        data.endY = triple.second
+        data.endZ = triple.third
     }
 
     fun asyncSave(){
 
         Plugin.async.execute {
 
-            cityMap[name] = this
+            cityMap[cityId] = this
 
             try {
-                val file = File("${Plugin.plugin.dataFolder}/${name}.json")
+                val file = File("${Plugin.plugin.dataFolder}/${cityId}.json")
 
 //                if (file.exists()){
 //                    file.delete()
@@ -224,7 +209,7 @@ class City {
 //                    return@execute
 //                }
 
-                val jsonStr = gson.toJson(this)
+                val jsonStr = gson.toJson(data)
                 val writer = FileWriter(file)
 
                 writer.write(jsonStr)
@@ -240,10 +225,10 @@ class City {
     fun asyncDelete(){
         Plugin.async.execute {
             try {
-                val file = File("${Plugin.plugin.dataFolder}/${name}.json")
+                val file = File("${Plugin.plugin.dataFolder}/${cityId}.json")
                 file.delete()
 
-                Region.regionMap.values.filter { region -> region.data.city==name }.forEach { region->
+                Region.regionMap.values.filter { region -> region.data.city==cityId }.forEach { region->
                     region.data.city=null
                     region.asyncSave()
                 }
@@ -259,11 +244,33 @@ class City {
     fun registerCityForRegion(){
         //cityの重複は認めない構造になっているので、nullのもののみ見る
         Region.regionMap.filterValues { region -> region.data.city==null  }.values.forEach {region ->
-            if(Utility.isWithinRange(region.teleport,getStart(),getEnd(),world,server)){
-                region.data.city=name
+            if(Utility.isWithinRange(region.teleport,getStart(),getEnd(),data.world,data.server)){
+                region.data.city=cityId
                 region.asyncSave()
             }
         }
     }
+
+    data class CityData(
+
+            var tax:Double=0.0,
+
+            var world:String,
+            var server:String,
+
+            var maxUser:Int=100,
+
+            var ownerScore:Int=0,
+            var liveScore:Int=0,
+
+            var defaultPrice:Double=0.0,
+
+            var startX:Int=0,
+            var startY:Int=0,
+            var startZ:Int=0,
+            var endX :Int=0,
+            var endY:Int=0,
+            var endZ:Int=0
+    )
 
 }

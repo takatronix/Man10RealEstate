@@ -134,7 +134,7 @@ class Region {
                 val score = ScoreDatabase.getScore(p.uniqueId)
                 data.forEach {
                     val city = City.where(it.value.teleport)!!
-                    if (city.ownerScore>score){
+                    if (city.data.ownerScore>score){
                         it.value.status = Status.LOCK
                     }else{
                         if(it.value.status==Status.LOCK){
@@ -284,7 +284,7 @@ class Region {
             return
         }
 
-        if (city.ownerScore > score){
+        if (city.data.ownerScore > score){
             Utility.sendMessage(p, "§c§lあなたにはこの土地を買うためのスコアが足りません！")
             return
         }
@@ -313,7 +313,7 @@ class Region {
         val city = City.where(teleport)?:return
         ownerUUID = null
         ownerName = null
-        price = default?:city.defaultPrice
+        price = default?:city.data.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
         this.data = RegionData(false,0.0,0.0, city.name)
@@ -359,7 +359,7 @@ class Region {
 
     fun addUser(player:Player){
 
-        if(getUsers().size < (City.cityMap[data.city]?.maxUser ?: -1)){
+        if(getUsers().size < (City.cityMap[data.city]?.data?.maxUser ?: -1)){
             User(player.uniqueId,this)
                     .asyncSave()
 
@@ -372,7 +372,7 @@ class Region {
             }
         }
         else{
-            Utility.sendMessage(player, "§c§l土地の居住可能人数が上限に達しています")
+            Utility.sendMessage(player, "§c§l土地の居住人数が上限に達しています")
         }
 
     }
@@ -469,6 +469,7 @@ class Region {
         var denyTeleport : Boolean,
         var defaultPrice : Double,
         var tax : Double,
+        //本当はcityNameにするべきだったけど保存名ズラすの面倒でそのままになってる
         var city:String?=null
     )
 

@@ -81,7 +81,7 @@ class User(val uuid: UUID,val region:Region) {
                 data.forEach {
                     val id = it.key.second
                     val city = City.where(Region.regionMap[id]!!.teleport)!!
-                    if (city.liveScore>score){ it.value.asyncDelete() }
+                    if (city.data.liveScore>score){ it.value.asyncDelete() }
                 }
             }
         }
