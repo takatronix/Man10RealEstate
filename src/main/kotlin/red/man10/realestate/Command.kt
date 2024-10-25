@@ -884,7 +884,7 @@ object Command:CommandExecutor {
                                 sendMessage(sender, "§8Price:${rg.price}")
                                 sendMessage(sender, "§7Owner:${rg.ownerName}")
                                 sendMessage(sender,"§8Tax:${City.getTax(rg.id)}")
-                                sendMessage(sender,"§8User:")
+                                sendMessage(sender,"§7User:")
                                 User.userMap.filterKeys { pair->pair.second==rg.id }.forEach {
                                     sendMessage(sender,"§8${Bukkit.getOfflinePlayer(it.key.first).name}")
                                 }
