@@ -21,7 +21,7 @@ class Region {
 
     companion object{
 
-        val regionData = ConcurrentHashMap<Int, Region>()
+        val regionMap = ConcurrentHashMap<Int, Region>()
         val gson = Gson()
         var finishLoading=AtomicBoolean(false)
 
@@ -50,7 +50,7 @@ class Region {
             finishLoading.set(false)
 
             Plugin.async.execute {
-                regionData.clear()
+                regionMap.clear()
 
                 val sql = MySQLManager(Plugin.plugin,"Man10RealEstate Loading")
 
@@ -110,14 +110,14 @@ class Region {
 
                     rg.data = gson.fromJson(rs.getString("data"),RegionData::class.java)
 
-                    regionData[id] = rg
+                    regionMap[id] = rg
 
                     if (Bukkit.getWorld(rg.world) == null){
                         Logger.logger("存在しないワールドの土地",id)
 //                        rg.asyncDelete()
 //                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
                     }else {
-                        regionData[id] = rg
+                        regionMap[id] = rg
                     }
                 }
                 rs.close()
@@ -130,7 +130,7 @@ class Region {
         //ログイン時にスコアを確認
         fun asyncLoginProcess(p:Player){
             Plugin.async.execute {
-                val data = regionData.filterValues { it.ownerUUID == p.uniqueId }
+                val data = regionMap.filterValues { it.ownerUUID == p.uniqueId }
                 val score = ScoreDatabase.getScore(p.uniqueId)
                 data.forEach {
                     val city = City.where(it.value.teleport)!!
@@ -200,7 +200,7 @@ class Region {
 
             rg.data = data
 
-            regionData[id] = rg
+            regionMap[id] = rg
 
             Logger.logger(p,"土地を作成",id)
 
@@ -359,7 +359,7 @@ class Region {
 
     fun addUser(player:Player){
 
-        if(getUsers().size < (City.cityData[data.city]?.maxUser ?: -1)){
+        if(getUsers().size < (City.cityMap[data.city]?.maxUser ?: -1)){
             User(player.uniqueId,this)
                     .asyncSave()
 

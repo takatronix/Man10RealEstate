@@ -49,7 +49,7 @@ object Event :Listener{
      */
     private fun updateSign(sign: Sign, id:Int){
 
-        val rg = Region.regionData[id]?:return
+        val rg = Region.regionMap[id]?:return
 
         sign.line(0, text("§eID:$id"))
         sign.line(1, text(rg.name))
@@ -169,7 +169,7 @@ object Event :Listener{
                 return
             }
 
-            val rg = Region.regionData[id]?:return
+            val rg = Region.regionMap[id]?:return
             if (!Utility.isWithinRange(e.block.location ,rg.startPosition,rg.endPosition,rg.world,rg.server) && !hasPermission(e.player, e.block.location, Permission.BLOCK)){
                 sendMessage(e.player,"§c土地の外に看板を設置することはできません")
                 return
@@ -199,7 +199,7 @@ object Event :Listener{
 
         val id = lines[0].replace("§eID:","").toIntOrNull()?:return
 
-        val rg = Region.regionData[id]?:return
+        val rg = Region.regionMap[id]?:return
 
         val p = e.player
 
@@ -447,7 +447,7 @@ object Event :Listener{
 //            }
 //        }
 
-        Region.regionData.forEach{ entry ->
+        Region.regionMap.forEach{ entry ->
             val rg = entry.value
             val id = entry.key
 

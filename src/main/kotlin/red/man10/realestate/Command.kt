@@ -71,7 +71,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§c§l足元が空気ブロックではありません")
                         return true
                     }
-                    Region.regionData.forEach{ entry ->
+                    Region.regionMap.forEach{ entry ->
                         val rg = entry.value
 
                         if (Utility.isWithinRange(sender.location,rg.startPosition,rg.endPosition,rg.world,rg.server)) {
@@ -98,7 +98,7 @@ object Command:CommandExecutor {
                     buyConfirmKey.remove(sender.uniqueId) //購入確認キー消去
 
                     async.execute {
-                        val rg = Region.regionData[id]
+                        val rg = Region.regionMap[id]
                         if (rg == null){
                             sendMessage(sender,"§c§l存在しない土地です")
                             return@execute
@@ -116,7 +116,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
 
                     if (rg.status != Region.Status.ON_SALE){
                         sendMessage(sender,"§c§lこの土地は販売されていません！")
@@ -167,7 +167,7 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id)){ return false }
 
-                    val data = Region.regionData[id]
+                    val data = Region.regionMap[id]
 
                     if (data == null){
                         sendMessage(sender,"§c§l存在しない土地です！")
@@ -227,7 +227,7 @@ object Command:CommandExecutor {
                     if (!userConfirm.keys.contains(sender.uniqueId))return false
 
                     val id = userConfirm[sender.uniqueId]?:return false
-                    val rg = Region.regionData[id]!!
+                    val rg = Region.regionMap[id]!!
                     userConfirm.remove(sender.uniqueId)
 
                     val owner = Bukkit.getPlayer(rg.ownerUUID!!)
@@ -276,7 +276,7 @@ object Command:CommandExecutor {
 
                     if (!hasRegionPermission(sender,id))return false
 
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
                     rg.span = span
                     rg.asyncSave()
 
@@ -291,7 +291,7 @@ object Command:CommandExecutor {
                     if (args.size != 3)return false
 
                     val id = args[1].toIntOrNull()?:return false
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
                     val city = City.where(rg.teleport)?:return false
 
                     if (sender.uniqueId != rg.ownerUUID && !sender.hasPermission(OP))return false
@@ -332,7 +332,7 @@ object Command:CommandExecutor {
                     if (!hasPermission(sender, USER))return false
 
                     val id = ownerConfirmKey[sender.uniqueId]?:return false
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
 
                     if(!rg.canOwn(sender))return false
 
@@ -359,7 +359,7 @@ object Command:CommandExecutor {
 
                     val loc = sender.location
 
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
 
                     if (!Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
                         sendMessage(sender,"§c土地の外にテレポートポイントを登録することはできません")
@@ -415,7 +415,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
                     val status = args[2]
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
 
 
                     rg.setStatus(sender,Region.Status.valueOf(status))
@@ -436,7 +436,7 @@ object Command:CommandExecutor {
                     if (!NumberUtils.isNumber(args[2]))return false
 
                     val id = args[1].toIntOrNull()?:return false
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
 
                     if (!hasRegionPermission(sender,id))return false
 
@@ -465,7 +465,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§c§l数字を入力してください")
                         return true
                     }
-                    val rg = Region.regionData[id]
+                    val rg = Region.regionMap[id]
 
                     if (rg==null){
                         sendMessage(sender,"§c§l指定したIDの土地は存在しません")
@@ -500,7 +500,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§c§l数字を入力してください")
                         return true
                     }
-                    val rg = Region.regionData[id]
+                    val rg = Region.regionMap[id]
 
                     if (rg==null){
                         sendMessage(sender,"§c§l指定したIDの土地は存在しません")
@@ -531,7 +531,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§c§l数字を入力してください")
                         return true
                     }
-                    val rg = Region.regionData[id]
+                    val rg = Region.regionMap[id]
 
                     if (rg==null){
                         sendMessage(sender,"§c§l指定したIDの土地は存在しません")
@@ -561,7 +561,7 @@ object Command:CommandExecutor {
                     if (!hasPermission(sender, USER))return false
 
                     sendMessage(sender,"§e§l支払う税金")
-                    Region.regionData.filterValues { it.ownerUUID == sender.uniqueId }.forEach {
+                    Region.regionMap.filterValues { it.ownerUUID == sender.uniqueId }.forEach {
                         sendMessage(sender,"§eID:${it.key}:税額:${City.getTax(it.key)}")
                     }
 
@@ -572,7 +572,7 @@ object Command:CommandExecutor {
 
                     val loc = sender.location
 
-                    for (rg in Region.regionData.values) {
+                    for (rg in Region.regionMap.values) {
                         if(Utility.isWithinRange(loc, rg.startPosition, rg.endPosition, rg.world,rg.server)) {
                             rg.showRegionData(sender)
                             return true
@@ -672,7 +672,7 @@ object Command:CommandExecutor {
 
                         if (args[1] == "city"){
 
-                            if(City.cityData.contains(args[2])){
+                            if(City.cityMap.contains(args[2])){
                                 sendMessage(sender,"§c§l${args[2]}は既に存在します")
                                 return@execute
                             }
@@ -779,7 +779,7 @@ object Command:CommandExecutor {
                         }
 
                         val id = args[2].toInt()
-                        val rg = Region.regionData[id]
+                        val rg = Region.regionMap[id]
 
                         if (rg == null){
                             sendMessage(sender,"§c§l存在しない土地です！")
@@ -795,7 +795,7 @@ object Command:CommandExecutor {
                     }
 
                     val id = args[2]
-                    val city = City.cityData[id]
+                    val city = City.cityMap[id]
 
                     if (city == null){
                         sendMessage(sender,"§c§l存在しない都市です！")
@@ -803,7 +803,7 @@ object Command:CommandExecutor {
 
                     }
                     city.asyncDelete()
-                    City.cityData.remove(id)
+                    City.cityMap.remove(id)
                     sendMessage(sender,"§a§l削除完了！")
 
                 }
@@ -871,12 +871,12 @@ object Command:CommandExecutor {
 
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,Runnable {
 
-                        sendMessage(sender,"土地数:${Region.regionData.size}")
-                        sendMessage(sender,"都市数:${City.cityData.size}")
+                        sendMessage(sender,"土地数:${Region.regionMap.size}")
+                        sendMessage(sender,"都市数:${City.cityMap.size}")
 
                         sendMessage(sender, "§e§l=====================================")
 
-                        for (rg in Region.regionData.values) {
+                        for (rg in Region.regionMap.values) {
 
                             if(Utility.isWithinRange(loc, rg.startPosition, rg.endPosition, rg.world,rg.server)) {
                                 sendMessage(sender, "§e§lRegionID:${rg.id}")
@@ -892,7 +892,7 @@ object Command:CommandExecutor {
                         }
 
 
-                        for (c in City.cityData){
+                        for (c in City.cityMap){
 
                             val data = c.value
 
@@ -947,7 +947,7 @@ object Command:CommandExecutor {
                     if (isRg){
 
                         val id = args[2].toInt()
-                        val rg = Region.regionData[id]
+                        val rg = Region.regionMap[id]
 
                         if (rg == null){
                             sendMessage(sender,"§c§l存在しない土地です！")
@@ -964,7 +964,7 @@ object Command:CommandExecutor {
                     }
 
                     val id = args[2]
-                    val city = City.cityData[id]
+                    val city = City.cityMap[id]
 
                     if (city == null){
                         sendMessage(sender,"§c存在しない都市です")
@@ -987,7 +987,7 @@ object Command:CommandExecutor {
                     if (args[1] == "rg"){
                         val id = args[2].toIntOrNull()
                         if(id!=null){
-                            val rg = Region.regionData[id] ?: return false
+                            val rg = Region.regionMap[id] ?: return false
                             rg.data.tax = tax
                             rg.asyncSave()
                             sendMessage(sender,"§a§l設定完了！")
@@ -1001,7 +1001,7 @@ object Command:CommandExecutor {
                             sendMessage(sender,"§a§l設定変更中...")
                             async.execute {
                                 City.getPartialMatchCities(args[2]).forEach { city ->
-                                    Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                    Region.regionMap.filter { it.value.data.city == city.name }.forEach { (i, region) ->
                                         region.data.tax = tax
                                         region.asyncSave()
                                     }
@@ -1050,12 +1050,12 @@ object Command:CommandExecutor {
                     val id = args[1].toIntOrNull()
                     val price =  args[2].toDouble()
                     if(id!=null) {
-                        val rg = Region.regionData[id] ?: return false
+                        val rg = Region.regionMap[id] ?: return false
                         rg.init(Region.Status.ON_SALE, price)
                     }
                     else{
                         City.getPartialMatchCities(args[2]).forEach { city->
-                            Region.regionData.filter { it.value.data.city==city.name }.forEach { (i,region) ->
+                            Region.regionMap.filter { it.value.data.city==city.name }.forEach { (i,region) ->
                                 sender.sendMessage("§aID${i}の土地を初期化")
                                 region.init(Region.Status.ON_SALE,price)
                             }
@@ -1120,7 +1120,7 @@ object Command:CommandExecutor {
                         return true
                     }
                     sendMessage(sender,"オーナーの土地")
-                    for (rg in Region.regionData.filter { it.value.ownerUUID == uuid }.keys){
+                    for (rg in Region.regionMap.filter { it.value.ownerUUID == uuid }.keys){
                         sendClickMessage(sender,"§e§lID:${rg}","mre tp $rg","飛ぶ")
 
                     }
@@ -1169,7 +1169,7 @@ object Command:CommandExecutor {
 
                     if(id!=null) {
 
-                        val rg = Region.regionData[id] ?: return false
+                        val rg = Region.regionMap[id] ?: return false
                         if (rg.taxStatus == Region.TaxStatus.FREE) {
                             rg.taxStatus = Region.TaxStatus.SUCCESS
                         } else {
@@ -1194,7 +1194,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§a§l設定変更中...")
                         async.execute {
                             City.getPartialMatchCities(args[1]).forEach { city ->
-                                Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                Region.regionMap.filter { it.value.data.city == city.name }.forEach { (i, region) ->
 
                                     if (region.taxStatus == Region.TaxStatus.FREE) {
                                         region.taxStatus = Region.TaxStatus.SUCCESS
@@ -1286,7 +1286,7 @@ object Command:CommandExecutor {
                         val id = args[2].toIntOrNull()
 
                         if(id!=null) {
-                            val rg = Region.regionData[id] ?: return false
+                            val rg = Region.regionMap[id] ?: return false
                             rg.data.defaultPrice = price
                             rg.asyncSave()
                         }
@@ -1299,7 +1299,7 @@ object Command:CommandExecutor {
                             sendMessage(sender,"§a§l設定変更中...")
                             async.execute {
                                 City.getPartialMatchCities(args[2]).forEach { city ->
-                                    Region.regionData.filter { it.value.data.city == city.name }.forEach { (i, region) ->
+                                    Region.regionMap.filter { it.value.data.city == city.name }.forEach { (i, region) ->
                                         region.data.defaultPrice = price
                                         region.asyncSave()
                                     }
@@ -1344,7 +1344,7 @@ object Command:CommandExecutor {
 
                     val id = args[1].toIntOrNull()?:return false
 
-                    val rg = Region.regionData[id]?:return false
+                    val rg = Region.regionMap[id]?:return false
                     val data = rg.data
 
                     data.denyTeleport = ! data.denyTeleport
@@ -1369,7 +1369,7 @@ object Command:CommandExecutor {
                         return false
                     }
                     if(id!=null){
-                        val rg = Region.regionData[id]?:return false
+                        val rg = Region.regionMap[id]?:return false
                         rg.price = price
                         rg.asyncSave()
                         sendMessage(sender,"§a§l${id}の金額を${args[2]}に変更しました")
@@ -1383,7 +1383,7 @@ object Command:CommandExecutor {
                         sendMessage(sender,"§a§l設定変更中...")
                         async.execute {
                             City.getPartialMatchCities(args[1]).forEach { city ->
-                                Region.regionData.filter { it.value.data.city == city.name }.forEach { (_, region) ->
+                                Region.regionMap.filter { it.value.data.city == city.name }.forEach { (_, region) ->
                                     region.price=price
                                     region.asyncSave()
                                 }
@@ -1408,7 +1408,7 @@ object Command:CommandExecutor {
                         Plugin.async.execute {
                             sendMessage(sender, "再読み込み中...")
 
-                            for (region in Region.regionData.values) {
+                            for (region in Region.regionMap.values) {
                                 region.reloadBelongingCity()
                                 region.asyncSave()
                             }
@@ -1422,7 +1422,7 @@ object Command:CommandExecutor {
                         Plugin.async.execute {
                             sendMessage(sender, "再読み込み中...")
 
-                            val region=Region.regionData[id]?: return@execute
+                            val region=Region.regionMap[id]?: return@execute
                             region.reloadBelongingCity()
                             region.asyncSave()
 
@@ -1468,7 +1468,7 @@ object Command:CommandExecutor {
 
         if (p.hasPermission(OP))return true
 
-        val data = Region.regionData[id]?:return false
+        val data = Region.regionMap[id]?:return false
 
         if (data.status == Region.Status.LOCK)return false
 

@@ -38,7 +38,7 @@ class User(val uuid: UUID,val region:Region) {
                 while (rs.next()){
                     val id = rs.getInt("region_id")
                     val uuid = UUID.fromString(rs.getString("uuid"))
-                    val region=Region.regionData[id]?:continue
+                    val region=Region.regionMap[id]?:continue
                     val user = User(uuid, region)
 
                     user.status = rs.getString("status")
@@ -80,7 +80,7 @@ class User(val uuid: UUID,val region:Region) {
 
                 data.forEach {
                     val id = it.key.second
-                    val city = City.where(Region.regionData[id]!!.teleport)!!
+                    val city = City.where(Region.regionMap[id]!!.teleport)!!
                     if (city.liveScore>score){ it.value.asyncDelete() }
                 }
             }
@@ -137,7 +137,7 @@ class User(val uuid: UUID,val region:Region) {
             status = "Lock"
         }else{
             paid = LocalDateTime.now()
-            val region = Region.regionData[region.id]
+            val region = Region.regionMap[region.id]
             if (region?.ownerUUID != null){
                 Plugin.bank.deposit(region.ownerUUID!!,rentAmount,"Man10RealEstate Rent","賃料の支払い")
             }

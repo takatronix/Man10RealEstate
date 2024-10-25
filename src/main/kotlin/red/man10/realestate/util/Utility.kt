@@ -63,7 +63,7 @@ object Utility {
     //プレイヤーが所持している土地がある都市の名前を返す
     fun playerLivedCities(player:Player):ArrayList<String>{
         val cities=ArrayList<String>()
-        Region.regionData.values.filter { region -> region.ownerUUID==player.uniqueId}.forEach {region->
+        Region.regionMap.values.filter { region -> region.ownerUUID==player.uniqueId}.forEach {region->
             region.data.city?.let {
                 if(!cities.contains(it)){
                     cities.add(it)

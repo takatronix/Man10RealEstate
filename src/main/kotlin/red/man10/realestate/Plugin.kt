@@ -107,7 +107,7 @@ class Plugin : JavaPlugin(), Listener {
                 if (isChangeDay){
                     Logger.logger("日付の変更を検知")
                     lastDay = LocalDateTime.now()
-                    Region.regionData.filterValues { it.span == 2 }.values.forEach { it.payRent() }
+                    Region.regionMap.filterValues { it.span == 2 }.values.forEach { it.payRent() }
                 }
 
                 //滞納支払日
@@ -119,14 +119,14 @@ class Plugin : JavaPlugin(), Listener {
                 //週変更(月曜日)
                 if (isChangeDay && now.dayOfWeek == DayOfWeek.MONDAY){
                     Logger.logger("週の変更を検知")
-                    Region.regionData.filterValues { it.span == 1 }.values.forEach { it.payRent() }
+                    Region.regionMap.filterValues { it.span == 1 }.values.forEach { it.payRent() }
                 }
 
                 //月変更
                 if (isChangeMonth){
                     Logger.logger("月の変更を検知")
                     lastMonth = LocalDateTime.now()
-                    Region.regionData.filterValues { it.span == 0 }.values.forEach { it.payRent() }
+                    Region.regionMap.filterValues { it.span == 0 }.values.forEach { it.payRent() }
 
                     if (payTax){City.payTax()}
 

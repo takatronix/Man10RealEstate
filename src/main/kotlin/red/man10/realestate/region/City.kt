@@ -16,7 +16,7 @@ class City {
 
     companion object{
 
-        val cityData = ConcurrentHashMap<String, City>()
+        val cityMap = ConcurrentHashMap<String, City>()
         private val gson = Gson()
 
         fun getPartialMatchCities(str:String):List<City>{
@@ -26,23 +26,23 @@ class City {
             val cities=ArrayList<City>()
 
             if(prefix&&suffix){
-                cityData.forEach{
+                cityMap.forEach{
                     if(it.key.contains(cityName))cities.add(it.value)
                 }
             }
             else if(prefix){
-                cityData.forEach{
+                cityMap.forEach{
                     if(it.key.endsWith(cityName))cities.add(it.value)
                 }
 
             }
             else if(suffix){
-                cityData.forEach{
+                cityMap.forEach{
                     if(it.key.startsWith(cityName))cities.add(it.value)
                 }
             }
             else{
-                cityData[cityName]?.let { cities.add(it) }
+                cityMap[cityName]?.let { cities.add(it) }
             }
 
             return cities.toList()
@@ -63,7 +63,7 @@ class City {
         fun asyncLoad(){
 
             Plugin.async.execute {
-                cityData.clear()
+                cityMap.clear()
 
                 val files = File(Plugin.plugin.dataFolder, File.separator).listFiles()?.toMutableList()?:return@execute
 
@@ -87,7 +87,7 @@ class City {
 
                         Bukkit.getLogger().info("load city : $name")
 
-                        cityData[name] = data
+                        cityMap[name] = data
 
                     }catch (e: IOException){
                         Bukkit.getLogger().info(e.message)
@@ -99,7 +99,7 @@ class City {
         }
 
         fun where(loc: Location):City?{
-            for (city in cityData){
+            for (city in cityMap){
                 if (Utility.isWithinRange(loc,city.value.getStart(),city.value.getEnd(),city.value.world,city.value.server)){
                     return city.value
                 }
@@ -109,7 +109,7 @@ class City {
 
         fun payTax(){
             //税金支払いが必要でかつ、滞納してない土地
-            val rgList = Region.regionData.values.filter { rg -> rg.taxStatus == Region.TaxStatus.SUCCESS && rg.ownerUUID != null }
+            val rgList = Region.regionMap.values.filter { rg -> rg.taxStatus == Region.TaxStatus.SUCCESS && rg.ownerUUID != null }
 
             Bukkit.getLogger().warning("税金の支払いを行います")
 
@@ -134,7 +134,7 @@ class City {
 
         fun payTaxFromWarnRegion(){
             //警告つきの土地のみ
-            val rgList = Region.regionData.values.filter { rg -> rg.taxStatus == Region.TaxStatus.WARN && rg.ownerUUID != null }
+            val rgList = Region.regionMap.values.filter { rg -> rg.taxStatus == Region.TaxStatus.WARN && rg.ownerUUID != null }
 
             Bukkit.getLogger().warning("滞納都市の税金の支払いを行います")
 
@@ -157,7 +157,7 @@ class City {
 
         //税額を取得 ペナルティなども考慮済みの額
         fun getTax(rgID:Int):Double{
-            val rg = Region.regionData[rgID]?:return 0.0
+            val rg = Region.regionMap[rgID]?:return 0.0
             if (rg.taxStatus == Region.TaxStatus.FREE)return 0.0
             val city = where(rg.teleport)?:return 0.0
 
@@ -212,7 +212,7 @@ class City {
 
         Plugin.async.execute {
 
-            cityData[name] = this
+            cityMap[name] = this
 
             try {
                 val file = File("${Plugin.plugin.dataFolder}/${name}.json")
@@ -243,7 +243,7 @@ class City {
                 val file = File("${Plugin.plugin.dataFolder}/${name}.json")
                 file.delete()
 
-                Region.regionData.values.filter { region -> region.data.city==name }.forEach { region->
+                Region.regionMap.values.filter { region -> region.data.city==name }.forEach { region->
                     region.data.city=null
                     region.asyncSave()
                 }
@@ -258,7 +258,7 @@ class City {
 
     fun registerCityForRegion(){
         //cityの重複は認めない構造になっているので、nullのもののみ見る
-        Region.regionData.filterValues { region -> region.data.city==null  }.values.forEach {region ->
+        Region.regionMap.filterValues { region -> region.data.city==null  }.values.forEach {region ->
             if(Utility.isWithinRange(region.teleport,getStart(),getEnd(),world,server)){
                 region.data.city=name
                 region.asyncSave()
