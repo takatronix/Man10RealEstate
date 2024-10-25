@@ -316,7 +316,7 @@ class Region {
         price = default?:city.data.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
-        this.data = RegionData(false,0.0,0.0, city.name)
+        this.data = RegionData(false,0.0,0.0, city.cityId)
         User.asyncDeleteAllRegionUser(id)
         asyncSave()
     }
@@ -429,7 +429,7 @@ class Region {
     }
 
     fun reloadBelongingCity(){
-        data.city=City.where(teleport)?.name
+        data.city=City.where(teleport)?.cityId
     }
 
     fun isInRegion(location: Location):Boolean{//自前で作った方が良さそう
