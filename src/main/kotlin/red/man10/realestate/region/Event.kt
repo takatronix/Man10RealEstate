@@ -298,10 +298,16 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun interactEvent(e:PlayerInteractEvent){
+
         if (e.action == Action.RIGHT_CLICK_AIR && e.action == Action.LEFT_CLICK_AIR)return
         if (!e.hasBlock())return
 
         val p = e.player
+        //光るイカ墨全部弾く
+        if(e.item?.type==Material.GLOW_INK_SAC&&!e.player.isOp){
+            sendMessage(p,"§7光るイカ墨を使うことはできません！")
+            return
+        }
 
         if (e.hasBlock()&&e.clickedBlock!!.state is Sign){
 
