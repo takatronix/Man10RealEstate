@@ -226,7 +226,7 @@ class Region {
     var price : Double = 0.0
     var span = 0 //0:month 1:week 2:day
 
-    val userList=HashMap<UUID, User>()
+    val users=HashMap<UUID, User>()
 
     lateinit var data : RegionData
 
@@ -334,12 +334,12 @@ class Region {
     }
 
     //住人の取得
-    fun getUsers(): List<User> {
+    fun getUserList(): List<User> {
         return User.fromRegion(id)
     }
 
     fun getUser(player:Player):User?{
-        return userList[player.uniqueId]
+        return users[player.uniqueId]
     }
 
 
@@ -359,7 +359,7 @@ class Region {
 
     fun addUser(player:Player){
 
-        if(getUsers().size < (City.cityMap[data.city]?.data?.maxUser ?: -1)){
+        if(getUserList().size < (City.cityMap[data.city]?.data?.maxUser ?: -1)){
             User(player.uniqueId,this)
                     .asyncSave()
 
@@ -463,6 +463,22 @@ class Region {
                 "§e§l値段:${Utility.format(price)}"
             )
         }
+    }
+
+    fun hasPermission(player:Player,permission: Permission):Boolean{
+
+        if (status == Region.Status.LOCK)return false
+        if (ownerUUID == player.uniqueId)return true
+        if (status == Region.Status.DANGER)return true
+
+        if (permission != Permission.BLOCK &&status == Region.Status.FREE)return true
+
+        val user=users[player.uniqueId]?:return false
+
+        if (user.status == "Lock")return false
+        if (user.permissions.contains(Permission.ALL))return true
+
+        return user.permissions.contains(permission)
     }
 
     data class RegionData(

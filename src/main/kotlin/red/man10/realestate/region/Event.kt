@@ -291,6 +291,8 @@ object Event :Listener{
         if (e.action == Action.RIGHT_CLICK_AIR && e.action == Action.LEFT_CLICK_AIR)return
         if (!e.hasBlock())return
 
+        val block=e.clickedBlock?:return
+
         val p = e.player
         //光るイカ墨全部弾く
         if(e.item?.type==Material.GLOW_INK_SAC&&!e.player.isOp){
@@ -298,7 +300,7 @@ object Event :Listener{
             return
         }
 
-        if (e.hasBlock()&&e.clickedBlock!!.state is Sign){
+        if (e.hasBlock()&&block.state is Sign){
 
             if (!e.hasItem()){return}
 
@@ -307,9 +309,7 @@ object Event :Listener{
             if (dye !is Colorable && e.item!!.type != Material.GLOW_INK_SAC)return
         }
 
-        val block=e.clickedBlock?.type?:return
-
-        if (BlockMaterialUtils.getAllowedBlocks(Permission.DOOR).contains(block)&&!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
+        if (BlockMaterialUtils.getAllowedBlocks(Permission.DOOR).contains(block.type)&&!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
@@ -321,14 +321,23 @@ object Event :Listener{
                 e.isCancelled = true
                 return
             }
-        }else{
-            if (!hasPermission(p,e.clickedBlock!!.location,Permission.BLOCK)){
-                sendMessage(p,"§7このブロックを触ることはできません！")
-                e.isCancelled = true
-                return
-            }
-
         }
+
+        //お試し
+        //うまくいかなかったら下にコメントアウトしてるやつに戻す
+        if(BlockMaterialUtils.isInteractive(block)){
+            sendMessage(p,"§7このブロックを触ることはできません！")
+            e.isCancelled = true
+            return
+        }
+
+//        if (!hasPermission(p,e.clickedBlock!!.location,Permission.DOOR)) {
+//            sendMessage(p, "§7このブロックを触ることはできません！")
+//            e.isCancelled = true
+//            return
+//        }
+
+
 
     }
 
@@ -437,15 +446,10 @@ object Event :Listener{
 //            }
 //        }
 
-        Region.regionMap.forEach{ entry ->
-            val rg = entry.value
-            val id = entry.key
+        Region.regionMap.values.forEach{ rg ->
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
-
-                val user= User.get(p,id)?:return false
-                return user.hasPermission(perm)
-
+                return rg.hasPermission(p,perm)
             }
         }
 
