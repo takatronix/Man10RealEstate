@@ -236,17 +236,6 @@ object Event :Listener{
     //保護処理 イベント
     ///////////////////////////////////////////////////////////////////////////
 
-    private val invList = listOf(
-            Material.CHEST,
-            Material.ENDER_CHEST,
-            Material.HOPPER,
-            Material.TRAPPED_CHEST,
-            Material.DISPENSER,
-            Material.DROPPER,
-            Material.FURNACE,
-            Material.BARREL,
-            Material.SHULKER_BOX)
-
     private val containerList = listOf(
             Material.CHEST,
             Material.HOPPER,
@@ -320,20 +309,20 @@ object Event :Listener{
 
         val block=e.clickedBlock?.type?:return
 
-        if (Permission.getAllowedBlocks(Permission.DOOR).contains(block)&&!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
+        if (BlockMaterialUtils.getAllowedBlocks(Permission.DOOR).contains(block)&&!hasPermission(p,e.clickedBlock!!.location, Permission.DOOR)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
         }
 
-        if (invList.contains(e.clickedBlock!!.type)){
+        if (BlockMaterialUtils.getAllowedBlocks(Permission.INVENTORY).contains(e.clickedBlock!!.type)){
             if (!hasPermission(p,e.clickedBlock!!.location, Permission.INVENTORY)){
                 sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
                 return
             }
         }else{
-            if (!hasPermission(p,e.clickedBlock!!.location,Permission.DOOR)){
+            if (!hasPermission(p,e.clickedBlock!!.location,Permission.BLOCK)){
                 sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
                 return
@@ -432,6 +421,7 @@ object Event :Listener{
     }
 
     private fun hasPermission(p:Player, loc: Location, perm: Permission):Boolean{
+        if(BlockMaterialUtils.isInteractive(loc.block))p.sendMessage("interactive")
 
         if (p.hasPermission(Command.OP))return true
 
