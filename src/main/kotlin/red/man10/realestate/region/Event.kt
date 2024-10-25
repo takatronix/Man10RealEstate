@@ -440,7 +440,6 @@ object Event :Listener{
     }
 
     private fun hasPermission(p:Player, loc: Location, perm: Permission):Boolean{
-        if(BlockMaterialUtils.isInteractive(loc.block))p.sendMessage("interactive")
 
         if (p.hasPermission(Command.OP))return true
 
