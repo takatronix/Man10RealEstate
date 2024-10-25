@@ -88,7 +88,7 @@ class City(val cityId:String) {
                         reader.close()
 
                         val data = gson.fromJson(jsonStr, CityData::class.java)
-                        cityMap[name]= newInstance(jsonStr,data)
+                        cityMap[name]= newInstance(name,data)
 
                         Bukkit.getLogger().info("load city : $name")
 
