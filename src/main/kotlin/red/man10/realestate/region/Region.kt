@@ -359,6 +359,11 @@ class Region {
 
     fun addUser(player:Player){
 
+        if(player.uniqueId==ownerUUID){
+            Utility.sendMessage(player, "§c§lオーナーは住人になれません")
+            return
+        }
+
         if(getUserList().size < (City.cityMap[data.city]?.data?.maxUser ?: -1)){
             User(player.uniqueId,this)
                     .asyncSave()
