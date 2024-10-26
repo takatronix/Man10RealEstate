@@ -151,9 +151,10 @@ class User(val uuid: UUID,val region:Region) {
         else permissions.add(permission)
     }
 
+
+    //user側は持たなくても良いかもしれない
     fun hasPermission(permission: Permission):Boolean{
         if (region.status == Region.Status.LOCK)return false
-        if (region.ownerUUID == uuid)return true
         if (region.status == Region.Status.DANGER)return true
 
         if (permission != Permission.BLOCK &&region.status == Region.Status.FREE)return true

@@ -9,6 +9,7 @@ import red.man10.realestate.Plugin
 import red.man10.realestate.region.user.Permission
 import red.man10.realestate.region.user.User
 import red.man10.realestate.util.MenuFramework
+import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.sendMessage
 
 class ManageUserMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.getOfflinePlayer(user.uuid).name}の管理"){
@@ -67,6 +68,10 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
         val allButton = Button(if (user.permissions.contains(Permission.ALL)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         allButton.title("§e§l全権限(付与注意!)")
         allButton.setClickAction{
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
             user.switchPermission(Permission.ALL)
             user.asyncSave()
             PermissionMenu(p,user).open()
@@ -76,6 +81,10 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
         val blockButton = Button(if (user.permissions.contains(Permission.BLOCK)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         blockButton.title("§e§lブロックの設置破壊")
         blockButton.setClickAction{
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
             user.switchPermission(Permission.BLOCK)
             user.asyncSave()
             PermissionMenu(p,user).open()
@@ -85,6 +94,10 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
         val invButton = Button(if (user.permissions.contains(Permission.INVENTORY)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         invButton.title("§e§l樽やかまどなどのインベントリ")
         invButton.setClickAction{
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
             user.switchPermission(Permission.INVENTORY)
             user.asyncSave()
             PermissionMenu(p,user).open()
@@ -94,6 +107,10 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
         val doorButton = Button(if (user.permissions.contains(Permission.DOOR)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         doorButton.title("§e§lドアの開閉")
         doorButton.setClickAction{
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
             user.switchPermission(Permission.DOOR)
             user.asyncSave()
             PermissionMenu(p,user).open()

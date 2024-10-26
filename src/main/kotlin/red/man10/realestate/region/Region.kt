@@ -420,6 +420,13 @@ class Region {
     fun setOwner(player:Player){
         ownerUUID=player.uniqueId
         ownerName=player.name
+        users[player.uniqueId]?.asyncDelete()
+        users.values.forEach {user->
+            Permission.values().forEach { permission ->
+                user.permissions.remove(permission)
+            }
+            user.asyncSave()
+        }
     }
 
     fun removeOwner():Boolean{
@@ -475,17 +482,14 @@ class Region {
 
         val user=users[player.uniqueId]?:return false
 
-        if (user.status == "Lock")return false
-        if (user.permissions.contains(Permission.ALL))return true
-
-        return user.permissions.contains(permission)
+        return user.hasPermission(permission)
     }
 
     data class RegionData(
         var denyTeleport : Boolean,
         var defaultPrice : Double,
         var tax : Double,
-        //本当はcityNameにするべきだったけど保存名ズラすの面倒でそのままになってる
+        //本当はcityNameもしくはcityIDにするべきだったけど保存名ズラすの面倒でそのままになってる
         var city:String?=null
     )
 
