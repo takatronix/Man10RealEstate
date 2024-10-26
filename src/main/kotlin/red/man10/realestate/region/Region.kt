@@ -338,9 +338,9 @@ class Region {
         return User.fromRegion(id)
     }
 
-    fun getUser(player:Player):User?{
-        return users[player.uniqueId]
-    }
+//    fun getUser(player:Player):User?{
+//        return users[player.uniqueId]
+//    }
 
 
     fun canOwn(player:Player):Boolean{
@@ -425,8 +425,8 @@ class Region {
     fun setOwner(player:Player){
         ownerUUID=player.uniqueId
         ownerName=player.name
-        users[player.uniqueId]?.asyncDelete()
-        users.values.forEach {user->
+        User.get(player,id)?.asyncDelete()
+        getUserList().forEach {user->
             Permission.values().forEach { permission ->
                 user.permissions.remove(permission)
             }
