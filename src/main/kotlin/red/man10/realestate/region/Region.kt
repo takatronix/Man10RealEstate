@@ -346,7 +346,6 @@ class Region {
     fun canOwn(player:Player):Boolean{
         if(Plugin.ownableCityNum!=-1){
             val cities=Utility.playerLivedCities(player)
-            println(cities)
             if(cities.size>=Plugin.ownableCityNum&&!cities.contains(data.city)){
 
                 Utility.sendMessage(player,"§c§lこれ以上他の都市に住むことはできません")
@@ -354,6 +353,17 @@ class Region {
                 return false
             }
         }
+
+        val rgNumInCity=regionMap.values.filter { region->region.ownerUUID==player.uniqueId&&region.data.city==data.city }.size
+        val city=City.cityMap[data.city]?:return false
+
+        if(rgNumInCity>=city.data.regionLimitPerPlayer){
+
+            Utility.sendMessage(player,"§c§lこれ以上この都市の土地オーナーになることはできません")
+
+            return false
+        }
+
         return true
     }
 

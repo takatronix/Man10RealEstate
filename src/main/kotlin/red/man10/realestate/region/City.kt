@@ -264,6 +264,7 @@ class City(val cityId:String) {
             var liveScore:Int=0,
 
             var defaultPrice:Double=0.0,
+            var regionLimitPerPlayer:Int=99,
 
             var startX:Int=0,
             var startY:Int=0,
