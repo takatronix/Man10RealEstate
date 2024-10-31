@@ -5,17 +5,16 @@
 
 package red.man10.realestate
 
-import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import red.man10.man10bank.BankAPI
 import red.man10.realestate.region.*
+import red.man10.realestate.region.user.User
 import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MenuFramework
 import red.man10.realestate.util.MySQLManager
 import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.util.*
 import java.util.concurrent.Executors
 
 
@@ -38,6 +37,8 @@ class Plugin : JavaPlugin(), Listener {
         var serverName = "paper"
         var penalty = 2.5 //税金の支払いに失敗した時のペナルティ
         var limitDayOfMonth = 15 //滞納した時に、次に支払いを求める日付(15ならn月15日に)
+
+        var ownableCityNum=-1 //住める都市の数
 
         private var payTax = true
 
@@ -75,6 +76,7 @@ class Plugin : JavaPlugin(), Listener {
         async.shutdown()
     }
 
+
     fun loadConfig(){
         reloadConfig()
 
@@ -84,6 +86,7 @@ class Plugin : JavaPlugin(), Listener {
         Event.maxContainers = config.getInt("containerAmount",24)
         payTax = config.getBoolean("taxTimer",true)
         saveResource("config.yml", false)
+        ownableCityNum=config.getInt("ownableCityNum",-1)
     }
 
     private fun runDailyTask(){
@@ -104,7 +107,7 @@ class Plugin : JavaPlugin(), Listener {
                 if (isChangeDay){
                     Logger.logger("日付の変更を検知")
                     lastDay = LocalDateTime.now()
-                    Region.regionData.filterValues { it.span == 2 }.values.forEach { it.payRent() }
+                    Region.regionMap.filterValues { it.span == 2 }.values.forEach { it.payRent() }
                 }
 
                 //滞納支払日
@@ -116,14 +119,14 @@ class Plugin : JavaPlugin(), Listener {
                 //週変更(月曜日)
                 if (isChangeDay && now.dayOfWeek == DayOfWeek.MONDAY){
                     Logger.logger("週の変更を検知")
-                    Region.regionData.filterValues { it.span == 1 }.values.forEach { it.payRent() }
+                    Region.regionMap.filterValues { it.span == 1 }.values.forEach { it.payRent() }
                 }
 
                 //月変更
                 if (isChangeMonth){
                     Logger.logger("月の変更を検知")
                     lastMonth = LocalDateTime.now()
-                    Region.regionData.filterValues { it.span == 0 }.values.forEach { it.payRent() }
+                    Region.regionMap.filterValues { it.span == 0 }.values.forEach { it.payRent() }
 
                     if (payTax){City.payTax()}
 

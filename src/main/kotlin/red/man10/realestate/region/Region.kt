@@ -5,20 +5,25 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import red.man10.man10score.ScoreDatabase
+import red.man10.realestate.Command
 import red.man10.realestate.Plugin
+import red.man10.realestate.region.user.Permission
+import red.man10.realestate.region.user.User
 import red.man10.realestate.util.Logger
 import red.man10.realestate.util.MySQLManager
 import red.man10.realestate.util.Utility
 import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 class Region {
 
     companion object{
 
-        val regionData = ConcurrentHashMap<Int, Region>()
+        val regionMap = ConcurrentHashMap<Int, Region>()
         val gson = Gson()
+        var finishLoading=AtomicBoolean(false)
 
         fun formatStatus(status: Status):String{
             return when(status){
@@ -42,9 +47,10 @@ class Region {
         fun asyncLoad(){
 
             Logger.logger("土地の読み込み開始")
+            finishLoading.set(false)
 
             Plugin.async.execute {
-                regionData.clear()
+                regionMap.clear()
 
                 val sql = MySQLManager(Plugin.plugin,"Man10RealEstate Loading")
 
@@ -104,18 +110,19 @@ class Region {
 
                     rg.data = gson.fromJson(rs.getString("data"),RegionData::class.java)
 
-                    regionData[id] = rg
+                    regionMap[id] = rg
 
                     if (Bukkit.getWorld(rg.world) == null){
                         Logger.logger("存在しないワールドの土地",id)
 //                        rg.asyncDelete()
 //                        Bukkit.getLogger().warning("id:${id}は存在しないワールドだったので、削除しました!")
                     }else {
-                        regionData[id] = rg
+                        regionMap[id] = rg
                     }
                 }
                 rs.close()
                 sql.close()
+                finishLoading.set(true)
             }
         }
 
@@ -123,14 +130,16 @@ class Region {
         //ログイン時にスコアを確認
         fun asyncLoginProcess(p:Player){
             Plugin.async.execute {
-                val data = regionData.filterValues { it.ownerUUID == p.uniqueId }
+                val data = regionMap.filterValues { it.ownerUUID == p.uniqueId }
                 val score = ScoreDatabase.getScore(p.uniqueId)
                 data.forEach {
                     val city = City.where(it.value.teleport)!!
-                    if (city.ownerScore>score){
+                    if (city.data.ownerScore>score){
                         it.value.status = Status.LOCK
                     }else{
+                        if(it.value.status==Status.LOCK){
                         it.value.status = Status.PROTECTED
+                        }
                     }
                 }
             }
@@ -191,7 +200,7 @@ class Region {
 
             rg.data = data
 
-            regionData[id] = rg
+            regionMap[id] = rg
 
             Logger.logger(p,"土地を作成",id)
 
@@ -216,6 +225,8 @@ class Region {
 
     var price : Double = 0.0
     var span = 0 //0:month 1:week 2:day
+
+    val users=HashMap<UUID, User>()
 
     lateinit var data : RegionData
 
@@ -273,10 +284,12 @@ class Region {
             return
         }
 
-        if (city.ownerScore > score){
+        if (city.data.ownerScore > score){
             Utility.sendMessage(p, "§c§lあなたにはこの土地を買うためのスコアが足りません！")
             return
         }
+
+        if(!canOwn(p))return
 
         if (!Plugin.vault.withdraw(p.uniqueId,price)){
             Utility.sendMessage(p, "§c§l電子マネーが足りません！")
@@ -287,8 +300,7 @@ class Region {
             Plugin.bank.deposit(ownerUUID!!,price,"Man10RealEstate RegionProfit","土地の売上")
         }
 
-        ownerUUID = p.uniqueId
-        ownerName = p.name
+        setOwner(p)
         status = Status.PROTECTED
         asyncSave()
 
@@ -301,10 +313,10 @@ class Region {
         val city = City.where(teleport)?:return
         ownerUUID = null
         ownerName = null
-        price = default?:city.defaultPrice
+        price = default?:city.data.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
-        this.data = RegionData(false,0.0,0.0)
+        this.data = RegionData(false,0.0,0.0, city.cityId)
         User.asyncDeleteAllRegionUser(id)
         asyncSave()
     }
@@ -322,8 +334,128 @@ class Region {
     }
 
     //住人の取得
-    fun getUser(): List<User> {
+    fun getUserList(): List<User> {
         return User.fromRegion(id)
+    }
+
+//    fun getUser(player:Player):User?{
+//        return users[player.uniqueId]
+//    }
+
+
+    fun canOwn(player:Player):Boolean{
+        if(Plugin.ownableCityNum!=-1){
+            val cities=Utility.playerLivedCities(player)
+            if(cities.size>=Plugin.ownableCityNum&&!cities.contains(data.city)){
+
+                Utility.sendMessage(player,"§c§lこれ以上他の都市に住むことはできません")
+
+                return false
+            }
+        }
+
+        val rgNumInCity=regionMap.values.filter { region->region.ownerUUID==player.uniqueId&&region.data.city==data.city }.size
+        val city=City.cityMap[data.city]?:return false
+
+        if(rgNumInCity>=city.data.regionLimitPerPlayer){
+
+            Utility.sendMessage(player,"§c§lこれ以上この都市の土地オーナーになることはできません")
+
+            return false
+        }
+
+        return true
+    }
+
+    fun addUser(player:Player){
+
+        if(player.uniqueId==ownerUUID){
+            Utility.sendMessage(player, "§c§lオーナーは住人になれません")
+            return
+        }
+
+        if(getUserList().size < (City.cityMap[data.city]?.data?.maxUser ?: -1)){
+            User(player.uniqueId,this)
+                    .asyncSave()
+
+            Utility.sendMessage(player, "§a§lあなたは住人になりました！")
+
+            ownerUUID?.let { uuid ->
+                Bukkit.getPlayer(uuid)?.let { owner->
+                    Utility.sendMessage(owner, "§a§l${player.name}が住人になりました！")
+                }
+            }
+        }
+        else{
+            Utility.sendMessage(player, "§c§l土地の居住人数が上限に達しています")
+        }
+
+    }
+
+    fun setStatus(player:Player,newStatus: Status){
+
+        if (player.hasPermission(Command.OP)){
+            Utility.sendMessage(player,"§a§lID${id}の土地の状態を${Status.display(newStatus)}に変更しました")
+            this.status=newStatus
+            return
+        }
+
+
+        if (status ==Status.LOCK){
+            Utility.sendMessage(player,"§c§lロック状態の土地のステータス変更はできません")
+            return
+        }
+
+        if (ownerUUID == player.uniqueId) {
+            Utility.sendMessage(player,"§e§l土地のステータスを${Status.display(newStatus)}に変更しました")
+            this.status=newStatus
+            return
+        }
+
+        if(newStatus==Status.LOCK){//OP以外がlockにできないように
+            return
+        }
+
+        val user= User.get(player,id)?:run {
+            Utility.sendMessage(player,"§c§l権限がありません")
+            return
+        }
+
+        if(user.permissions.contains(Permission.ALL) && user.status == "Share"){
+            Utility.sendMessage(player,"§e§l土地のステータスを${Status.display(newStatus)}に変更しました")
+            this.status=newStatus
+            return
+        }
+
+
+        Utility.sendMessage(player,"§c§l権限がありません")
+
+    }
+
+    fun setOwner(player:Player){
+        ownerUUID=player.uniqueId
+        ownerName=player.name
+        User.get(player,id)?.asyncDelete()
+        getUserList().forEach {user->
+            Permission.values().forEach { permission ->
+                user.permissions.remove(permission)
+            }
+            user.asyncSave()
+        }
+    }
+
+    fun removeOwner():Boolean{
+        ownerUUID=null
+        ownerName=null
+        return true
+    }
+
+    fun reloadBelongingCity(){
+        data.city=City.where(teleport)?.cityId
+    }
+
+    fun isInRegion(location: Location):Boolean{//自前で作った方が良さそう
+        return Utility.isWithinRange(location,startPosition,endPosition,location.world.name,Plugin.serverName)
     }
 
     fun showRegionData(p:Player){
@@ -355,10 +487,25 @@ class Region {
         }
     }
 
+    fun hasPermission(player:Player,permission: Permission):Boolean{
+
+        if (status == Region.Status.LOCK)return false
+        if (ownerUUID == player.uniqueId)return true
+        if (status == Region.Status.DANGER)return true
+
+        if (permission != Permission.BLOCK &&status == Region.Status.FREE)return true
+
+        val user=users[player.uniqueId]?:return false
+
+        return user.hasPermission(permission)
+    }
+
     data class RegionData(
         var denyTeleport : Boolean,
         var defaultPrice : Double,
-        var tax : Double
+        var tax : Double,
+        //本当はcityNameもしくはcityIDにするべきだったけど保存名ズラすの面倒でそのままになってる
+        var city:String?=null
     )
 
     enum class TaxStatus(val value : String){
@@ -372,6 +519,18 @@ class Region {
         PROTECTED("Protected"),
         LOCK("Lock"),
         FREE("Free"),
-        DANGER("Danger")
+        DANGER("Danger");
+
+        companion object{
+            fun display(status: Status):String{
+                return when(status){
+                    ON_SALE->"販売中"
+                    PROTECTED->"保護"
+                    LOCK->"ロック"
+                    FREE->"フリー"
+                    DANGER->"無法地帯"
+                }
+            }
+        }
     }
 }

@@ -17,7 +17,7 @@ class RegionListMenu(p:Player, val page:Int = 0) : MenuFramework(p, LARGE_CHEST_
 
             val index = inc + page*45
             inc ++
-            val list = Region.regionData.filterValues { rg -> rg.ownerUUID == p.uniqueId }.values.toList()
+            val list = Region.regionMap.filterValues { rg -> rg.ownerUUID == p.uniqueId }.values.toList()
             if (list.size <= index)break
 
             val button = Button(Material.PAPER)

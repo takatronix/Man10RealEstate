@@ -1,6 +1,5 @@
 package red.man10.realestate.menu
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Material
@@ -14,7 +13,8 @@ import red.man10.realestate.util.Utility.sendMessage
 class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${id}の管理") {
 
     override fun init() {
-        val rg = Region.regionData[id]
+        val rg = Region.regionMap[id]
+
 
         if (rg == null){
             val closeButton = Button(Material.BARRIER)
@@ -28,16 +28,14 @@ class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${
         statusButton.lore(mutableListOf("§f現在のステータス:${Region.formatStatus(rg.status)}"))
         statusButton.setClickAction{
             if (rg.status == Region.Status.PROTECTED){
-                rg.status = Region.Status.ON_SALE
+                rg.setStatus(p,Region.Status.ON_SALE)
                 rg.asyncSave()
-                sendMessage(p,"§e土地のステータスを販売中に変更しました")
                 ManageRegionMenu(p,id).open()
                 return@setClickAction
             }
             if (rg.status == Region.Status.ON_SALE){
-                rg.status = Region.Status.PROTECTED
+                rg.setStatus(p,Region.Status.PROTECTED)
                 rg.asyncSave()
-                sendMessage(p,"§e土地のステータスを保護に変更しました")
                 ManageRegionMenu(p,id).open()
                 return@setClickAction
             }

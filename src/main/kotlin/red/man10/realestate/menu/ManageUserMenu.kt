@@ -6,23 +6,17 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import red.man10.realestate.Plugin
-import red.man10.realestate.region.Region
-import red.man10.realestate.region.User
+import red.man10.realestate.region.user.Permission
+import red.man10.realestate.region.user.User
 import red.man10.realestate.util.MenuFramework
+import red.man10.realestate.util.Utility
 import red.man10.realestate.util.Utility.sendMessage
 
-class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, 9,"${Bukkit.getOfflinePlayer(user.uuid).name}の管理"){
+class ManageUserMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.getOfflinePlayer(user.uuid).name}の管理"){
 
     override fun init() {
-        val rg = Region.regionData[user.regionId]
+        val rg = user.region
         val name = Bukkit.getOfflinePlayer(user.uuid).name
-
-        if (rg == null){
-            val closeButton = Button(Material.BARRIER)
-            setButton(closeButton,4)
-            sendMessage(p, "§c§l存在しない土地です")
-            return
-        }
 
         //賃料ボタン
         val rentButton = Button(Material.DIAMOND)
@@ -34,7 +28,7 @@ class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, 9,"${Bukkit.getO
             p.sendMessage(
                 Component.text(Plugin.prefix).append(
                     Component.text("§b§l§n[ここをクリック]")
-                .clickEvent(ClickEvent.suggestCommand("/mre setrent ${user.regionId} $name "))))
+                .clickEvent(ClickEvent.suggestCommand("/mre setrent ${user.region.id} $name "))))
             p.closeInventory()
         }
         setButton(rentButton,1)
@@ -44,10 +38,10 @@ class ManageUserMenu(p:Player,val user:User) : MenuFramework(p, 9,"${Bukkit.getO
         permissionButton.title("§f§l権限の設定")
         permissionButton.lore(mutableListOf(
             "§a§l現在の設定",
-            "§7§l全権限(現在使用不可):${if (user.allowAll) "§a§lo" else "§c§lx"}",
-            "§7§lブロック:${if (user.allowBlock) "§a§lo" else "§c§lx"}",
-            "§7§lチェストや樽:${if (user.allowInv) "§a§lo" else "§c§lx"}",
-            "§7§lドア:${if (user.allowDoor) "§a§lo" else "§c§lx"}"
+            "§7§l全権限(現在使用不可):${if (user.permissions.contains(Permission.ALL)) "§a§lo" else "§c§lx"}",
+            "§7§lブロック:${if (user.permissions.contains(Permission.BLOCK)) "§a§lo" else "§c§lx"}",
+            "§7§lチェストや樽:${if (user.permissions.contains(Permission.INVENTORY)) "§a§lo" else "§c§lx"}",
+            "§7§lドア:${if (user.permissions.contains(Permission.DOOR)) "§a§lo" else "§c§lx"}"
         ))
         permissionButton.setClickAction{
             PermissionMenu(p,user).open()
@@ -71,37 +65,53 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
 
     override fun init() {
 
-        val allButton = Button(if (user.allowAll) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
+        val allButton = Button(if (user.permissions.contains(Permission.ALL)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         allButton.title("§e§l全権限(付与注意!)")
         allButton.setClickAction{
-            user.allowAll = !user.allowAll
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
+            user.switchPermission(Permission.ALL)
             user.asyncSave()
             PermissionMenu(p,user).open()
         }
         setButton(allButton,1)
 
-        val blockButton = Button(if (user.allowBlock) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
+        val blockButton = Button(if (user.permissions.contains(Permission.BLOCK)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         blockButton.title("§e§lブロックの設置破壊")
         blockButton.setClickAction{
-            user.allowBlock = !user.allowBlock
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
+            user.switchPermission(Permission.BLOCK)
             user.asyncSave()
             PermissionMenu(p,user).open()
         }
         setButton(blockButton,3)
 
-        val invButton = Button(if (user.allowInv) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
+        val invButton = Button(if (user.permissions.contains(Permission.INVENTORY)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         invButton.title("§e§l樽やかまどなどのインベントリ")
         invButton.setClickAction{
-            user.allowInv = !user.allowInv
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
+            user.switchPermission(Permission.INVENTORY)
             user.asyncSave()
             PermissionMenu(p,user).open()
         }
         setButton(invButton,5)
 
-        val doorButton = Button(if (user.allowDoor) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
+        val doorButton = Button(if (user.permissions.contains(Permission.DOOR)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         doorButton.title("§e§lドアの開閉")
         doorButton.setClickAction{
-            user.allowDoor = !user.allowDoor
+            if(user.region.ownerUUID!=p.uniqueId){
+                sendMessage(p,"§c§l権限がありません")
+                return@setClickAction
+            }
+            user.switchPermission(Permission.DOOR)
             user.asyncSave()
             PermissionMenu(p,user).open()
         }

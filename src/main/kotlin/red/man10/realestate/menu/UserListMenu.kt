@@ -20,14 +20,14 @@ class UserListMenu(p:Player,private val id:Int) : MenuFramework(p, LARGE_CHEST_S
 //        prepareButton.title("§c§l準備中")
 //        addButton(prepareButton)
 
-        val rg = Region.regionData[id]
+        val rg = Region.regionMap[id]
 
         if (rg == null){
             Utility.sendMessage(p,"存在しない土地です")
             p.closeInventory()
             return
         }
-        val userList = rg.getUser()
+        val userList=rg.getUserList()
 
         for (user in userList){
             val button = Button(Material.PLAYER_HEAD)
