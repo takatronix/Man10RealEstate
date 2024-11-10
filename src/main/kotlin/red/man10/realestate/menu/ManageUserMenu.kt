@@ -15,6 +15,7 @@ import red.man10.realestate.util.Utility.sendMessage
 class ManageUserMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.getOfflinePlayer(user.uuid).name}の管理"){
 
     override fun init() {
+        clickable(false)
         val rg = user.region
         val name = Bukkit.getOfflinePlayer(user.uuid).name
 
@@ -64,6 +65,7 @@ class ManageUserMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
 class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.getOfflinePlayer(user.uuid).name}の権限"){
 
     override fun init() {
+        clickable(false)
 
         val allButton = Button(if (user.permissions.contains(Permission.ALL)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         allButton.title("§e§l全権限(付与注意!)")

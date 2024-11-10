@@ -7,6 +7,9 @@ import red.man10.realestate.util.MenuFramework
 class MainMenu(p: Player) : MenuFramework(p,9, "メインメニュー") {
 
     override fun init() {
+
+        clickable(false)
+
         val manageButton = Button(Material.PAPER)
         manageButton.title("§f§l自分の土地を管理する")
         manageButton.setClickAction{

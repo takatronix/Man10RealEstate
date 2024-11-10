@@ -8,6 +8,7 @@ import red.man10.realestate.util.MenuFramework
 class BookmarkMenu(p:Player,val page:Int = 0) : MenuFramework(p, LARGE_CHEST_SIZE,"ブックマーク"){
 
     override fun init() {
+        clickable(false)
 
         var inc = 0
 

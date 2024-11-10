@@ -10,6 +10,7 @@ import red.man10.realestate.util.Utility.format
 class RegionListMenu(p:Player, val page:Int = 0) : MenuFramework(p, LARGE_CHEST_SIZE,"土地を管理する") {
 
     override fun init() {
+        clickable(false)
 
         var inc = 0
 
