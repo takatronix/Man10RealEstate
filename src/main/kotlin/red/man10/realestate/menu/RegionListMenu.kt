@@ -13,12 +13,12 @@ class RegionListMenu(p:Player, val page:Int = 0) : MenuFramework(p, LARGE_CHEST_
         clickable(false)
 
         var inc = 0
+        val list = Region.regionMap.filterValues { rg -> rg.ownerUUID == p.uniqueId }.values.toList()
 
         while (menu.getItem(44) == null){
 
             val index = inc + page*45
             inc ++
-            val list = Region.regionMap.filterValues { rg -> rg.ownerUUID == p.uniqueId }.values.toList()
             if (list.size <= index)break
 
             val button = Button(Material.PAPER)
@@ -52,7 +52,7 @@ class RegionListMenu(p:Player, val page:Int = 0) : MenuFramework(p, LARGE_CHEST_
         if (page!=0){
             val previous = Button(Material.RED_STAINED_GLASS_PANE)
             previous.title("前のページへ")
-            previous.setClickAction{ RegionListMenu(p,page-1) }
+            previous.setClickAction{ RegionListMenu(p,page-1).open() }
             arrayOf(45,46,47).forEach { setButton(previous,it) }
 
         }
@@ -61,7 +61,7 @@ class RegionListMenu(p:Player, val page:Int = 0) : MenuFramework(p, LARGE_CHEST_
         if (inc>=44){
             val next = Button(Material.RED_STAINED_GLASS_PANE)
             next.title("次のページへ")
-            next.setClickAction{ RegionListMenu(p,page+1) }
+            next.setClickAction{ RegionListMenu(p,page+1).open() }
             arrayOf(51,52,53).forEach { setButton(next,it) }
         }
 

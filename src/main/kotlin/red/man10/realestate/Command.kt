@@ -616,6 +616,7 @@ object Command:CommandExecutor {
                     §e§l/mreop editrg <city> : 指定リージョンの編集コマンド一覧を表示する"
                     §e§l/mreop denytp <regionID> : 指定リージョンのmre tpの規制を編集"
                     §e§l/mreop reloadCityData <regionID/all> : 指定リージョンの所属している土地情報をリロードする"
+                    "/mreop citylimit <city名> <数字> : 指定都市の所持数上限を設定する"
                 """.trimIndent())
 
                 return true
@@ -1391,6 +1392,35 @@ object Command:CommandExecutor {
 
                     }
 
+
+
+                }
+
+                "citylimit"-> {
+
+                    if(args.size<3){
+                        sendMessage(sender, "mre citylimit <city名> <数字>")
+                        return false
+                    }
+                    val limit=args[2].toIntOrNull()?:run{
+                        sendMessage(sender, "mre citylimit <city名> <数字>")
+                        return false
+                    }
+
+                    if (isRunning.get()) {
+                        sendMessage(sender, "§c§l現在別の処理が走っています")
+                        return true
+                    }
+                    isRunning.set(true)
+                    sendMessage(sender, "§a§l設定変更中...")
+                    async.execute {
+                        City.getPartialMatchCities(args[1]).forEach { city ->
+                            city.data.regionLimitPerPlayer=limit
+                            city.asyncSave()
+                        }
+                        isRunning.set(false)
+                        sendMessage(sender, "§a§l設定完了！")
+                    }
 
 
                 }
