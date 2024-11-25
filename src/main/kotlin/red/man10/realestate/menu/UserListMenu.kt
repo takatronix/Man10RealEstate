@@ -15,6 +15,7 @@ import red.man10.realestate.util.Utility
 class UserListMenu(p:Player,private val id:Int) : MenuFramework(p, LARGE_CHEST_SIZE,"ID:${id}の住人の管理") {
 
     override fun init() {
+        clickable(false)
 
 //        val prepareButton = Button(Material.BARRIER)
 //        prepareButton.title("§c§l準備中")

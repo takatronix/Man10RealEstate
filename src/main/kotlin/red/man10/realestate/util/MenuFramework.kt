@@ -24,13 +24,14 @@ import java.util.*
  * このクラスを継承させて使用する。
  * 起動時にsetup関数を呼んでPluginインスタンスを渡す
  *
- * (最終更新 2023/07/07) created by Jin Morikawa
+ * (最終更新 2024/11/11) created by Jin Morikawa
  */
 open class MenuFramework(val p:Player,private val menuSize: Int, private val title: String){
 
     lateinit var menu : Inventory
     private var closeAction : OnCloseListener? = null
     private var clickAction : Button.OnClickListener? = null
+    private var clickable=true
 
     companion object{
         private val menuStack = HashMap<UUID,Stack<MenuFramework>>()
@@ -75,6 +76,10 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
     }
 
     open fun init(){}
+
+    fun clickable(boolean:Boolean){
+        clickable=boolean
+    }
 
     fun open(){
 //        p.closeInventory()
@@ -249,6 +254,8 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             if (p !is Player)return
 
             val menu = peek(p) ?:return
+
+            if(!menu.clickable)e.isCancelled=true
 
             menu.clickAction?.action(e)
 

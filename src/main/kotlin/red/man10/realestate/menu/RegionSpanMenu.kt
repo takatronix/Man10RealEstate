@@ -9,6 +9,7 @@ import red.man10.realestate.util.Utility.sendMessage
 class RegionSpanMenu(p:Player,val id:Int) : MenuFramework(p,9,"スパンの変更"){
 
     override fun init() {
+        clickable(false)
         val rg = Region.regionMap[id]
         if (rg == null){
             val closeButton = Button(Material.BARRIER)

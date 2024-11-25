@@ -13,6 +13,7 @@ import red.man10.realestate.util.Utility.sendMessage
 class ManageRegionMenu(p:Player,val id:Int) : MenuFramework(p, CHEST_SIZE,"ID:${id}の管理") {
 
     override fun init() {
+        clickable(false)
         val rg = Region.regionMap[id]
 
 
