@@ -153,7 +153,6 @@ class User(val uuid: UUID,val region:Region) {
     }
 
 
-    //user側は持たなくても良いかもしれない
     fun hasPermission(permission: Permission):Boolean{
 
         if (status == "Lock")return false
