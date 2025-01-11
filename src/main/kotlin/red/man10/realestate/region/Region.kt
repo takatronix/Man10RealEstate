@@ -226,7 +226,7 @@ class Region {
     var price : Double = 0.0
     var span = 0 //0:month 1:week 2:day
 
-    val users=HashMap<UUID, User>()
+    //val users=HashMap<UUID, User>()
 
     lateinit var data : RegionData
 
@@ -487,18 +487,48 @@ class Region {
         }
     }
 
-    fun hasPermission(player:Player,permission: Permission):Boolean{
 
-        if (status == Region.Status.LOCK)return false
-        if (ownerUUID == player.uniqueId)return true
-        if (status == Region.Status.DANGER)return true
 
-        if (permission != Permission.BLOCK &&status == Region.Status.FREE)return true
+    //////////////////
+    //権限判定関連
 
-        val user=users[player.uniqueId]?:return false
 
-        return user.hasPermission(permission)
+    fun canEditBlock(player:Player):Boolean{
+        if(player.isOp)return true
+        if(status==Region.Status.LOCK)return false
+        if(ownerUUID==player.uniqueId)return true
+        if(status==Region.Status.DANGER)return true
+        return User.get(player,id)?.hasPermission(Permission.BLOCK)?:false
     }
+
+    fun canOpenContainer(player:Player):Boolean{
+        if(player.isOp)return true
+        if(status==Region.Status.LOCK)return false
+        if(ownerUUID==player.uniqueId)return true
+        if(status==Region.Status.DANGER)return true
+        if(status==Region.Status.FREE)return true
+        return User.get(player,id)?.hasPermission(Permission.INVENTORY)?:false
+    }
+
+    fun canUseDoor(player:Player):Boolean{
+        if(player.isOp)return true
+        if(status==Region.Status.LOCK)return false
+        if(ownerUUID==player.uniqueId)return true
+        if(status==Region.Status.DANGER)return true
+        if(status==Region.Status.FREE)return true
+        return User.get(player,id)?.hasPermission(Permission.DOOR)?:false
+    }
+
+    fun canAllAction(player:Player):Boolean{
+        if(player.isOp)return true
+        if(status==Region.Status.LOCK)return false
+        if(ownerUUID==player.uniqueId)return true
+        if(status==Region.Status.DANGER)return true
+        if(status==Region.Status.FREE)return true
+        return User.get(player,id)?.hasPermission(Permission.ALL)?:false
+    }
+    ///
+    //////////////////
 
     data class RegionData(
         var denyTeleport : Boolean,

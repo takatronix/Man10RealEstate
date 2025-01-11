@@ -10,7 +10,7 @@ repositories {
     mavenCentral()
     maven {
         name = 'papermc-repo'
-        url = 'https://papermc.io/repo/repository/maven-public/'
+        url = 'https://repo.papermc.io/repository/maven-public'
     }
     maven {
         name = 'sonatype'

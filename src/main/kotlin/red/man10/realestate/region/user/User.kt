@@ -16,6 +16,7 @@ import kotlin.collections.ArrayList
 //居住者に関するクラス
 class User(val uuid: UUID,val region:Region) {
 
+
     companion object{
         val userMap = ConcurrentHashMap<Pair<UUID,Int>, User>()
 
@@ -154,10 +155,6 @@ class User(val uuid: UUID,val region:Region) {
 
     //user側は持たなくても良いかもしれない
     fun hasPermission(permission: Permission):Boolean{
-        if (region.status == Region.Status.LOCK)return false
-        if (region.status == Region.Status.DANGER)return true
-
-        if (permission != Permission.BLOCK &&region.status == Region.Status.FREE)return true
 
         if (status == "Lock")return false
         if (permissions.contains(Permission.ALL))return true

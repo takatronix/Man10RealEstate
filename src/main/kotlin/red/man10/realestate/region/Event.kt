@@ -171,7 +171,7 @@ object Event :Listener{
             }
 
             val rg = Region.regionMap[id]?:return
-            if (!Utility.isWithinRange(e.block.location ,rg.startPosition,rg.endPosition,rg.world,rg.server) && !hasPermission(e.player, e.block.location, Permission.BLOCK)){
+            if (!Utility.isWithinRange(e.block.location ,rg.startPosition,rg.endPosition,rg.world,rg.server) &&!(getCurrentRegion(e.block.location)?.canEditBlock(p)?:p.isOp)){
                 sendMessage(e.player,"§c土地の外に看板を設置することはできません")
                 return
             }
@@ -248,7 +248,7 @@ object Event :Listener{
 
         val p = e.player
 
-        if (!hasPermission(p,e.block.location, Permission.BLOCK)){
+        if (!(getCurrentRegion(e.block.location)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7このブロックは壊すことができません！")
             e.isCancelled = true
         }
@@ -260,7 +260,7 @@ object Event :Listener{
 
         val block = e.block
 
-        if (!hasPermission(p,block.location, Permission.BLOCK)){
+        if (!(getCurrentRegion(block.location)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§cここにブロックを置くことはできません！")
             e.isCancelled = true
             return
@@ -279,7 +279,7 @@ object Event :Listener{
     fun onPlayerBucketEmpty(e: PlayerBucketEmptyEvent) {
         val p = e.player
 
-        if (!hasPermission(p, p.location, Permission.BLOCK)) {
+        if (!(getCurrentRegion(e.block.location)?.canEditBlock(p)?:p.isOp)) {
             sendMessage(p,"§7ここに水などを置くことはできません！")
             e.isCancelled = true
 
@@ -310,23 +310,25 @@ object Event :Listener{
             if (dye !is Colorable && e.item!!.type != Material.GLOW_INK_SAC)return
         }
 
-        if (BlockMaterialUtils.getAllowedBlocks(Permission.DOOR).contains(block.type)&&!hasPermission(p,block.location, Permission.DOOR)){
-            sendMessage(p,"§7このブロックを触ることはできません！")
-            e.isCancelled = true
+        if (BlockMaterialUtils.getAllowedBlocks(Permission.DOOR).contains(block.type)){
+            if(!(getCurrentRegion(block.location)?.canUseDoor(p)?:p.isOp)) {
+                sendMessage(p, "§7このブロックを触ることはできません！")
+                e.isCancelled = true
+            }
             return
         }
 
         if (BlockMaterialUtils.getAllowedBlocks(Permission.INVENTORY).contains(e.clickedBlock!!.type)){
-            if (!hasPermission(p,block.location, Permission.INVENTORY)){
+            if (!(getCurrentRegion(block.location)?.canOpenContainer(p)?:p.isOp)){
                 sendMessage(p,"§7このブロックを触ることはできません！")
                 e.isCancelled = true
-                return
             }
+            return
         }
 
         //お試し
         //うまくいかなかったら下にコメントアウトしてるやつに戻す
-        if(BlockMaterialUtils.isInteractive(block)&&!hasPermission(p,block.location,Permission.ALL)){
+        if(BlockMaterialUtils.isInteractive(block)&&!(getCurrentRegion(block.location)?.canAllAction(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
@@ -346,8 +348,8 @@ object Event :Listener{
     fun signEvent(e:SignChangeEvent){
         val p = e.player
 
-        if (!hasPermission(p,e.block.location,Permission.BLOCK)){
-            sendMessage(p,"§7ここに看板を置くことができません！")
+        if (!(getCurrentRegion(e.block.location)?.canEditBlock(p)?:p.isOp)){
+            sendMessage(p,"§7ここに看板を置くことはできません！")
             e.isCancelled = true
         }
 
@@ -356,7 +358,7 @@ object Event :Listener{
     @EventHandler(priority = EventPriority.LOWEST)
     fun hangingPlace(e:HangingPlaceEvent){
         val player=e.player?:return
-        if(!hasPermission(player,e.entity.location,Permission.BLOCK)){
+        if(!(getCurrentRegion(e.entity.location)?.canEditBlock(player)?:player.isOp)){
             sendMessage(player,"§7ここに額縁を置くことはできません！")//多分絵画でもここ通る
             e.isCancelled = true
         }
@@ -368,7 +370,7 @@ object Event :Listener{
 
         if (p !is Player)return
 
-        if (!hasPermission(p,e.entity.location,Permission.BLOCK)){
+        if (!(getCurrentRegion(e.entity.location)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
@@ -380,7 +382,7 @@ object Event :Listener{
 
         val p = e.player
 
-        if (!hasPermission(p, e.rightClicked.location,Permission.DOOR)){
+        if (!(getCurrentRegion(e.rightClicked.location)?.canUseDoor(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
@@ -394,7 +396,7 @@ object Event :Listener{
 
         if (p !is Player)return
 
-        if (!hasPermission(p, e.entity.location,Permission.DOOR)){
+        if (!(getCurrentRegion(e.entity.location)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
@@ -405,7 +407,7 @@ object Event :Listener{
     fun armorStand(e:PlayerArmorStandManipulateEvent){
         val p = e.player
 
-        if (!hasPermission(p, e.rightClicked.location,Permission.BLOCK)){
+        if (!(getCurrentRegion(e.rightClicked.location)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7このアーマースタンドを触ることはできません！")
             e.isCancelled = true
         }
@@ -418,9 +420,10 @@ object Event :Listener{
         val p = e.entity
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
-        if (!hasPermission(p,e.data.loc,Permission.INVENTORY)){
+        if (!(getCurrentRegion(e.data.loc)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7この額縁を触ることはできません！")
             e.isCancelled = true
+            return
         }
         e.isCancelled = false
     }
@@ -431,7 +434,7 @@ object Event :Listener{
         val p = e.remover
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
-        if (!hasPermission(p,e.data.loc,Permission.BLOCK)){
+        if (!(getCurrentRegion(e.data.loc)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7この額縁を触ることはできません！")
             e.isCancelled = true
         }
@@ -439,31 +442,41 @@ object Event :Listener{
         e.isCancelled = false
     }
 
-    private fun hasPermission(p:Player, loc: Location, perm: Permission):Boolean{
-
-        if (p.hasPermission(Command.OP))return true
-
-        if (disableWorld.contains(loc.world.name)){ return true }
-
-        val city=City.where(loc)?:return false
-
-//        city.getBelongingRegions().forEach {region ->
-//            if(region.isInRegion(loc)){
-//                region.getUser(p)?.let {user->
-//                    user.hasPermission(perm)
-//                }?:return false
-//            }
-//        }
-
+    private fun getCurrentRegion(loc:Location):Region?{
         Region.regionMap.values.forEach{ rg ->
 
             if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
-                return rg.hasPermission(p,perm)
+                return rg
             }
         }
-
-        return false
+        return null
     }
+
+//    private fun hasPermission(p:Player, loc: Location, perm: Permission):Boolean{
+//
+//        if (p.hasPermission(Command.OP))return true
+//
+//        if (disableWorld.contains(loc.world.name)){ return true }
+//
+//        val city=City.where(loc)?:return false
+//
+////        city.getBelongingRegions().forEach {region ->
+////            if(region.isInRegion(loc)){
+////                region.getUser(p)?.let {user->
+////                    user.hasPermission(perm)
+////                }?:return false
+////            }
+////        }
+//
+//        Region.regionMap.values.forEach{ rg ->
+//
+//            if (Utility.isWithinRange(loc,rg.startPosition,rg.endPosition,rg.world,rg.server)){
+//                return rg.hasPermission(p,perm)
+//            }
+//        }
+//
+//        return false
+//    }
 
     private fun countContainer(block: Block): Int {
 
