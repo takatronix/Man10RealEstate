@@ -8,6 +8,7 @@ import org.bukkit.block.Block
 import org.bukkit.block.Container
 import org.bukkit.block.Sign
 import org.bukkit.block.data.Openable
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
@@ -358,7 +359,7 @@ object Event :Listener{
     @EventHandler(priority = EventPriority.LOWEST)
     fun hangingPlace(e:HangingPlaceEvent){
         val player=e.player?:return
-        if(!(getCurrentRegion(e.entity.location)?.canEditBlock(player)?:player.isOp)){
+        if(!(getCurrentRegion(e.entity.location)?.canEditItemFrame(player)?:player.isOp)){
             sendMessage(player,"§7ここに額縁を置くことはできません！")//多分絵画でもここ通る
             e.isCancelled = true
         }
@@ -369,6 +370,15 @@ object Event :Listener{
         val p = e.remover?:return
 
         if (p !is Player)return
+
+        //いるのかわからんのでとりあえず分離している
+        if(e.entity.type in listOf(EntityType.ITEM_FRAME,EntityType.GLOW_ITEM_FRAME)){
+            if(!(getCurrentRegion(e.entity.location)?.canEditItemFrame(p)?:p.isOp)){
+                sendMessage(p,"§7この額縁を触ることはできません！")
+                e.isCancelled=true
+            }
+            return
+        }
 
         if (!(getCurrentRegion(e.entity.location)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
@@ -382,7 +392,16 @@ object Event :Listener{
 
         val p = e.player
 
-        if (!(getCurrentRegion(e.rightClicked.location)?.canUseDoor(p)?:p.isOp)){
+        //いるのかわからんのでとりあえず分離している
+        if(e.rightClicked.type in listOf(EntityType.ITEM_FRAME,EntityType.GLOW_ITEM_FRAME)){
+            if(!(getCurrentRegion(e.rightClicked.location)?.canEditItemFrame(p)?:p.isOp)){
+                sendMessage(p,"§7この額縁を触ることはできません！")
+                e.isCancelled=true
+            }
+            return
+        }
+
+        if (!(getCurrentRegion(e.rightClicked.location)?.canEditBlock(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
         }
@@ -420,7 +439,7 @@ object Event :Listener{
         val p = e.entity
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
-        if (!(getCurrentRegion(e.data.loc)?.canEditBlock(p)?:p.isOp)){
+        if (!(getCurrentRegion(e.data.loc)?.canEditItemFrame(p)?:p.isOp)){
             sendMessage(p,"§7この額縁を触ることはできません！")
             e.isCancelled = true
             return
@@ -434,7 +453,7 @@ object Event :Listener{
         val p = e.remover
         if (p !is Player)return
         if (e.ifpCause == IFPCause.OP_STAFF)return
-        if (!(getCurrentRegion(e.data.loc)?.canEditBlock(p)?:p.isOp)){
+        if (!(getCurrentRegion(e.data.loc)?.canEditItemFrame(p)?:p.isOp)){
             sendMessage(p,"§7この額縁を触ることはできません！")
             e.isCancelled = true
         }

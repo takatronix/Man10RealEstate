@@ -519,12 +519,19 @@ class Region {
         return User.get(player,id)?.hasPermission(Permission.DOOR)?:false
     }
 
+    fun canEditItemFrame(player:Player):Boolean{
+        if(player.isOp)return true
+        if(status==Region.Status.LOCK)return false
+        if(ownerUUID==player.uniqueId)return true
+        if(status==Region.Status.DANGER)return true
+        return User.get(player,id)?.hasPermission(Permission.ITEM_FRAME)?:false
+    }
+
     fun canAllAction(player:Player):Boolean{
         if(player.isOp)return true
         if(status==Region.Status.LOCK)return false
         if(ownerUUID==player.uniqueId)return true
         if(status==Region.Status.DANGER)return true
-        if(status==Region.Status.FREE)return true
         return User.get(player,id)?.hasPermission(Permission.ALL)?:false
     }
     ///

@@ -59,6 +59,9 @@ class User(val uuid: UUID,val region:Region) {
                     if(rs.getInt("allow_inv") == 1){
                         user.permissions.add(Permission.INVENTORY)
                     }
+                    if(rs.getInt("allow_item_frame") == 1){
+                        user.permissions.add(Permission.ITEM_FRAME)
+                    }
 
                     userMap[Pair(uuid,id)] = user
                 }
@@ -122,6 +125,7 @@ class User(val uuid: UUID,val region:Region) {
                 "`allow_block`='${if (permissions.contains(Permission.BLOCK)){1}else{0}}'," +
                 "`allow_inv`='${if (permissions.contains(Permission.INVENTORY)){1}else{0}}'," +
                 "`allow_door`='${if (permissions.contains(Permission.DOOR)){1}else{0}}'," +
+                "`allow_item_frame`='${if (permissions.contains(Permission.ITEM_FRAME)){1}else{0}}'," +
                 "`rent`='${rentAmount}'" +
                 " WHERE `uuid`='${uuid}' AND `region_id`='${region.id}';")
     }
