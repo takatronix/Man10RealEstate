@@ -40,6 +40,8 @@ class Plugin : JavaPlugin(), Listener {
 
         var ownableCityNum=-1 //住める都市の数
 
+        var useIFP=true
+
         private var payTax = true
 
     }
@@ -68,6 +70,7 @@ class Plugin : JavaPlugin(), Listener {
         Region.asyncLoad()
         User.asyncLoad()
 
+
         runDailyTask()
     }
 
@@ -87,6 +90,7 @@ class Plugin : JavaPlugin(), Listener {
         payTax = config.getBoolean("taxTimer",true)
         saveResource("config.yml", false)
         ownableCityNum=config.getInt("ownableCityNum",-1)
+        useIFP=config.getBoolean("useIFP",true)
     }
 
     private fun runDailyTask(){
