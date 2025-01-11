@@ -46,6 +46,7 @@ CREATE TABLE `region_user` (
   `allow_block` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
   `allow_inv` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
   `allow_door` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
+  `allow_item_frame` TINYINT NOT NULL DEFAULT '0' COMMENT '権限設定(1で許す 0で許さない)',
   `rent`    double DEFAULT '0.0' COMMENT '賃料',
   INDEX `region_id` (`region_id`),
   KEY `uuid` (`uuid`)

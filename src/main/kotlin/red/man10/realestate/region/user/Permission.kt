@@ -6,6 +6,7 @@ enum class Permission {
     ALL,
     BLOCK,
     DOOR,
-    INVENTORY
+    INVENTORY,
+    ITEM_FRAME
 
 }

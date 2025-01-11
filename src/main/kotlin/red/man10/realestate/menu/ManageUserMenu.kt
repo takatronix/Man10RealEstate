@@ -37,13 +37,19 @@ class ManageUserMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
         //権限設定
         val permissionButton = Button(Material.EMERALD_BLOCK)
         permissionButton.title("§f§l権限の設定")
-        permissionButton.lore(mutableListOf(
-            "§a§l現在の設定",
-            "§7§l全権限(現在使用不可):${if (user.permissions.contains(Permission.ALL)) "§a§lo" else "§c§lx"}",
-            "§7§lブロック:${if (user.permissions.contains(Permission.BLOCK)) "§a§lo" else "§c§lx"}",
-            "§7§lチェストや樽:${if (user.permissions.contains(Permission.INVENTORY)) "§a§lo" else "§c§lx"}",
-            "§7§lドア:${if (user.permissions.contains(Permission.DOOR)) "§a§lo" else "§c§lx"}"
-        ))
+
+        val lore=mutableListOf(
+                "§a§l現在の設定",
+                "§7§l全権限(現在使用不可):${if (user.permissions.contains(Permission.ALL)) "§a§lo" else "§c§lx"}",
+                "§7§lブロック:${if (user.permissions.contains(Permission.BLOCK)) "§a§lo" else "§c§lx"}",
+                "§7§lチェストや樽:${if (user.permissions.contains(Permission.INVENTORY)) "§a§lo" else "§c§lx"}",
+                "§7§lドア:${if (user.permissions.contains(Permission.DOOR)) "§a§lo" else "§c§lx"}"
+        )
+        if(Plugin.useIFP){
+            lore.add("§7§l額縁:${if (user.permissions.contains(Permission.ITEM_FRAME)) "§a§lo" else "§c§lx"}")
+        }
+
+        permissionButton.lore(lore)
         permissionButton.setClickAction{
             PermissionMenu(p,user).open()
         }
@@ -78,7 +84,7 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
             user.asyncSave()
             PermissionMenu(p,user).open()
         }
-        setButton(allButton,1)
+        setButton(allButton,0)
 
         val blockButton = Button(if (user.permissions.contains(Permission.BLOCK)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         blockButton.title("§e§lブロックの設置破壊")
@@ -91,7 +97,7 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
             user.asyncSave()
             PermissionMenu(p,user).open()
         }
-        setButton(blockButton,3)
+        setButton(blockButton,2)
 
         val invButton = Button(if (user.permissions.contains(Permission.INVENTORY)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         invButton.title("§e§l樽やかまどなどのインベントリ")
@@ -104,7 +110,7 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
             user.asyncSave()
             PermissionMenu(p,user).open()
         }
-        setButton(invButton,5)
+        setButton(invButton,4)
 
         val doorButton = Button(if (user.permissions.contains(Permission.DOOR)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
         doorButton.title("§e§lドアの開閉")
@@ -117,7 +123,21 @@ class PermissionMenu(p:Player,val user: User) : MenuFramework(p, 9,"${Bukkit.get
             user.asyncSave()
             PermissionMenu(p,user).open()
         }
-        setButton(doorButton,7)
 
+        setButton(doorButton,6)
+        if(Plugin.useIFP) {
+            val itemFrameButton = Button(if (user.permissions.contains(Permission.ITEM_FRAME)) Material.EMERALD_BLOCK else Material.REDSTONE_BLOCK)
+            itemFrameButton.title("§e§l額縁の編集")
+            itemFrameButton.setClickAction {
+                if (user.region.ownerUUID != p.uniqueId) {
+                    sendMessage(p, "§c§l権限がありません")
+                    return@setClickAction
+                }
+                user.switchPermission(Permission.ITEM_FRAME)
+                user.asyncSave()
+                PermissionMenu(p, user).open()
+            }
+            setButton(itemFrameButton, 8)
+        }
     }
 }
