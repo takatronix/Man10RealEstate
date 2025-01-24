@@ -18,7 +18,7 @@ class City constructor(val cityId:String){
 
 
     constructor(cityId:String,worldName:String,serverName:String,startPosition: Triple<Int,Int,Int>,endPosition: Triple<Int,Int,Int>,tax:Double):this(cityId){
-        CityData(tax,worldName,serverName, startX = startPosition.first, startY = startPosition.second, startZ = startPosition.third
+        this.data=CityData(tax,worldName,serverName, startX = startPosition.first, startY = startPosition.second, startZ = startPosition.third
                 , endX = endPosition.first, endY = endPosition.second, endZ = endPosition.third)
     }
 
