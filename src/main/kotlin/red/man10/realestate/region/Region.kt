@@ -534,6 +534,10 @@ class Region {
         if(status==Region.Status.DANGER)return true
         return User.get(player,id)?.hasPermission(Permission.ALL)?:false
     }
+
+    fun isUser(player: Player):Boolean{
+        return User.userMap.contains(Pair(player.uniqueId,id))
+    }
     ///
     //////////////////
 

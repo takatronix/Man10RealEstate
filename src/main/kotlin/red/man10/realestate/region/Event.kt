@@ -329,7 +329,7 @@ object Event :Listener{
 
         //お試し
         //うまくいかなかったら下にコメントアウトしてるやつに戻す
-        if(BlockMaterialUtils.isInteractive(block)&&!(getCurrentRegion(block.location)?.canAllAction(p)?:p.isOp)){
+        if(BlockMaterialUtils.isInteractive(block)&&!(getCurrentRegion(block.location)?.isUser(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
             return
