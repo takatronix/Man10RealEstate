@@ -551,7 +551,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    rg.init()
+                    rg.init(tax = rg.data.tax)
 
                     sendMessage(sender,"§c§l手放しました")
                 }
