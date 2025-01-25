@@ -247,6 +247,8 @@ object Event :Listener{
     @EventHandler(priority = EventPriority.LOWEST)
     fun blockBreakEvent(e: BlockBreakEvent){
 
+        if(disableWorld.contains(e.player.world.name))return
+
         val p = e.player
 
         if (!(getCurrentRegion(e.block.location)?.canEditBlock(p)?:p.isOp)){
@@ -257,6 +259,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun blockPlaceEvent(e: BlockPlaceEvent){
+        if(disableWorld.contains(e.player.world.name))return
         val p = e.player
 
         val block = e.block
@@ -278,6 +281,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerBucketEmpty(e: PlayerBucketEmptyEvent) {
+        if(disableWorld.contains(e.player.world.name))return
         val p = e.player
 
         if (!(getCurrentRegion(e.block.location)?.canEditBlock(p)?:p.isOp)) {
@@ -289,6 +293,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun interactEvent(e:PlayerInteractEvent){
+        if(disableWorld.contains(e.player.world.name))return
 
         if (e.action == Action.RIGHT_CLICK_AIR && e.action == Action.LEFT_CLICK_AIR)return
         if (!e.hasBlock())return
@@ -329,9 +334,14 @@ object Event :Listener{
 
         //お試し
         //うまくいかなかったら下にコメントアウトしてるやつに戻す
-        if(BlockMaterialUtils.isInteractive(block)&&!(getCurrentRegion(block.location)?.canAllAction(p)?:p.isOp)){
+        if(BlockMaterialUtils.isInteractive(block)&&!(getCurrentRegion(block.location)?.canInteract(p)?:p.isOp)){
             sendMessage(p,"§7このブロックを触ることはできません！")
             e.isCancelled = true
+            return
+        }
+
+        if(e.action==Action.PHYSICAL&&!(getCurrentRegion(block.location)?.canEditBlock(p)?:p.isOp)){
+            e.isCancelled=true
             return
         }
 
@@ -347,6 +357,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun signEvent(e:SignChangeEvent){
+        if(disableWorld.contains(e.player.world.name))return
         val p = e.player
 
         if (!(getCurrentRegion(e.block.location)?.canEditBlock(p)?:p.isOp)){
@@ -359,6 +370,7 @@ object Event :Listener{
     @EventHandler(priority = EventPriority.LOWEST)
     fun hangingPlace(e:HangingPlaceEvent){
         val player=e.player?:return
+        if(disableWorld.contains(player.world.name))return
         if(!(getCurrentRegion(e.entity.location)?.canEditItemFrame(player)?:player.isOp)){
             sendMessage(player,"§7ここに額縁を置くことはできません！")//多分絵画でもここ通る
             e.isCancelled = true
@@ -367,6 +379,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun breakEntity(e: HangingBreakByEntityEvent){
+        if(disableWorld.contains(e.remover.world.name))return
         val p = e.remover?:return
 
         if (p !is Player)return
@@ -389,6 +402,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun interact(e:PlayerInteractEntityEvent){
+        if(disableWorld.contains(e.player.world.name))return
 
         val p = e.player
 
@@ -410,6 +424,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun breakEntity(e:EntityDamageByEntityEvent){
+        if(disableWorld.contains(e.damager.world.name))return
 
         val p = e.damager
 
@@ -424,6 +439,7 @@ object Event :Listener{
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun armorStand(e:PlayerArmorStandManipulateEvent){
+        if(disableWorld.contains(e.player.world.name))return
         val p = e.player
 
         if (!(getCurrentRegion(e.rightClicked.location)?.canEditBlock(p)?:p.isOp)){

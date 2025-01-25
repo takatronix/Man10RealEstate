@@ -5,6 +5,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import org.apache.commons.lang.math.NumberUtils
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.command.Command
@@ -550,7 +551,7 @@ object Command:CommandExecutor {
                         return false
                     }
 
-                    rg.init()
+                    rg.init(tax = rg.data.tax)
 
                     sendMessage(sender,"§c§l手放しました")
                 }
@@ -616,7 +617,7 @@ object Command:CommandExecutor {
                     §e§l/mreop editrg <city> : 指定リージョンの編集コマンド一覧を表示する"
                     §e§l/mreop denytp <regionID> : 指定リージョンのmre tpの規制を編集"
                     §e§l/mreop reloadCityData <regionID/all> : 指定リージョンの所属している土地情報をリロードする"
-                    "/mreop citylimit <city名> <数字> : 指定都市の所持数上限を設定する"
+                    §e§l/mreop citylimit <city名> <数字> : 指定都市の所持数上限を設定する"
                 """.trimIndent())
 
                 return true
@@ -678,7 +679,7 @@ object Command:CommandExecutor {
                                 return@execute
                             }
 
-                            val city=City.newInstance(args[2],sender.world.name,Plugin.serverName,startPosition,endPosition,amount)
+                            val city=City(args[2],sender.world.name,Plugin.serverName,startPosition,endPosition,amount)
                             city.registerCityForRegion()
                             city.asyncSave()
 //                            val city = City()
@@ -1460,6 +1461,7 @@ object Command:CommandExecutor {
                     }
 
                 }
+
 
 
 

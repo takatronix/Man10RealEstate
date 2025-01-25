@@ -309,14 +309,14 @@ class Region {
         Utility.sendMessage(p, "§a§l土地の購入成功！")
     }
 
-    fun init(status: Status = Status.ON_SALE, default: Double? = null){
+    fun init(status: Status = Status.ON_SALE, default: Double? = null,tax:Double=0.0){
         val city = City.where(teleport)?:return
         ownerUUID = null
         ownerName = null
         price = default?:city.data.defaultPrice
         this.status = status
         this.taxStatus = TaxStatus.SUCCESS
-        this.data = RegionData(false,0.0,0.0, city.cityId)
+        this.data = RegionData(false,0.0,tax, city.cityId)
         User.asyncDeleteAllRegionUser(id)
         asyncSave()
     }
@@ -533,6 +533,10 @@ class Region {
         if(ownerUUID==player.uniqueId)return true
         if(status==Region.Status.DANGER)return true
         return User.get(player,id)?.hasPermission(Permission.ALL)?:false
+    }
+
+    fun canInteract(player: Player):Boolean{
+        return player.isOp||ownerUUID==player.uniqueId||User.userMap.keys.contains(Pair(player.uniqueId,id))
     }
     ///
     //////////////////

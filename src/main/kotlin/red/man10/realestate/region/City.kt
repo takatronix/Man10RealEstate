@@ -13,7 +13,22 @@ import java.io.FileWriter
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
-class City(val cityId:String) {
+class City constructor(val cityId:String){
+
+
+
+    constructor(cityId:String,worldName:String,serverName:String,startPosition: Triple<Int,Int,Int>,endPosition: Triple<Int,Int,Int>,tax:Double):this(cityId){
+        this.data=CityData(tax,worldName,serverName, startX = startPosition.first, startY = startPosition.second, startZ = startPosition.third
+                , endX = endPosition.first, endY = endPosition.second, endZ = endPosition.third)
+    }
+
+
+    constructor(cityId: String,data:CityData):this(cityId){
+
+        this.data=data
+
+    }
+
 
     companion object{
 
@@ -49,21 +64,6 @@ class City(val cityId:String) {
             return cities.toList()
         }
 
-        fun newInstance(name:String,worldName:String,serverName:String,startPosition: Triple<Int,Int,Int>,endPosition: Triple<Int,Int,Int>,tax:Double):City{
-            val city = City(name)
-            CityData(tax,worldName,serverName, startX = startPosition.first, startY = startPosition.second, startZ = startPosition.third
-            , endX = endPosition.first, endY = endPosition.second, endZ = endPosition.third)
-            return city
-        }
-
-        fun newInstance(name:String,data:CityData):City{
-            val city = City(name)
-
-            city.data=data
-
-            return city
-        }
-
         fun asyncLoad(){
 
             Plugin.async.execute {
@@ -88,7 +88,7 @@ class City(val cityId:String) {
                         reader.close()
 
                         val data = gson.fromJson(jsonStr, CityData::class.java)
-                        cityMap[name]= newInstance(name,data)
+                        cityMap[name]= City(name,data)
 
                         Bukkit.getLogger().info("load city : $name")
 

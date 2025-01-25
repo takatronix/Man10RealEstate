@@ -39,7 +39,9 @@ object BlockMaterialUtils {
                     Material.PURPLE_SHULKER_BOX,
                     Material.RED_SHULKER_BOX,
                     Material.WHITE_SHULKER_BOX,
-                    Material.YELLOW_SHULKER_BOX)),
+                    Material.YELLOW_SHULKER_BOX,
+                    Material.BEACON,
+                    Material.DECORATED_POT)),
 
             Pair(Permission.DOOR,listOf(
                     Material.ACACIA_DOOR,
