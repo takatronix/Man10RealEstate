@@ -535,8 +535,8 @@ class Region {
         return User.get(player,id)?.hasPermission(Permission.ALL)?:false
     }
 
-    fun isUser(player: Player):Boolean{
-        return User.userMap.contains(Pair(player.uniqueId,id))
+    fun canInteract(player: Player):Boolean{
+        return player.isOp||ownerUUID==player.uniqueId||User.userMap.keys.contains(Pair(player.uniqueId,id))
     }
     ///
     //////////////////
