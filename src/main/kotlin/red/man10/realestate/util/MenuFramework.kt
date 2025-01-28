@@ -83,10 +83,10 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
 
     fun open(){
 //        p.closeInventory()
-        menu = Bukkit.createInventory(null,menuSize, text(title))
-        init()
-        push(p,this)
         Bukkit.getScheduler().runTask(instance,Runnable {
+            menu = Bukkit.createInventory(null,menuSize, text(title))
+            init()
+            push(p,this)
             p.openInventory(menu)
         })
     }
@@ -254,6 +254,9 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             if (p !is Player)return
 
             val menu = peek(p) ?:return
+
+            //メニューが違う場合は無視
+            if (e.view.title != menu.title)return
 
             if(!menu.clickable)e.isCancelled=true
 

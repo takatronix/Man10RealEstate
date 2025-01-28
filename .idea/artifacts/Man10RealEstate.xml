@@ -1,9 +1,9 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="Man10RealEstate">
-    <output-path>$PROJECT_DIR$/../../paper/plugins</output-path>
+    <output-path>$PROJECT_DIR$/../../minecraft/Paper_1_20_4/plugins</output-path>
     <root id="archive" name="Man10RealEstate.jar">
       <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources" />
-      <element id="module-output" name="red.man10.Man10RealEstate.main" />
+      <element id="module-output" name="Man10RealEstate.main" />
     </root>
   </artifact>
 </component>
