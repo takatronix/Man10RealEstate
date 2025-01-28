@@ -8,7 +8,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -18,6 +17,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * マイクラプラグインでメニューを作るためのフレームワーク
@@ -34,7 +34,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
     private var clickable=true
 
     companion object{
-        private val menuStack = HashMap<UUID,Stack<MenuFramework>>()
+        private val menuStack = ConcurrentHashMap<UUID,Stack<MenuFramework>>()
         private lateinit var instance : JavaPlugin
 
         const val CHEST_SIZE = 27
@@ -86,8 +86,8 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
         Bukkit.getScheduler().runTask(instance,Runnable {
             menu = Bukkit.createInventory(null,menuSize, text(title))
             init()
-            push(p,this)
             p.openInventory(menu)
+            push(p,this)
         })
     }
 
@@ -117,14 +117,16 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
     }
 
     fun close(e:InventoryCloseEvent){
-        closeAction?.closeAction(e)
-        if (e.reason == InventoryCloseEvent.Reason.PLAYER){
-            pop(p)//ひとつ前のメニューに戻るためにスタックを一個削除
-            pop(p)?.open()
-        }
-        if (e.reason == InventoryCloseEvent.Reason.PLUGIN){
-            menuStack.remove(e.player.uniqueId)
-        }
+        Bukkit.getScheduler().runTask(instance,Runnable {
+            closeAction?.closeAction(e)
+            if (e.reason == InventoryCloseEvent.Reason.PLAYER) {
+                pop(p)//ひとつ前のメニューに戻るためにスタックを一個削除
+                pop(p)?.open()
+            }
+            if (e.reason == InventoryCloseEvent.Reason.PLUGIN){
+                menuStack.remove(e.player.uniqueId)
+            }
+        })
     }
 
     fun interface OnCloseListener{
@@ -246,7 +248,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
 
     object MenuListener:Listener{
 
-        @EventHandler(priority = EventPriority.HIGHEST)
+        @EventHandler
         fun clickEvent(e:InventoryClickEvent){
 
             val p = e.whoClicked
@@ -256,7 +258,10 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             val menu = peek(p) ?:return
 
             //メニューが違う場合は無視
-            if (e.view.title != menu.title)return
+            if (e.view.title != menu.title){
+                p.sendMessage("§c§lメニューを開き直してください")
+                return
+            }
 
             if(!menu.clickable)e.isCancelled=true
 
@@ -269,11 +274,13 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             data.click(e)
         }
 
-        @EventHandler(priority = EventPriority.LOW)
+        @EventHandler
         fun closeEvent(e:InventoryCloseEvent){
 
             if (e.player !is Player)return
+
             val menu = peek(e.player as Player) ?:return
+
             menu.close(e)
         }
 
