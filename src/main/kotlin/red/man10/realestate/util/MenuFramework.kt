@@ -70,6 +70,10 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             return stack.peek()
         }
 
+        fun delete(p:Player){
+            menuStack.remove(p.uniqueId)
+        }
+
         fun dispatch(plugin:JavaPlugin,job:()->Unit){
             Bukkit.getScheduler().runTask(plugin, Runnable(job))
         }
@@ -259,6 +263,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
 
             //メニューが違う場合は無視
             if (e.view.title != menu.title){
+                delete(p)
                 e.isCancelled = true
                 p.closeInventory()
                 p.sendMessage("§c§lメニューを開き直してください")
