@@ -288,6 +288,11 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
 
             val menu = peek(e.player as Player) ?:return
 
+            //メニューが違う場合は無視
+            if (e.view.title != menu.title){
+                return
+            }
+
             menu.close(e)
         }
 
