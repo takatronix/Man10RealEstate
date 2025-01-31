@@ -324,6 +324,7 @@ class Region {
     fun asyncDelete(){
         MySQLManager.mysqlQueue.add("DELETE FROM `region` WHERE  `id`=$id;")
         User.asyncDeleteAllRegionUser(id)
+        regionMap.remove(id)
         Logger.logger("土地を削除",id)
     }
 
