@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -146,12 +147,13 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
         init {
             buttonItem = ItemStack(icon)
             val meta = buttonItem.itemMeta
-            meta.persistentDataContainer.set(NamespacedKey.fromString("key")!!
-                , PersistentDataType.STRING,key)
+            meta.persistentDataContainer.set(BUTTON_KEY, PersistentDataType.STRING,key)
             buttonItem.itemMeta = meta
         }
 
         companion object{
+
+            private val BUTTON_KEY = NamespacedKey.fromString("menu-framework-key")!!
 
             private val buttonMap = HashMap<String, Button>()
 
@@ -164,9 +166,14 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
                 if (!item.hasItemMeta())return null
 
                 val meta = item.itemMeta
-                val key = meta.persistentDataContainer[NamespacedKey.fromString("key")!!, PersistentDataType.STRING]?:return null
+                val key = meta.persistentDataContainer[BUTTON_KEY, PersistentDataType.STRING]?:return null
 
                 return buttonMap[key]
+            }
+
+            fun isButton(item:ItemStack):Boolean{
+                val meta = item.itemMeta?:return false
+                return meta.persistentDataContainer[BUTTON_KEY, PersistentDataType.STRING] != null
             }
         }
 
@@ -260,6 +267,21 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
 
             if (p !is Player)return
 
+            val item = e.currentItem
+            //ボタンをクリックした場合
+            if (item != null && Button.isButton(item)){
+
+                //ボタンをクリックしたインベントリがプレイヤーのインベントリの場合
+                if (e.clickedInventory == p.inventory){
+                    Bukkit.getLogger().info("clicked player inventory")
+                    item.amount = 0
+                    return
+                }
+
+                val button = Button.get(item)!!
+                button.click(e)
+            }
+
             val menu = peek(p) ?:return
 
             //メニューが違う場合は無視
@@ -274,12 +296,6 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             if(!menu.clickable)e.isCancelled=true
 
             menu.clickAction?.action(e)
-
-            val item = e.currentItem?:return
-            val button = Button.get(item) ?:return
-            e.isCancelled = true
-
-            button.click(e)
         }
 
         @EventHandler
@@ -295,6 +311,14 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             }
 
             menu.close(e)
+        }
+
+        @EventHandler
+        fun interactEvent(e:PlayerInteractEvent){
+            val item = e.item?:return
+            if (!Button.isButton(item))return
+            item.amount = 0
+            e.isCancelled = true
         }
 
     }
