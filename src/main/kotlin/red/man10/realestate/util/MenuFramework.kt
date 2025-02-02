@@ -45,7 +45,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             instance = plugin
         }
 
-        fun push(p:Player,menu:MenuFramework){
+        fun push(p:Player,menu: MenuFramework){
             val stack = menuStack[p.uniqueId]?: Stack()
             if (stack.isNotEmpty() && menu::class == stack.peek()::class){
                 return
@@ -55,7 +55,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
         }
 
         //      スタックの取り出し
-        fun pop(p:Player):MenuFramework?{
+        fun pop(p:Player): MenuFramework?{
             val stack = menuStack[p.uniqueId]?:return null
             if (stack.isEmpty())return null
             val menu = stack.pop()
@@ -101,7 +101,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
     }
 
     //
-    fun addButton(button:Button){
+    fun addButton(button: Button){
         menu.addItem(button.icon())
     }
 
@@ -234,6 +234,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
 
 
         fun click(e:InventoryClickEvent){
+            e.isCancelled = true
             actionData?.action(e)
         }
 
@@ -275,10 +276,10 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
             menu.clickAction?.action(e)
 
             val item = e.currentItem?:return
-            val data = Button.get(item) ?:return
+            val button = Button.get(item) ?:return
             e.isCancelled = true
 
-            data.click(e)
+            button.click(e)
         }
 
         @EventHandler
