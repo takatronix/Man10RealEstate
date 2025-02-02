@@ -24,6 +24,7 @@ class BookmarkMenu(p:Player,val page:Int = 0) : MenuFramework(p, LARGE_CHEST_SIZ
             button.title("§bID:${id}")
             button.setClickAction{
                 p.performCommand("mre tp $id")
+                delete(p)
                 p.closeInventory()
             }
             addButton(button)
