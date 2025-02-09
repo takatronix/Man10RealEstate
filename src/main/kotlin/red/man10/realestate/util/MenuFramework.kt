@@ -181,7 +181,7 @@ open class MenuFramework(val p:Player,private val menuSize: Int, private val tit
         fun setIcon(item:ItemStack): Button {
             buttonItem = item.clone()
             val meta = buttonItem.itemMeta
-            meta.persistentDataContainer.set(NamespacedKey.fromString("key")!!
+            meta.persistentDataContainer.set(NamespacedKey.fromString("menu-framework-key")!!
                 , PersistentDataType.STRING,key)
             buttonItem.itemMeta = meta
             set(this)
